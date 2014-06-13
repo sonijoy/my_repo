@@ -75,7 +75,7 @@ class WP_Customize_Setting {
 	 * @param array                $args    Setting arguments.
 	 * @return WP_Customize_Setting $setting
 	 */
-	public function __construct( $manager, $id, $args = array() ) {
+	function __construct( $manager, $id, $args = array() ) {
 		$keys = array_keys( get_class_vars( __CLASS__ ) );
 		foreach ( $keys as $key ) {
 			if ( isset( $args[ $key ] ) )
@@ -232,10 +232,10 @@ class WP_Customize_Setting {
 		switch( $this->type ) {
 			case 'theme_mod' :
 				return $this->_update_theme_mod( $value );
-
+				break;
 			case 'option' :
 				return $this->_update_option( $value );
-
+				break;
 			default :
 
 				/**

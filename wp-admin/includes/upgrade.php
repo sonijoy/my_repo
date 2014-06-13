@@ -465,11 +465,9 @@ function upgrade_100() {
 		}
 	}
 
-	$sql = "UPDATE $wpdb->options
-		SET option_value = REPLACE(option_value, 'wp-links/links-images/', 'wp-images/links/')
-		WHERE option_name LIKE %s
-		AND option_value LIKE %s";
-	$wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( 'links_rating_image' ) . '%', $wpdb->esc_like( 'wp-links/links-images/' ) . '%' ) );
+	$wpdb->query("UPDATE $wpdb->options SET option_value = REPLACE(option_value, 'wp-links/links-images/', 'wp-images/links/')
+	WHERE option_name LIKE 'links_rating_image%'
+	AND option_value LIKE 'wp-links/links-images/%'");
 
 	$done_ids = $wpdb->get_results("SELECT DISTINCT post_id FROM $wpdb->post2cat");
 	if ($done_ids) :
@@ -1102,28 +1100,9 @@ function upgrade_300() {
 
 	// 3.0 screen options key name changes.
 	if ( is_main_site() && !defined('DO_NOT_UPGRADE_GLOBAL_TABLES') ) {
-		$sql = "DELETE FROM $wpdb->usermeta
-			WHERE meta_key LIKE %s
-			OR meta_key LIKE %s
-			OR meta_key LIKE %s
-			OR meta_key LIKE %s
-			OR meta_key LIKE %s
-			OR meta_key LIKE %s
-			OR meta_key = 'manageedittagscolumnshidden'
-			OR meta_key = 'managecategoriescolumnshidden'
-			OR meta_key = 'manageedit-tagscolumnshidden'
-			OR meta_key = 'manageeditcolumnshidden'
-			OR meta_key = 'categories_per_page'
-			OR meta_key = 'edit_tags_per_page'";
-		$prefix = $wpdb->esc_like( $wpdb->base_prefix );
-		$wpdb->query( $wpdb->prepare( $sql,
-			$prefix . '%' . $wpdb->esc_like( 'meta-box-hidden' ) . '%',
-			$prefix . '%' . $wpdb->esc_like( 'closedpostboxes' ) . '%',
-			$prefix . '%' . $wpdb->esc_like( 'manage-'	   ) . '%' . $wpdb->esc_like( '-columns-hidden' ) . '%',
-			$prefix . '%' . $wpdb->esc_like( 'meta-box-order'  ) . '%',
-			$prefix . '%' . $wpdb->esc_like( 'metaboxorder'    ) . '%',
-			$prefix . '%' . $wpdb->esc_like( 'screen_layout'   ) . '%'
-		) );
+		$prefix = like_escape($wpdb->base_prefix);
+		$wpdb->query( "DELETE FROM $wpdb->usermeta WHERE meta_key LIKE '{$prefix}%meta-box-hidden%' OR meta_key LIKE '{$prefix}%closedpostboxes%' OR meta_key LIKE '{$prefix}%manage-%-columns-hidden%' OR meta_key LIKE '{$prefix}%meta-box-order%' OR meta_key LIKE '{$prefix}%metaboxorder%' OR meta_key LIKE '{$prefix}%screen_layout%'
+					 OR meta_key = 'manageedittagscolumnshidden' OR meta_key='managecategoriescolumnshidden' OR meta_key = 'manageedit-tagscolumnshidden' OR meta_key = 'manageeditcolumnshidden' OR meta_key = 'categories_per_page' OR meta_key = 'edit_tags_per_page'" );
 	}
 
 }
@@ -1305,12 +1284,11 @@ function upgrade_network() {
 		// The multi-table delete syntax is used to delete the transient record from table a,
 		// and the corresponding transient_timeout record from table b.
 		$time = time();
-		$sql = "DELETE a, b FROM $wpdb->sitemeta a, $wpdb->sitemeta b
-			WHERE a.meta_key LIKE %s
-			AND a.meta_key NOT LIKE %s
-			AND b.meta_key = CONCAT( '_site_transient_timeout_', SUBSTRING( a.meta_key, 17 ) )
-			AND b.meta_value < %d";
-		$wpdb->query( $wpdb->prepare( $sql, $wpdb->esc_like( '_site_transient_' ) . '%', $wpdb->esc_like ( '_site_transient_timeout_' ) . '%', $time ) );
+		$wpdb->query("DELETE a, b FROM $wpdb->sitemeta a, $wpdb->sitemeta b WHERE
+			a.meta_key LIKE '\_site\_transient\_%' AND
+			a.meta_key NOT LIKE '\_site\_transient\_timeout\_%' AND
+			b.meta_key = CONCAT( '_site_transient_timeout_', SUBSTRING( a.meta_key, 17 ) )
+			AND b.meta_value < $time");
 	}
 
 	// 2.8
@@ -1404,18 +1382,13 @@ function upgrade_network() {
  */
 function maybe_create_table($table_name, $create_ddl) {
 	global $wpdb;
-	
-	$query = $wpdb->prepare( "SHOW TABLES LIKE %s", $wpdb->esc_like( $table_name ) );
-
-	if ( $wpdb->get_var( $query ) == $table_name ) {
+	if ( $wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name )
 		return true;
-	}
 	//didn't find it try to create it.
-	$wpdb->query($create_ddl);
+	$q = $wpdb->query($create_ddl);
 	// we cannot directly tell that whether this succeeded!
-	if ( $wpdb->get_var( $query ) == $table_name ) {
+	if ( $wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name )
 		return true;
-	}
 	return false;
 }
 
@@ -1474,7 +1447,7 @@ function maybe_add_column($table_name, $column_name, $create_ddl) {
 		}
 	}
 	//didn't find it try to create it.
-	$wpdb->query($create_ddl);
+	$q = $wpdb->query($create_ddl);
 	// we cannot directly tell that whether this succeeded!
 	foreach ($wpdb->get_col("DESC $table_name", 0) as $column ) {
 		if ($column == $column_name) {
@@ -1582,8 +1555,8 @@ function dbDelta( $queries = '', $execute = true ) {
 		$queries = explode( ';', $queries );
 		$queries = array_filter( $queries );
 	}
-
-	/**
+	
+	/** 
 	 * Filter the dbDelta SQL queries.
 	 *
 	 * @since 3.3.0
@@ -1611,23 +1584,23 @@ function dbDelta( $queries = '', $execute = true ) {
 			// Unrecognized query type
 		}
 	}
-
-	/**
+	
+	/** 
 	 * Filter the dbDelta SQL queries for creating tables and/or databases.
 	 *
 	 * Queries filterable via this hook contain "CREATE TABLE" or "CREATE DATABASE".
-	 *
+	 * 
 	 * @since 3.3.0
 	 *
 	 * @param array $cqueries An array of dbDelta create SQL queries.
 	 */
 	$cqueries = apply_filters( 'dbdelta_create_queries', $cqueries );
 
-	/**
+	/** 
 	 * Filter the dbDelta SQL queries for inserting or updating.
 	 *
 	 * Queries filterable via this hook contain "INSERT INTO" or "UPDATE".
-	 *
+	 * 
 	 * @since 3.3.0
 	 *
 	 * @param array $iqueries An array of dbDelta insert or update SQL queries.
@@ -1821,7 +1794,7 @@ function make_db_current( $tables = 'all' ) {
  * @since 1.5.0
  */
 function make_db_current_silent( $tables = 'all' ) {
-	dbDelta( $tables );
+	$alterations = dbDelta( $tables );
 }
 
 /**

@@ -236,7 +236,6 @@ add_action( 'install_plugins_search',    'display_plugins_table' );
 add_action( 'install_plugins_featured',  'display_plugins_table' );
 add_action( 'install_plugins_popular',   'display_plugins_table' );
 add_action( 'install_plugins_new',       'display_plugins_table' );
-add_action( 'install_plugins_beta',      'display_plugins_table' );
 add_action( 'install_plugins_favorites', 'display_plugins_table' );
 
 /**
@@ -411,6 +410,11 @@ function install_plugin_information() {
 			echo '<div class="updated"><p>' . __('<strong>Warning:</strong> This plugin has <strong>not been marked as compatible</strong> with your version of WordPress.') . '</p></div>';
 
 		foreach ( (array)$api->sections as $section_name => $content ) {
+
+			if ( isset( $plugins_section_titles[ $section_name ] ) )
+				$title = $plugins_section_titles[ $section_name ];
+			else
+				$title = ucwords( str_replace( '_', ' ', $section_name ) );
 
 			$content = links_add_base_url( $content, 'https://wordpress.org/plugins/' . $api->slug . '/' );
 			$content = links_add_target( $content, '_blank' );

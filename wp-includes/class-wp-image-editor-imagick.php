@@ -18,7 +18,7 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 
 	protected $image = null; // Imagick Object
 
-	public function __destruct() {
+	function __destruct() {
 		if ( $this->image instanceof Imagick ) {
 			// we don't need the original in memory anymore
 			$this->image->clear();

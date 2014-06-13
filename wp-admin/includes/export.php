@@ -240,21 +240,12 @@ function export_wp( $args = array() ) {
 	 * Output list of authors with posts
 	 *
 	 * @since 3.1.0
-	 *
-	 * @param array $post_ids Array of post IDs to filter the query by. Optional.
 	 */
-	function wxr_authors_list( array $post_ids = null ) {
+	function wxr_authors_list() {
 		global $wpdb;
 
-		if ( !empty( $post_ids ) ) {
-			$post_ids = array_map( 'absint', $post_ids );
-			$and = 'AND ID IN ( ' . implode( ', ', $post_ids ) . ')';
-		} else {
-			$and = '';
-		}
-
 		$authors = array();
-		$results = $wpdb->get_results( "SELECT DISTINCT post_author FROM $wpdb->posts WHERE post_status != 'auto-draft' $and" );
+		$results = $wpdb->get_results( "SELECT DISTINCT post_author FROM $wpdb->posts WHERE post_status != 'auto-draft'" );
 		foreach ( (array) $results as $result )
 			$authors[] = get_userdata( $result->post_author );
 
@@ -353,7 +344,7 @@ function export_wp( $args = array() ) {
 	<wp:base_site_url><?php echo wxr_site_url(); ?></wp:base_site_url>
 	<wp:base_blog_url><?php bloginfo_rss( 'url' ); ?></wp:base_blog_url>
 
-<?php wxr_authors_list( $post_ids ); ?>
+<?php wxr_authors_list(); ?>
 
 <?php foreach ( $cats as $c ) : ?>
 	<wp:category><wp:term_id><?php echo $c->term_id ?></wp:term_id><wp:category_nicename><?php echo $c->slug; ?></wp:category_nicename><wp:category_parent><?php echo $c->parent ? $cats[$c->parent]->slug : ''; ?></wp:category_parent><?php wxr_cat_name( $c ); ?><?php wxr_category_description( $c ); ?></wp:category>
@@ -450,9 +441,8 @@ function export_wp( $args = array() ) {
 			<wp:meta_key><?php echo $meta->meta_key; ?></wp:meta_key>
 			<wp:meta_value><?php echo wxr_cdata( $meta->meta_value ); ?></wp:meta_value>
 		</wp:postmeta>
-<?php	endforeach;
-
-		$comments = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $wpdb->comments WHERE comment_post_ID = %d AND comment_approved <> 'spam'", $post->ID ) );
+<?php	endforeach; ?>
+<?php	$comments = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $wpdb->comments WHERE comment_post_ID = %d AND comment_approved <> 'spam'", $post->ID ) );
 		foreach ( $comments as $c ) : ?>
 		<wp:comment>
 			<wp:comment_id><?php echo $c->comment_ID; ?></wp:comment_id>

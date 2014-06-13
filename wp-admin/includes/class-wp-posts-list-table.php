@@ -16,7 +16,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 	 * @var bool
 	 * @access protected
 	 */
-	protected $hierarchical_display;
+	var $hierarchical_display;
 
 	/**
 	 * Holds the number of pending comments for each post
@@ -25,7 +25,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 	 * @var int
 	 * @access protected
 	 */
-	protected $comment_pending_count;
+	var $comment_pending_count;
 
 	/**
 	 * Holds the number of posts for this user
@@ -34,7 +34,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 	 * @var int
 	 * @access private
 	 */
-	private $user_posts_count;
+	var $user_posts_count;
 
 	/**
 	 * Holds the number of posts which are sticky.
@@ -43,9 +43,9 @@ class WP_Posts_List_Table extends WP_List_Table {
 	 * @var int
 	 * @access private
 	 */
-	private $sticky_posts_count = 0;
+	var $sticky_posts_count = 0;
 
-	public function __construct( $args = array() ) {
+	function __construct( $args = array() ) {
 		global $post_type_object, $wpdb;
 
 		parent::__construct( array(
@@ -74,11 +74,11 @@ class WP_Posts_List_Table extends WP_List_Table {
 		}
 	}
 
-	public function ajax_user_can() {
+	function ajax_user_can() {
 		return current_user_can( get_post_type_object( $this->screen->post_type )->cap->edit_posts );
 	}
 
-	public function prepare_items() {
+	function prepare_items() {
 		global $avail_post_stati, $wp_query, $per_page, $mode;
 
 		$avail_post_stati = wp_edit_posts_query();
@@ -109,18 +109,18 @@ class WP_Posts_List_Table extends WP_List_Table {
 		) );
 	}
 
-	public function has_items() {
+	function has_items() {
 		return have_posts();
 	}
 
-	public function no_items() {
+	function no_items() {
 		if ( isset( $_REQUEST['post_status'] ) && 'trash' == $_REQUEST['post_status'] )
 			echo get_post_type_object( $this->screen->post_type )->labels->not_found_in_trash;
 		else
 			echo get_post_type_object( $this->screen->post_type )->labels->not_found;
 	}
 
-	protected function get_views() {
+	function get_views() {
 		global $locked_post_status, $avail_post_stati;
 
 		$post_type = $this->screen->post_type;
@@ -181,7 +181,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 		return $status_links;
 	}
 
-	protected function get_bulk_actions() {
+	function get_bulk_actions() {
 		$actions = array();
 
 		if ( $this->is_trash )
@@ -197,7 +197,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 		return $actions;
 	}
 
-	protected function extra_tablenav( $which ) {
+	function extra_tablenav( $which ) {
 		global $cat;
 ?>
 		<div class="alignleft actions">
@@ -239,14 +239,14 @@ class WP_Posts_List_Table extends WP_List_Table {
 <?php
 	}
 
-	public function current_action() {
+	function current_action() {
 		if ( isset( $_REQUEST['delete_all'] ) || isset( $_REQUEST['delete_all2'] ) )
 			return 'delete_all';
 
 		return parent::current_action();
 	}
 
-	protected function pagination( $which ) {
+	function pagination( $which ) {
 		global $mode;
 
 		parent::pagination( $which );
@@ -255,11 +255,11 @@ class WP_Posts_List_Table extends WP_List_Table {
 			$this->view_switcher( $mode );
 	}
 
-	protected function get_table_classes() {
+	function get_table_classes() {
 		return array( 'widefat', 'fixed', is_post_type_hierarchical( $this->screen->post_type ) ? 'pages' : 'posts' );
 	}
 
-	protected function get_columns() {
+	function get_columns() {
 		$post_type = $this->screen->post_type;
 
 		$posts_columns = array();
@@ -269,9 +269,10 @@ class WP_Posts_List_Table extends WP_List_Table {
 		/* translators: manage posts column name */
 		$posts_columns['title'] = _x( 'Title', 'column name' );
 
-		if ( post_type_supports( $post_type, 'author' ) ) {
+		if ( post_type_supports( $post_type, 'author' ) )
 			$posts_columns['author'] = __( 'Author' );
-		}
+
+		$taxonomies = array();
 
 		$taxonomies = get_object_taxonomies( $post_type, 'objects' );
 		$taxonomies = wp_filter_object_list( $taxonomies, array( 'show_admin_column' => true ), 'and', 'name' );
@@ -344,7 +345,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 		return $posts_columns;
 	}
 
-	protected function get_sortable_columns() {
+	function get_sortable_columns() {
 		return array(
 			'title'    => 'title',
 			'parent'   => 'parent',
@@ -353,7 +354,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 		);
 	}
 
-	protected function display_rows( $posts = array(), $level = 0 ) {
+	function display_rows( $posts = array(), $level = 0 ) {
 		global $wp_query, $per_page;
 
 		if ( empty( $posts ) )
@@ -368,7 +369,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 		}
 	}
 
-	private function _display_rows( $posts, $level = 0 ) {
+	function _display_rows( $posts, $level = 0 ) {
 		global $mode;
 
 		// Create array of post IDs.
@@ -383,7 +384,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 			$this->single_row( $post, $level );
 	}
 
-	private function _display_rows_hierarchical( $pages, $pagenum = 1, $per_page = 20 ) {
+	function _display_rows_hierarchical( $pages, $pagenum = 1, $per_page = 20 ) {
 		global $wpdb;
 
 		$level = 0;
@@ -475,7 +476,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 	 * @param int $pagenum
 	 * @param int $per_page
 	 */
-	private function _page_rows( &$children_pages, &$count, $parent, $level, $pagenum, $per_page ) {
+	function _page_rows( &$children_pages, &$count, $parent, $level, $pagenum, $per_page ) {
 
 		if ( ! isset( $children_pages[$parent] ) )
 			return;
@@ -520,7 +521,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 		unset( $children_pages[$parent] ); //required in order to keep track of orphans
 	}
 
-	protected function single_row( $post, $level = 0 ) {
+	function single_row( $post, $level = 0 ) {
 		global $mode;
 		static $alternate;
 
@@ -878,7 +879,7 @@ class WP_Posts_List_Table extends WP_List_Table {
 	 *
 	 * @since 3.1.0
 	 */
-	public function inline_edit() {
+	function inline_edit() {
 		global $mode;
 
 		$screen = $this->screen;

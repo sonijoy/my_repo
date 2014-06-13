@@ -37,12 +37,9 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 			}
 		});
 
-		if (  pixels && ! initial ) {
-			// Resize iframe, not needed in iOS
-			if ( ! tinymce.Env.iOS ) {
-				iframe = editor.getContentAreaContainer().firstChild;
-				DOM.setStyle( iframe, 'height', iframe.clientHeight + pixels );
-			}
+		if ( pixels && ! initial ) {
+			iframe = editor.getContentAreaContainer().firstChild;
+			DOM.setStyle( iframe, 'height', iframe.clientHeight + pixels ); // Resize iframe
 
 			if ( state === 'hide' ) {
 				setUserSetting('hidetb', '0');
@@ -280,10 +277,6 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 			doc = editor.getDoc(),
 			dom = editor.dom;
 
-		if ( tinymce.Env.iOS ) {
-			dom.addClass( doc.documentElement, 'ios' );
-		}
-
 		if ( editor.getParam( 'directionality' ) === 'rtl' ) {
 			bodyClass.push('rtl');
 			dom.setAttrib( doc.documentElement, 'dir', 'rtl' );
@@ -349,33 +342,22 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 
 	editor.on( 'SaveContent', function( e ) {
 		// If editor is hidden, we just want the textarea's value to be saved
-		if ( ! editor.inline && editor.isHidden() ) {
+		if ( editor.isHidden() ) {
 			e.content = e.element.value;
 			return;
 		}
 
 		// Keep empty paragraphs :(
-		e.content = e.content.replace( /<p>(?:<br ?\/?>|\u00a0|\uFEFF| )*<\/p>/g, '<p>&nbsp;</p>' );
+		e.content = e.content.replace( /<p>(<br ?\/?>|\u00a0|\uFEFF)?<\/p>/g, '<p>&nbsp;</p>' );
 
 		if ( editor.getParam( 'wpautop', true ) && typeof window.switchEditors !== 'undefined' ) {
 			e.content = window.switchEditors.pre_wpautop( e.content );
 		}
 	});
 
-	// Remove spaces from empty paragraphs.
-	editor.on( 'BeforeSetContent', function( event ) {
-		if ( event.content ) {
-			event.content = event.content.replace( /<p>(?:&nbsp;|\u00a0|\uFEFF| )+<\/p>/gi, '<p></p>' );
-		}
-	});
-
 	editor.on( 'preInit', function() {
 		// Don't replace <i> with <em> and <b> with <strong> and don't remove them when empty
 		editor.schema.addValidElements( '@[id|accesskey|class|dir|lang|style|tabindex|title|contenteditable|draggable|dropzone|hidden|spellcheck|translate],i,b' );
-
-		if ( tinymce.Env.iOS ) {
-			editor.settings.height = 300;
-		}
 	});
 
 	// Add custom shortcuts

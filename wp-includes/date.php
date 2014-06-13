@@ -105,7 +105,7 @@ class WP_Date_Query {
 	 *                              Accepts 'post_date', 'post_date_gmt', 'post_modified', 'post_modified_gmt',
 	 *                              'comment_date', 'comment_date_gmt'.
 	 */
-	public function __construct( $date_query, $default_column = 'post_date' ) {
+	function __construct( $date_query, $default_column = 'post_date' ) {
 		if ( empty( $date_query ) || ! is_array( $date_query ) )
 			return;
 
@@ -256,12 +256,16 @@ class WP_Date_Query {
 
 		if ( isset( $query['month'] ) && $value = $this->build_value( $compare, $query['month'] ) )
 			$where_parts[] = "MONTH( $column ) $compare $value";
-		else if ( isset( $query['monthnum'] ) && $value = $this->build_value( $compare, $query['monthnum'] ) )
+
+		// Legacy
+		if ( isset( $query['monthnum'] ) && $value = $this->build_value( $compare, $query['monthnum'] ) )
 			$where_parts[] = "MONTH( $column ) $compare $value";
 
 		if ( isset( $query['week'] ) && false !== ( $value = $this->build_value( $compare, $query['week'] ) ) )
 			$where_parts[] = _wp_mysql_week( $column ) . " $compare $value";
-		else if ( isset( $query['w'] ) && false !== ( $value = $this->build_value( $compare, $query['w'] ) ) )
+
+		// Legacy
+		if ( isset( $query['w'] ) && false !== ( $value = $this->build_value( $compare, $query['w'] ) ) )
 			$where_parts[] = _wp_mysql_week( $column ) . " $compare $value";
 
 		if ( isset( $query['dayofyear'] ) && $value = $this->build_value( $compare, $query['dayofyear'] ) )

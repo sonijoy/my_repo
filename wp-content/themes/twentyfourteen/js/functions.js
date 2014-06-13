@@ -40,13 +40,7 @@
 	 * @link http://www.nczonline.net/blog/2013/01/15/fixing-skip-to-content-links/
 	 */
 	_window.on( 'hashchange.twentyfourteen', function() {
-		var hash = location.hash.substring( 1 ), element;
-
-		if ( ! hash ) {
-			return;
-		}
-
-		element = document.getElementById( hash );
+		var element = document.getElementById( location.hash.substring( 1 ) );
 
 		if ( element ) {
 			if ( ! /^(?:a|select|input|button|textarea)$/i.test( element.tagName ) ) {

@@ -10,21 +10,21 @@
 class WP_Themes_List_Table extends WP_List_Table {
 
 	protected $search_terms = array();
-	public $features = array();
+	var $features = array();
 
-	public function __construct( $args = array() ) {
+	function __construct( $args = array() ) {
 		parent::__construct( array(
 			'ajax' => true,
 			'screen' => isset( $args['screen'] ) ? $args['screen'] : null,
 		) );
 	}
 
-	public function ajax_user_can() {
+	function ajax_user_can() {
 		// Do not check edit_theme_options here. AJAX calls for available themes require switch_themes.
 		return current_user_can( 'switch_themes' );
 	}
 
-	public function prepare_items() {
+	function prepare_items() {
 		$themes = wp_get_themes( array( 'allowed' => true ) );
 
 		if ( ! empty( $_REQUEST['s'] ) )
@@ -57,7 +57,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 		) );
 	}
 
-	public function no_items() {
+	function no_items() {
 		if ( $this->search_terms || $this->features ) {
 			_e( 'No items found.' );
 			return;
@@ -85,7 +85,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 		printf( __( 'Only the current theme is available to you. Contact the %s administrator for information about accessing additional themes.' ), get_site_option( 'site_name' ) );
 	}
 
-	public function tablenav( $which = 'top' ) {
+	function tablenav( $which = 'top' ) {
 		if ( $this->get_pagination_arg( 'total_pages' ) <= 1 )
 			return;
 		?>
@@ -97,7 +97,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 		<?php
 	}
 
-	public function display() {
+	function display() {
 		wp_nonce_field( "fetch-list-" . get_class( $this ), '_ajax_fetch_list_nonce' );
 ?>
 		<?php $this->tablenav( 'top' ); ?>
@@ -110,11 +110,11 @@ class WP_Themes_List_Table extends WP_List_Table {
 <?php
 	}
 
-	protected function get_columns() {
+	function get_columns() {
 		return array();
 	}
 
-	protected function display_rows_or_placeholder() {
+	function display_rows_or_placeholder() {
 		if ( $this->has_items() ) {
 			$this->display_rows();
 		} else {
@@ -124,7 +124,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 		}
 	}
 
-	protected function display_rows() {
+	function display_rows() {
 		$themes = $this->items;
 
 		foreach ( $themes as $theme ):
@@ -208,7 +208,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 		endforeach;
 	}
 
-	public function search_theme( $theme ) {
+	function search_theme( $theme ) {
 		// Search the features
 		foreach ( $this->features as $word ) {
 			if ( ! in_array( $word, $theme->get('Tags') ) )
@@ -249,7 +249,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 	 * @uses get_pagenum()
 	 * @uses _pagination_args['total_pages']
 	 */
-	private function _js_vars( $extra_args = array() ) {
+	 function _js_vars( $extra_args = array() ) {
 		$search_string = isset( $_REQUEST['s'] ) ? esc_attr( wp_unslash( $_REQUEST['s'] ) ) : '';
 
 		$args = array(

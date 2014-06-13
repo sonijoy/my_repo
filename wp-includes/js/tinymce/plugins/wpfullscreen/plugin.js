@@ -63,33 +63,20 @@ tinymce.PluginManager.add( 'wpfullscreen', function( editor ) {
 	editor.addCommand( 'wpFullScreenOn', fullscreenOn );
 	editor.addCommand( 'wpFullScreenOff', fullscreenOff );
 
-	function getExtAPI() {
-		return ( typeof wp !== 'undefined' && wp.editor && wp.editor.fullscreen );
-	}
-
-	// Toggle DFW mode. For use from inside the editor.
 	function toggleFullscreen() {
-		var fullscreen = getExtAPI();
+		// Toggle DFW mode. For use from inside the editor.
+		if ( typeof wp === 'undefined' || ! wp.editor || ! wp.editor.fullscreen ) {
+			return;
+		}
 
-		if ( fullscreen ) {
-			if ( editor.getParam('wp_fullscreen') ) {
-				fullscreen.off();
-			} else {
-				fullscreen.on();
-			}
+		if ( editor.getParam('wp_fullscreen') ) {
+			wp.editor.fullscreen.off();
+		} else {
+			wp.editor.fullscreen.on();
 		}
 	}
 
 	editor.addCommand( 'wpFullScreen', toggleFullscreen );
-
-	editor.on( 'keydown', function( event ) {
-		var fullscreen;
-
-		// Turn fullscreen off when Esc is pressed.
-		if ( event.keyCode === 27 && ( fullscreen = getExtAPI() ) && fullscreen.settings.visible ) {
-			fullscreen.off();
-		}
-	});
 
 	editor.on( 'init', function() {
 		// Set the editor when initializing from whitin DFW

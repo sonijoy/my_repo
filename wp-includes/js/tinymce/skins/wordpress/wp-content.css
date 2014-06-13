@@ -1,14 +1,4 @@
 /* Additional default styles for the editor */
-
-html.ios {
-	height: 100%;
-}
-
-.ios body#tinymce {
-	height: 200%;
-	max-width: none;
-}
-
 body {
 	font-family: Georgia, "Times New Roman", "Bitstream Charter", Times, serif;
 	font-size: 13px;
@@ -216,10 +206,6 @@ audio {
 	border: 0;
 	width: 1px;
 	height: 1px;
-	-moz-user-select: text;
-	-webkit-user-select: text;
-	-ms-user-select: text;
-	user-select: text;
 }
 
 /**
@@ -231,13 +217,13 @@ audio {
 	border: 1px solid transparent;
 }
 
-.wpview-wrap[data-mce-selected] {
+.wpview-wrap.selected {
 	background-color: rgba(0,0,0,0.1);
 	border-color: rgba(0,0,0,0.3);
 }
 
-.ie8 .wpview-wrap[data-mce-selected],
-.ie7 .wpview-wrap[data-mce-selected] {
+.ie8 .wpview-wrap.selected,
+.ie7 .wpview-wrap.selected {
 	background-color: #e5e5e5;
 	border-color: #777;
 }
@@ -250,7 +236,7 @@ audio {
 	left: 0;
 }
 
-.wpview-wrap[data-mce-selected] .wpview-overlay {
+.wpview-wrap.selected .wpview-overlay {
 	display: none;
 }
 
@@ -262,17 +248,16 @@ audio {
 	z-index: 100;
 }
 
-.wpview-wrap[data-mce-selected] .toolbar {
+.wpview-wrap.selected .toolbar {
 	display: block;
 }
 
 #wp-image-toolbar {
 	position: absolute;
-	margin: 0;
 }
 
 .wpview-wrap .toolbar div,
-#wp-image-toolbar i {
+#wp-image-toolbar div {
 	margin-top: 7px;
 	margin-left: 7px;
 	padding: 2px;
@@ -288,8 +273,8 @@ audio {
 
 .ie8 .wpview-wrap .toolbar div,
 .ie7 .wpview-wrap .toolbar div,
-.ie8 #wp-image-toolbar i,
-.ie7 #wp-image-toolbar i {
+.ie8 #wp-image-toolbar div,
+.ie7 #wp-image-toolbar div {
 	display: inline;
 	padding: 0;
 }
@@ -310,7 +295,7 @@ audio {
 	margin: 0;
 }
 
-.wpview-wrap[data-mce-selected] .wpview-error {
+.selected .wpview-error {
 	border-color: transparent;
 }
 
@@ -328,8 +313,9 @@ audio {
 	font-family: 'Open Sans', sans-serif;
 }
 
+
 .wpview-wrap .toolbar div:hover,
-#wp-image-toolbar i:hover {
+#wp-image-toolbar div:hover {
 	box-shadow: 0 1px 3px rgba(0,0,0,0.8);
 	background-color: #000;
 	color: #2ea2cc;
@@ -481,7 +467,7 @@ img.wp-oembed {
 }
 
 .rtl .wpview-wrap .toolbar div,
-.rtl #wp-image-toolbar i {
+.rtl #wp-image-toolbar div {
 	margin-left: auto;
 	margin-right: 7px;
 }

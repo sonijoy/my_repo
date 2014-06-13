@@ -295,11 +295,10 @@
 	margin: 3px 0;
 }
 
-.media-sidebar .setting .name {
+.media-sidebar .setting span {
 	min-width: 30%;
 	margin-right: 4%;
 	font-size: 12px;
-	text-align: right;
 }
 
 .media-sidebar .setting select {
@@ -320,17 +319,13 @@
 	min-height: 22px;
 	padding-top: 8px;
 	line-height: 16px;
+	text-align: right;
 	font-weight: normal;
 	color: #666;
 }
 
-.compat-item label span  {
-	text-align: right;
-}
-
 .media-sidebar .setting input,
-.media-sidebar .setting textarea,
-.media-sidebar .setting .value {
+.media-sidebar .setting textarea {
 	margin: 1px;
 	width: 65%;
 	float: right;
@@ -483,7 +478,8 @@
 	border-right: 0;
 }
 
-.media-router > a:active {
+.media-router > a:active,
+.media-router > a:focus {
 	outline: none;
 }
 
@@ -698,16 +694,6 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-}
-
-.attachment:focus {
-	-webkit-box-shadow:
-		0 0 0 1px #5b9dd9,
-		0 0 2px 2px #5b9dd9;
-	box-shadow:
-		0 0 0 1px #5b9dd9,
-		0 0 2px 2px #5b9dd9;
-	outline: none;
 }
 
 .selected.attachment {
@@ -939,7 +925,6 @@
 	right: 300px;
 	bottom: 0;
 	overflow: auto;
-	outline: none;
 }
 
 .attachments-browser .instructions {
@@ -1405,7 +1390,7 @@
 	margin-top: 35px;
 }
 
-.attachment-info .thumbnail-image:after {
+.attachment-info .thumbnail:after {
 	content: '';
 	display: block;
 	position: absolute;
@@ -1598,7 +1583,7 @@
 
 .media-frame .embed-url .spinner {
 	position: absolute;
-	top: 32px;
+	top: 16px;
 	right: 26px;
 }
 
@@ -1609,20 +1594,12 @@
 .embed-link-settings,
 .embed-media-settings {
 	position: absolute;
-	top: 70px;
+	top: 60px;
 	left: 0;
 	right: 0;
 	bottom: 0;
 	padding: 16px 16px 32px;
 	overflow: auto;
-}
-
-.embed-preview img, .embed-preview iframe, .embed-preview embed {
-	max-width: 100%;
-}
-
-.embed-preview img {
-	height: auto;
 }
 
 .image-details .media-modal {
@@ -2372,78 +2349,4 @@
   	.media-frame .spinner {
   		background-image: url(../images/spinner-2x.gif);
   	}
-}
-
-
-/**
- * Media Grid
- */
-
-.media-grid-view h1 {
-	color: #222;
-	font-size: 23px;
-	font-weight: 400;
-	margin: 10px 0 0;
-	padding: 9px 15px 4px 22px;
-	line-height: 29px;
-}
-
-.media-grid-view-switch {
-	position: fixed;
-	right: 10px;
-	top: 44px;
-	z-index: 300;
-}
-
-/**
- * Position both the frame and the uploader window into the content
- * area of the screen.
- */
-.media-grid-view {
-	position: fixed;
-	bottom: 0;
-	left: 160px;
-	right: 0;
-	top: 32px;
-}
-@media screen and (max-width: 900px) {
-	.auto-fold .media-grid-view {
-		left: 36px;
-	}
-}
-@media screen and (max-width: 782px) {
-	.media-grid-view {
-		top: 46px;
-	}
-	.auto-fold .media-grid-view {
-		left: 0px;
-		bottom: 0px;
-	}
-}
-
-/* Regions we don't use at all */
-.media-grid-view .media-frame-toolbar,
-.media-grid-view .media-frame-menu {
-	display: none;
-}
-
-.media-grid-view .media-frame-content {
-	bottom: 40px;
-}
-@media screen and (max-width: 782px) {
-	.media-grid-view .media-frame-content {
-		border-bottom: none;
-		bottom: 0;
-	}
-}
-
-@media only screen and (max-width: 640px), screen and (max-height: 400px) {
-	.media-grid-view .media-frame-title {
-		display: block;
-		width: auto;
-		bottom: auto;
-		right: 0;
-		top: 0;
-		height: 60px;
-	}
 }

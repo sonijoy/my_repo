@@ -233,31 +233,11 @@ function wp_mail( $to, $subject, $message, $headers = '', $attachments = array()
 	 * @param array $args A compacted array of wp_mail() arguments, including the "to" email,
 	 *                    subject, message, headers, and attachments values.
 	 */
-	$atts = apply_filters( 'wp_mail', compact( 'to', 'subject', 'message', 'headers', 'attachments' ) );
+	extract( apply_filters( 'wp_mail', compact( 'to', 'subject', 'message', 'headers', 'attachments' ) ) );
 
-	if ( isset( $atts['to'] ) ) {
-		$to = $atts['to'];
-	}
-
-	if ( isset( $atts['subject'] ) ) {
-		$subject = $atts['subject'];
-	}
-
-	if ( isset( $atts['message'] ) ) {
-		$message = $atts['message'];
-	}
-
-	if ( isset( $atts['headers'] ) ) {
-		$headers = $atts['headers'];
-	}
-
-	if ( isset( $atts['attachments'] ) ) {
-		$attachments = $atts['attachments'];
-	}
-
-	if ( ! is_array( $attachments ) ) {
+	if ( !is_array($attachments) )
 		$attachments = explode( "\n", str_replace( "\r\n", "\n", $attachments ) );
-	}
+
 	global $phpmailer;
 
 	// (Re)create it, if it's gone missing
@@ -628,15 +608,13 @@ function wp_validate_auth_cookie($cookie = '', $scheme = '') {
 		return false;
 	}
 
-	$scheme = $cookie_elements['scheme'];
-	$username = $cookie_elements['username'];
-	$hmac = $cookie_elements['hmac'];
-	$expired = $expiration = $cookie_elements['expiration'];
+	extract($cookie_elements, EXTR_OVERWRITE);
+
+	$expired = $expiration;
 
 	// Allow a grace period for POST and AJAX requests
-	if ( defined('DOING_AJAX') || 'POST' == $_SERVER['REQUEST_METHOD'] ) {
+	if ( defined('DOING_AJAX') || 'POST' == $_SERVER['REQUEST_METHOD'] )
 		$expired += HOUR_IN_SECONDS;
-	}
 
 	// Quick check to see if an honest cookie has expired
 	if ( $expired < time() ) {
@@ -681,9 +659,8 @@ function wp_validate_auth_cookie($cookie = '', $scheme = '') {
 		return false;
 	}
 
-	if ( $expiration < time() ) {// AJAX/POST grace period set above
+	if ( $expiration < time() ) // AJAX/POST grace period set above
 		$GLOBALS['login_grace_period'] = 1;
-	}
 
 	/**
 	 * Fires once an authentication cookie has been validated.
@@ -818,12 +795,8 @@ function wp_set_auth_cookie($user_id, $remember = false, $secure = '') {
 		$expire = 0;
 	}
 
-	if ( '' === $secure ) {
+	if ( '' === $secure )
 		$secure = is_ssl();
-	}
-
-	// Frontend cookie is secure when the auth cookie is secure and the site's home URL is forced HTTPS.
-	$secure_logged_in_cookie = $secure && 'https' === parse_url( get_option( 'home' ), PHP_URL_SCHEME );
 
 	/**
 	 * Filter whether the connection is secure.
@@ -840,11 +813,11 @@ function wp_set_auth_cookie($user_id, $remember = false, $secure = '') {
 	 *
 	 * @since 3.1.0
 	 *
-	 * @param bool $secure_logged_in_cookie Whether to use a secure cookie when logged-in.
-	 * @param int  $user_id                 User ID.
-	 * @param bool $secure                  Whether the connection is secure.
+	 * @param bool $cookie  Whether to use a secure cookie when logged-in.
+	 * @param int  $user_id User ID.
+	 * @param bool $secure  Whether the connection is secure.
 	 */
-	$secure_logged_in_cookie = apply_filters( 'secure_logged_in_cookie', $secure_logged_in_cookie, $user_id, $secure );
+	$secure_logged_in_cookie = apply_filters( 'secure_logged_in_cookie', false, $user_id, $secure );
 
 	if ( $secure ) {
 		$auth_cookie_name = SECURE_AUTH_COOKIE;
@@ -1773,51 +1746,45 @@ function wp_salt( $scheme = 'auth' ) {
 		$duplicated_keys = array( 'put your unique phrase here' => true );
 		foreach ( array( 'AUTH', 'SECURE_AUTH', 'LOGGED_IN', 'NONCE', 'SECRET' ) as $first ) {
 			foreach ( array( 'KEY', 'SALT' ) as $second ) {
-				if ( ! defined( "{$first}_{$second}" ) ) {
+				if ( ! defined( "{$first}_{$second}" ) )
 					continue;
-				}
 				$value = constant( "{$first}_{$second}" );
 				$duplicated_keys[ $value ] = isset( $duplicated_keys[ $value ] );
 			}
 		}
 	}
 
-	$values = array(
-		'key' => '',
-		'salt' => ''
-	);
-	if ( defined( 'SECRET_KEY' ) && SECRET_KEY && empty( $duplicated_keys[ SECRET_KEY ] ) ) {
-		$values['key'] = SECRET_KEY;
-	}
-	if ( 'auth' == $scheme && defined( 'SECRET_SALT' ) && SECRET_SALT && empty( $duplicated_keys[ SECRET_SALT ] ) ) {
-		$values['salt'] = SECRET_SALT;
-	}
+	$key = $salt = '';
+	if ( defined( 'SECRET_KEY' ) && SECRET_KEY && empty( $duplicated_keys[ SECRET_KEY ] ) )
+		$key = SECRET_KEY;
+	if ( 'auth' == $scheme && defined( 'SECRET_SALT' ) && SECRET_SALT && empty( $duplicated_keys[ SECRET_SALT ] ) )
+		$salt = SECRET_SALT;
 
 	if ( in_array( $scheme, array( 'auth', 'secure_auth', 'logged_in', 'nonce' ) ) ) {
 		foreach ( array( 'key', 'salt' ) as $type ) {
 			$const = strtoupper( "{$scheme}_{$type}" );
 			if ( defined( $const ) && constant( $const ) && empty( $duplicated_keys[ constant( $const ) ] ) ) {
-				$values[ $type ] = constant( $const );
-			} elseif ( ! $values[ $type ] ) {
-				$values[ $type ] = get_site_option( "{$scheme}_{$type}" );
-				if ( ! $values[ $type ] ) {
-					$values[ $type ] = wp_generate_password( 64, true, true );
-					update_site_option( "{$scheme}_{$type}", $values[ $type ] );
+				$$type = constant( $const );
+			} elseif ( ! $$type ) {
+				$$type = get_site_option( "{$scheme}_{$type}" );
+				if ( ! $$type ) {
+					$$type = wp_generate_password( 64, true, true );
+					update_site_option( "{$scheme}_{$type}", $$type );
 				}
 			}
 		}
 	} else {
-		if ( ! $values['key'] ) {
-			$values['key'] = get_site_option( 'secret_key' );
-			if ( ! $values['key'] ) {
-				$values['key'] = wp_generate_password( 64, true, true );
-				update_site_option( 'secret_key', $values['key'] );
+		if ( ! $key ) {
+			$key = get_site_option( 'secret_key' );
+			if ( ! $key ) {
+				$key = wp_generate_password( 64, true, true );
+				update_site_option( 'secret_key', $key );
 			}
 		}
-		$values['salt'] = hash_hmac( 'md5', $scheme, $values['key'] );
+		$salt = hash_hmac( 'md5', $scheme, $key );
 	}
 
-	$cached_salts[ $scheme ] = $values['key'] . $values['salt'];
+	$cached_salts[ $scheme ] = $key . $salt;
 
 	/** This filter is documented in wp-includes/pluggable.php */
 	return apply_filters( 'salt', $cached_salts[ $scheme ], $scheme );

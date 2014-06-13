@@ -73,7 +73,7 @@ tinymce.PluginManager.add( 'wpview', function( editor ) {
 
 		deselect();
 		selected = viewNode;
-		dom.setAttrib( viewNode, 'data-mce-selected', 1 );
+		dom.addClass( viewNode, 'selected' );
 
 		clipboard = dom.create( 'div', {
 			'class': 'wpview-clipboard',
@@ -94,7 +94,6 @@ tinymce.PluginManager.add( 'wpview', function( editor ) {
 
 		// select the hidden div
 		editor.selection.select( clipboard, true );
-		editor.nodeChanged();
 	}
 
 	/**
@@ -110,7 +109,7 @@ tinymce.PluginManager.add( 'wpview', function( editor ) {
 			dom.remove( clipboard );
 
 			dom.unbind( selected, 'beforedeactivate focusin focusout click mouseup', _stop );
-			dom.setAttrib( selected, 'data-mce-selected', null );
+			dom.removeClass( selected, 'selected' );
 		}
 
 		selected = null;
@@ -158,22 +157,12 @@ tinymce.PluginManager.add( 'wpview', function( editor ) {
 	// matching view patterns, and transform the matches into
 	// view wrappers.
 	editor.on( 'BeforeSetContent', function( event ) {
-		var node;
-
 		if ( ! event.content ) {
 			return;
 		}
 
 		if ( ! event.initial ) {
 			wp.mce.views.unbind( editor );
-		}
-
-		node = editor.selection.getNode();
-
-		// When a url is pasted, only try to embed it when pasted in an empty paragrapgh.
-		if ( event.content.match( /^\s*(https?:\/\/[^\s"]+)\s*$/i ) &&
-			( node.nodeName !== 'P' || node.parentNode !== editor.getBody() || ! editor.dom.isEmpty( node ) ) ) {
-			return;
 		}
 
 		event.content = wp.mce.views.toViews( event.content );
@@ -285,7 +274,7 @@ tinymce.PluginManager.add( 'wpview', function( editor ) {
 			node.innerHTML = wp.mce.views.toViews( node.innerHTML );
 		});
 
-		editor.dom.bind( editor.getBody().parentNode, 'mousedown mouseup click', function( event ) {
+		editor.dom.bind( editor.getBody(), 'mousedown mouseup click', function( event ) {
 			var view = getParentView( event.target ),
 				deselectEventType;
 

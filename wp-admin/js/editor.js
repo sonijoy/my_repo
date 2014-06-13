@@ -60,8 +60,7 @@ window.switchEditors = {
 			if ( ed ) {
 				ed.show();
 
-				// No point resizing the iframe in iOS
-				if ( ! tinymce.Env.iOS && editorHeight ) {
+				if ( editorHeight ) {
 					toolbarHeight = getToolbarHeight();
 					editorHeight = editorHeight - toolbarHeight + 14;
 
@@ -85,18 +84,16 @@ window.switchEditors = {
 			}
 
 			if ( ed ) {
-				if ( ! tinymce.Env.iOS ) {
-					iframe = DOM.get( id + '_ifr' );
-					editorHeight = iframe ? parseInt( iframe.style.height, 10 ) : 0;
+				iframe = DOM.get( id + '_ifr' );
+				editorHeight = iframe ? parseInt( iframe.style.height, 10 ) : 0;
 
-					if ( editorHeight ) {
-						toolbarHeight = getToolbarHeight();
-						editorHeight = editorHeight + toolbarHeight - 14;
+				if ( editorHeight ) {
+					toolbarHeight = getToolbarHeight();
+					editorHeight = editorHeight + toolbarHeight - 14;
 
-						// height cannot be under 50 or over 5000
-						if ( editorHeight > 50 && editorHeight < 5000 ) {
-							txtarea_el.style.height = editorHeight + 'px';
-						}
+					// height cannot be under 50 or over 5000
+					if ( editorHeight > 50 && editorHeight < 5000 ) {
+						txtarea_el.style.height = editorHeight + 'px';
 					}
 				}
 

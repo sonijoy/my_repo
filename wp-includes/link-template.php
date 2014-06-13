@@ -290,7 +290,7 @@ function get_post_permalink( $id = 0, $leavename = false, $sample = false ) {
  *
  * @since 1.0.0
  *
- * @param int|WP_Post $post_id Optional. Post ID or WP_Post object. Default is global `$post`.
+ * @param int $post_id Optional. Post ID.
  * @param mixed $deprecated Not used.
  * @return string
  */
@@ -1196,25 +1196,23 @@ function get_edit_post_link( $id = 0, $context = 'display' ) {
  *
  * @since 1.0.0
  *
- * @param string $text Optional. Anchor text.
+ * @param string $link Optional. Anchor text.
  * @param string $before Optional. Display before edit link.
  * @param string $after Optional. Display after edit link.
  * @param int $id Optional. Post ID.
  */
-function edit_post_link( $text = null, $before = '', $after = '', $id = 0 ) {
-	if ( ! $post = get_post( $id ) ) {
+function edit_post_link( $link = null, $before = '', $after = '', $id = 0 ) {
+	if ( !$post = get_post( $id ) )
 		return;
-	}
 
-	if ( ! $url = get_edit_post_link( $post->ID ) ) {
+	if ( !$url = get_edit_post_link( $post->ID ) )
 		return;
-	}
 
-	if ( null === $text ) {
-		$text = __( 'Edit This' );
-	}
+	if ( null === $link )
+		$link = __('Edit This');
 
-	$link = '<a class="post-edit-link" href="' . $url . '">' . $text . '</a>';
+	$post_type_obj = get_post_type_object( $post->post_type );
+	$link = '<a class="post-edit-link" href="' . $url . '">' . $link . '</a>';
 
 	/**
 	 * Filter the post edit link anchor tag.
@@ -1223,9 +1221,8 @@ function edit_post_link( $text = null, $before = '', $after = '', $id = 0 ) {
 	 *
 	 * @param string $link    Anchor tag for the edit link.
 	 * @param int    $post_id Post ID.
-	 * @param string $text    Anchor text.
 	 */
-	echo $before . apply_filters( 'edit_post_link', $link, $post->ID, $text ) . $after;
+	echo $before . apply_filters( 'edit_post_link', $link, $post->ID ) . $after;
 }
 
 /**
@@ -1301,22 +1298,20 @@ function get_edit_comment_link( $comment_id = 0 ) {
  *
  * @since 1.0.0
  *
- * @param string $text Optional. Anchor text.
+ * @param string $link Optional. Anchor text.
  * @param string $before Optional. Display before edit link.
  * @param string $after Optional. Display after edit link.
  */
-function edit_comment_link( $text = null, $before = '', $after = '' ) {
+function edit_comment_link( $link = null, $before = '', $after = '' ) {
 	global $comment;
 
-	if ( ! current_user_can( 'edit_comment', $comment->comment_ID ) ) {
+	if ( !current_user_can( 'edit_comment', $comment->comment_ID ) )
 		return;
-	}
 
-	if ( null === $text ) {
-		$text = __( 'Edit This' );
-	}
+	if ( null === $link )
+		$link = __('Edit This');
 
-	$link = '<a class="comment-edit-link" href="' . get_edit_comment_link( $comment->comment_ID ) . '">' . $text . '</a>';
+	$link = '<a class="comment-edit-link" href="' . get_edit_comment_link( $comment->comment_ID ) . '">' . $link . '</a>';
 
 	/**
 	 * Filter the comment edit link anchor tag.
@@ -1325,9 +1320,8 @@ function edit_comment_link( $text = null, $before = '', $after = '' ) {
 	 *
 	 * @param string $link       Anchor tag for the edit link.
 	 * @param int    $comment_id Comment ID.
-	 * @param string $text       Anchor text.
 	 */
-	echo $before . apply_filters( 'edit_comment_link', $link, $comment->comment_ID, $text ) . $after;
+	echo $before . apply_filters( 'edit_comment_link', $link, $comment->comment_ID ) . $after;
 }
 
 /**
@@ -1655,9 +1649,8 @@ function adjacent_posts_rel_link( $title = '%title', $in_same_term = false, $exc
  *
  */
 function adjacent_posts_rel_link_wp_head() {
-	if ( ! is_single() ) {
+	if ( !is_singular() || is_attachment() )
 		return;
-	}
 	adjacent_posts_rel_link();
 }
 
@@ -1759,8 +1752,8 @@ function get_boundary_post( $in_same_term = false, $excluded_terms = '', $start 
  * @param string       $taxonomy       Optional. Taxonomy, if $in_same_term is true. Default 'category'.
  * @return string
  */
-function get_previous_post_link( $format = '&laquo; %link', $link = '%title', $in_same_term = false, $excluded_terms = '', $taxonomy = 'category' ) {
-	return get_adjacent_post_link( $format, $link, $in_same_term, $excluded_terms, true, $taxonomy );
+function get_previous_post_link( $format = '&laquo; %link', $link = '%title', $in_same_cat = false, $excluded_terms = '', $taxonomy = 'category' ) {
+	return get_adjacent_post_link( $format, $link, $in_same_cat, $excluded_terms, true, $taxonomy );
 }
 
 /**
@@ -1775,8 +1768,8 @@ function get_previous_post_link( $format = '&laquo; %link', $link = '%title', $i
  * @param array|string $excluded_terms Optional. Array or comma-separated list of excluded term IDs.
  * @param string       $taxonomy       Optional. Taxonomy, if $in_same_term is true. Default 'category'.
  */
-function previous_post_link( $format = '&laquo; %link', $link = '%title', $in_same_term = false, $excluded_terms = '', $taxonomy = 'category' ) {
-	echo get_previous_post_link( $format, $link, $in_same_term, $excluded_terms, $taxonomy );
+function previous_post_link( $format = '&laquo; %link', $link = '%title', $in_same_cat = false, $excluded_terms = '', $taxonomy = 'category' ) {
+	echo get_previous_post_link( $format, $link, $in_same_cat, $excluded_terms, $taxonomy );
 }
 
 /**
@@ -1791,8 +1784,8 @@ function previous_post_link( $format = '&laquo; %link', $link = '%title', $in_sa
  * @param string       $taxonomy       Optional. Taxonomy, if $in_same_term is true. Default 'category'.
  * @return string
  */
-function get_next_post_link( $format = '%link &raquo;', $link = '%title', $in_same_term = false, $excluded_terms = '', $taxonomy = 'category' ) {
-	return get_adjacent_post_link( $format, $link, $in_same_term, $excluded_terms, false, $taxonomy );
+function get_next_post_link( $format = '%link &raquo;', $link = '%title', $in_same_cat = false, $excluded_terms = '', $taxonomy = 'category' ) {
+	return get_adjacent_post_link( $format, $link, $in_same_cat, $excluded_terms, false, $taxonomy );
 }
 
 /**
@@ -1807,8 +1800,8 @@ function get_next_post_link( $format = '%link &raquo;', $link = '%title', $in_sa
  * @param array|string $excluded_terms Optional. Array or comma-separated list of excluded term IDs.
  * @param string       $taxonomy       Optional. Taxonomy, if $in_same_term is true. Default 'category'.
  */
-function next_post_link( $format = '%link &raquo;', $link = '%title', $in_same_term = false, $excluded_terms = '', $taxonomy = 'category' ) {
-	 echo get_next_post_link( $format, $link, $in_same_term, $excluded_terms, $taxonomy );
+function next_post_link( $format = '%link &raquo;', $link = '%title', $in_same_cat = false, $excluded_terms = '', $taxonomy = 'category' ) {
+	 echo get_next_post_link( $format, $link, $in_same_cat, $excluded_terms, $taxonomy );
 }
 
 /**
@@ -1826,11 +1819,11 @@ function next_post_link( $format = '%link &raquo;', $link = '%title', $in_same_t
  * @param string       $taxonomy       Optional. Taxonomy, if $in_same_term is true. Default 'category'.
  * @return string
  */
-function get_adjacent_post_link( $format, $link, $in_same_term = false, $excluded_terms = '', $previous = true, $taxonomy = 'category' ) {
+function get_adjacent_post_link( $format, $link, $in_same_cat = false, $excluded_terms = '', $previous = true, $taxonomy = 'category' ) {
 	if ( $previous && is_attachment() )
 		$post = get_post( get_post()->post_parent );
 	else
-		$post = get_adjacent_post( $in_same_term, $excluded_terms, $previous, $taxonomy );
+		$post = get_adjacent_post( $in_same_cat, $excluded_terms, $previous, $taxonomy );
 
 	if ( ! $post ) {
 		$output = '';
@@ -1882,14 +1875,14 @@ function get_adjacent_post_link( $format, $link, $in_same_term = false, $exclude
  *
  * @param string       $format         Link anchor format.
  * @param string       $link           Link permalink format.
- * @param bool         $in_same_term   Optional. Whether link should be in a same taxonomy term.
+ * @param bool         $in_same_cat    Optional. Whether link should be in a same category.
  * @param array|string $excluded_terms Optional. Array or comma-separated list of excluded category IDs.
  * @param bool         $previous       Optional. Whether to display link to previous or next post. Default true.
  * @param string       $taxonomy       Optional. Taxonomy, if $in_same_term is true. Default 'category'.
  * @return string
  */
-function adjacent_post_link( $format, $link, $in_same_term = false, $excluded_terms = '', $previous = true, $taxonomy = 'category' ) {
-	echo get_adjacent_post_link( $format, $link, $in_same_term, $excluded_terms, $previous, $taxonomy );
+function adjacent_post_link( $format, $link, $in_same_cat = false, $excluded_terms = '', $previous = true, $taxonomy = 'category' ) {
+	echo get_adjacent_post_link( $format, $link, $in_same_cat, $excluded_terms, $previous, $taxonomy );
 }
 
 /**
@@ -2637,12 +2630,11 @@ function content_url($path = '') {
 */
 function plugins_url($path = '', $plugin = '') {
 
-	$path = str_replace( '\\' ,'/', $path ); // sanitize for Win32 installs
-	$path = preg_replace( '|/+|', '/', $path );
-	$plugin = str_replace( '\\' ,'/', $plugin ); // sanitize for Win32 installs
-	$plugin = preg_replace( '|/+|', '/', $plugin );
-	$mu_plugin_dir = str_replace( '\\' ,'/', WPMU_PLUGIN_DIR ); // sanitize for Win32 installs
-	$mu_plugin_dir = preg_replace( '|/+|', '/', $mu_plugin_dir );
+	$mu_plugin_dir = WPMU_PLUGIN_DIR;
+	foreach ( array('path', 'plugin', 'mu_plugin_dir') as $var ) {
+		$$var = str_replace('\\' ,'/', $$var); // sanitize for Win32 installs
+		$$var = preg_replace('|/+|', '/', $$var);
+	}
 
 	if ( !empty($plugin) && 0 === strpos($plugin, $mu_plugin_dir) )
 		$url = WPMU_PLUGIN_URL;
@@ -2847,13 +2839,15 @@ function self_admin_url($path = '', $scheme = 'admin') {
  */
 function set_url_scheme( $url, $scheme = null ) {
 	$orig_scheme = $scheme;
-
-	if ( ! $scheme ) {
-		$scheme = is_ssl() ? 'https' : 'http';
-	} elseif ( $scheme === 'admin' || $scheme === 'login' || $scheme === 'login_post' || $scheme === 'rpc' ) {
-		$scheme = is_ssl() || force_ssl_admin() ? 'https' : 'http';
-	} elseif ( $scheme !== 'http' && $scheme !== 'https' && $scheme !== 'relative' ) {
-		$scheme = is_ssl() ? 'https' : 'http';
+	if ( ! in_array( $scheme, array( 'http', 'https', 'relative' ) ) ) {
+		if ( ( 'login_post' == $scheme || 'rpc' == $scheme ) && ( force_ssl_login() || force_ssl_admin() ) )
+			$scheme = 'https';
+		elseif ( ( 'login' == $scheme ) && force_ssl_admin() )
+			$scheme = 'https';
+		elseif ( ( 'admin' == $scheme ) && force_ssl_admin() )
+			$scheme = 'https';
+		else
+			$scheme = ( is_ssl() ? 'https' : 'http' );
 	}
 
 	$url = trim( $url );

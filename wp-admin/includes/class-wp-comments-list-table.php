@@ -17,11 +17,11 @@
  */
 class WP_Comments_List_Table extends WP_List_Table {
 
-	public $checkbox = true;
+	var $checkbox = true;
 
-	public $pending_count = array();
+	var $pending_count = array();
 
-	public function __construct( $args = array() ) {
+	function __construct( $args = array() ) {
 		global $post_id;
 
 		$post_id = isset( $_REQUEST['p'] ) ? absint( $_REQUEST['p'] ) : 0;
@@ -37,11 +37,11 @@ class WP_Comments_List_Table extends WP_List_Table {
 		) );
 	}
 
-	public function ajax_user_can() {
+	function ajax_user_can() {
 		return current_user_can('edit_posts');
 	}
 
-	public function prepare_items() {
+	function prepare_items() {
 		global $post_id, $comment_status, $search, $comment_type;
 
 		$comment_status = isset( $_REQUEST['comment_status'] ) ? $_REQUEST['comment_status'] : 'all';
@@ -125,7 +125,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 		) );
 	}
 
-	public function get_per_page( $comment_status = 'all' ) {
+	function get_per_page( $comment_status = 'all' ) {
 		$comments_per_page = $this->get_items_per_page( 'edit_comments_per_page' );
 		/**
 		 * Filter the number of comments listed per page in the comments list table.
@@ -139,7 +139,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 		return $comments_per_page;
 	}
 
-	public function no_items() {
+	function no_items() {
 		global $comment_status;
 
 		if ( 'moderated' == $comment_status )
@@ -148,7 +148,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 			_e( 'No comments found.' );
 	}
 
-	public function get_views() {
+	function get_views() {
 		global $post_id, $comment_status, $comment_type;
 
 		$status_links = array();
@@ -201,7 +201,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 		return $status_links;
 	}
 
-	public function get_bulk_actions() {
+	function get_bulk_actions() {
 		global $comment_status;
 
 		$actions = array();
@@ -225,7 +225,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 		return $actions;
 	}
 
-	public function extra_tablenav( $which ) {
+	function extra_tablenav( $which ) {
 		global $comment_status, $comment_type;
 ?>
 		<div class="alignleft actions">
@@ -248,7 +248,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 				) );
 
 				foreach ( $comment_types as $type => $label )
-					echo "\t" . '<option value="' . esc_attr( $type ) . '"' . selected( $comment_type, $type, false ) . ">$label</option>\n";
+					echo "\t<option value='" . esc_attr( $type ) . "'" . selected( $comment_type, $type, false ) . ">$label</option>\n";
 			?>
 			</select>
 <?php
@@ -277,14 +277,14 @@ class WP_Comments_List_Table extends WP_List_Table {
 		echo '</div>';
 	}
 
-	public function current_action() {
+	function current_action() {
 		if ( isset( $_REQUEST['delete_all'] ) || isset( $_REQUEST['delete_all2'] ) )
 			return 'delete_all';
 
 		return parent::current_action();
 	}
 
-	public function get_columns() {
+	function get_columns() {
 		global $post_id;
 
 		$columns = array();
@@ -301,14 +301,16 @@ class WP_Comments_List_Table extends WP_List_Table {
 		return $columns;
 	}
 
-	public function get_sortable_columns() {
+	function get_sortable_columns() {
 		return array(
 			'author'   => 'comment_author',
 			'response' => 'comment_post_ID'
 		);
 	}
 
-	public function display() {
+	function display() {
+		extract( $this->_args );
+
 		wp_nonce_field( "fetch-list-" . get_class( $this ), '_ajax_fetch_list_nonce' );
 
 		$this->display_tablenav( 'top' );
@@ -340,7 +342,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 		$this->display_tablenav( 'bottom' );
 	}
 
-	public function single_row( $a_comment ) {
+	function single_row( $a_comment ) {
 		global $post, $comment;
 
 		$comment = $a_comment;
@@ -356,7 +358,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 		echo "</tr>\n";
 	}
 
-	public function column_cb( $comment ) {
+	function column_cb( $comment ) {
 		if ( $this->user_can ) { ?>
 		<label class="screen-reader-text" for="cb-select-<?php echo $comment->comment_ID; ?>"><?php _e( 'Select comment' ); ?></label>
 		<input id="cb-select-<?php echo $comment->comment_ID; ?>" type="checkbox" name="delete_comments[]" value="<?php echo $comment->comment_ID; ?>" />
@@ -364,7 +366,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 		}
 	}
 
-	public function column_comment( $comment ) {
+	function column_comment( $comment ) {
 		global $comment_status;
 		$post = get_post();
 
@@ -489,7 +491,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 		}
 	}
 
-	public function column_author( $comment ) {
+	function column_author( $comment ) {
 		global $comment_status;
 
 		$author_url = get_comment_author_url();
@@ -519,11 +521,11 @@ class WP_Comments_List_Table extends WP_List_Table {
 		}
 	}
 
-	public function column_date() {
+	function column_date( $comment ) {
 		return get_comment_date( __( 'Y/m/d \a\t g:ia' ) );
 	}
 
-	public function column_response() {
+	function column_response( $comment ) {
 		$post = get_post();
 
 		if ( isset( $this->pending_count[$post->ID] ) ) {
@@ -551,7 +553,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 			echo $thumb;
 	}
 
-	public function column_default( $comment, $column_name ) {
+	function column_default( $comment, $column_name ) {
 		/**
 		 * Fires when the default column output is displayed for a single row.
 		 *
@@ -576,7 +578,7 @@ class WP_Comments_List_Table extends WP_List_Table {
  */
 class WP_Post_Comments_List_Table extends WP_Comments_List_Table {
 
-	public function get_column_info() {
+	function get_column_info() {
 		$this->_column_headers = array(
 			array(
 			'author'   => __( 'Author' ),
@@ -589,31 +591,26 @@ class WP_Post_Comments_List_Table extends WP_Comments_List_Table {
 		return $this->_column_headers;
 	}
 
-	public function get_table_classes() {
+	function get_table_classes() {
 		$classes = parent::get_table_classes();
 		$classes[] = 'comments-box';
 		return $classes;
 	}
 
-	public function display( $output_empty = false ) {
-		$singular = $this->_args['singular'];
+	function display( $output_empty = false ) {
+		extract( $this->_args );
 
 		wp_nonce_field( "fetch-list-" . get_class( $this ), '_ajax_fetch_list_nonce' );
 ?>
 <table class="<?php echo implode( ' ', $this->get_table_classes() ); ?>" style="display:none;">
-	<tbody id="the-comment-list"<?php
-		if ( $singular ) {
-			echo " data-wp-lists='list:$singular'";
-		} ?>>
-		<?php if ( ! $output_empty ) {
-			$this->display_rows_or_placeholder();
-		} ?>
+	<tbody id="the-comment-list"<?php if ( $singular ) echo " data-wp-lists='list:$singular'"; ?>>
+		<?php if ( ! $output_empty ) $this->display_rows_or_placeholder(); ?>
 	</tbody>
 </table>
 <?php
 	}
 
-	public function get_per_page( $comment_status = false ) {
+	function get_per_page( $comment_status = false ) {
 		return 10;
 	}
 }

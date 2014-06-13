@@ -641,7 +641,7 @@ function get_comment_link( $comment = null, $args = array() ) {
  *
  * @since 1.5.0
  *
- * @param int|WP_Post $post_id Optional. Post ID or WP_Post object. Default is global `$post`.
+ * @param int|WP_Post $post_id Post ID or WP_Post object. Default current post.
  * @return string The link to the comments.
  */
 function get_comments_link( $post_id = 0 ) {
@@ -678,26 +678,28 @@ function comments_link( $deprecated = '', $deprecated_2 = '' ) {
  *
  * @since 1.5.0
  *
- * @param int|WP_Post $post_id Optional. Post ID or WP_Post object. Default is global `$post`.
+ * @param int|WP_Post $post_id Post ID or WP_Post object. Default current post.
  * @return int The number of comments a post has.
  */
 function get_comments_number( $post_id = 0 ) {
-	$post = get_post( $post_id );
+	$post_id = absint( $post_id );
 
-	if ( ! $post ) {
+	if ( !$post_id )
+		$post_id = get_the_ID();
+
+	$post = get_post($post_id);
+	if ( ! isset($post->comment_count) )
 		$count = 0;
-	} else {
+	else
 		$count = $post->comment_count;
-		$post_id = $post->ID;
-	}
 
 	/**
 	 * Filter the returned comment count for a post.
 	 *
 	 * @since 1.5.0
 	 *
-	 * @param int $count   Number of comments a post has.
-	 * @param int $post_id Post ID.
+	 * @param int         $count   Nnumber of comments a post has.
+	 * @param int|WP_Post $post_id Post ID or WP_Post object.
 	 */
 	return apply_filters( 'get_comments_number', $count, $post_id );
 }
@@ -1050,7 +1052,7 @@ function wp_comment_form_unfiltered_html_nonce() {
  * and the post ID respectively.
  *
  * The $file path is passed through a filter hook called, 'comments_template'
- * which includes the template path and $file combined. Tries the $filtered path
+ * which includes the TEMPLATEPATH and $file combined. Tries the $filtered path
  * first and if it fails it will require the default comment template from the
  * default theme. If either does not exist, then the WordPress process will be
  * halted. It is advised for that reason, that the default theme is not deleted.
@@ -1135,7 +1137,7 @@ function comments_template( $file = '/comments.php', $separate_comments = false 
 	if ( !defined('COMMENTS_TEMPLATE') )
 		define('COMMENTS_TEMPLATE', true);
 
-	$theme_template = get_stylesheet_directory() . $file;
+	$theme_template = STYLESHEETPATH . $file;
 	/**
 	 * Filter the path to the theme template file used for the comments template.
 	 *
@@ -1146,8 +1148,8 @@ function comments_template( $file = '/comments.php', $separate_comments = false 
 	$include = apply_filters( 'comments_template', $theme_template );
 	if ( file_exists( $include ) )
 		require( $include );
-	elseif ( file_exists( get_template_directory() . $file ) )
-		require( get_template_directory() . $file );
+	elseif ( file_exists( TEMPLATEPATH . $file ) )
+		require( TEMPLATEPATH . $file );
 	else // Backward compat code will be removed in a future release
 		require( ABSPATH . WPINC . '/theme-compat/comments.php');
 }
@@ -1289,7 +1291,7 @@ function comments_popup_link( $zero = false, $one = false, $more = false, $css_c
  *                             Default current post.
  * @return mixed Link to show comment form, if successful. False, if comments are closed.
  */
-function get_comment_reply_link( $args = array(), $comment = null, $post = null ) {
+function get_comment_reply_link($args = array(), $comment = null, $post = null) {
 
 	$defaults = array(
 		'add_below'  => 'comment',
@@ -1301,31 +1303,28 @@ function get_comment_reply_link( $args = array(), $comment = null, $post = null 
 		'after'      => ''
 	);
 
-	$args = wp_parse_args( $args, $defaults );
+	$args = wp_parse_args($args, $defaults);
 
-	if ( 0 == $args['depth'] || $args['max_depth'] <= $args['depth'] ) {
+	if ( 0 == $args['depth'] || $args['max_depth'] <= $args['depth'] )
 		return;
-	}
 
-	$add_below = $args['add_below'];
-	$respond_id = $args['respond_id'];
-	$reply_text = $args['reply_text'];
+	extract($args, EXTR_SKIP);
 
-	$comment = get_comment( $comment );
-	if ( empty( $post ) ) {
+	$comment = get_comment($comment);
+	if ( empty($post) )
 		$post = $comment->comment_post_ID;
-	}
-	$post = get_post( $post );
+	$post = get_post($post);
 
-	if ( ! comments_open( $post->ID ) ) {
+	if ( !comments_open($post->ID) )
 		return false;
-	}
 
-	if ( get_option( 'comment_registration' ) && ! is_user_logged_in() ) {
-		$link = '<a rel="nofollow" class="comment-reply-login" href="' . esc_url( wp_login_url( get_permalink() ) ) . '">' . $args['login_text'] . '</a>';
-	} else {
+	$link = '';
+
+	if ( get_option('comment_registration') && ! is_user_logged_in() )
+		$link = '<a rel="nofollow" class="comment-reply-login" href="' . esc_url( wp_login_url( get_permalink() ) ) . '">' . $login_text . '</a>';
+	else
 		$link = "<a class='comment-reply-link' href='" . esc_url( add_query_arg( 'replytocom', $comment->comment_ID ) ) . "#" . $respond_id . "' onclick='return addComment.moveForm(\"$add_below-$comment->comment_ID\", \"$comment->comment_ID\", \"$respond_id\", \"$post->ID\")'>$reply_text</a>";
-	}
+
 	/**
 	 * Filter the comment reply link.
 	 *
@@ -1336,7 +1335,7 @@ function get_comment_reply_link( $args = array(), $comment = null, $post = null 
 	 * @param object  $comment The object of the comment being replied.
 	 * @param WP_Post $post    The WP_Post object.
 	 */
-	return apply_filters( 'comment_reply_link', $args['before'] . $link . $args['after'], $args, $comment, $post );
+	return apply_filters( 'comment_reply_link', $before . $link . $after, $args, $comment, $post );
 }
 
 /**
@@ -1390,21 +1389,18 @@ function get_post_reply_link($args = array(), $post = null) {
 	);
 
 	$args = wp_parse_args($args, $defaults);
-	$add_below = $args['add_below'];
-	$respond_id = $args['respond_id'];
-	$reply_text = $args['reply_text'];
+	extract($args, EXTR_SKIP);
 	$post = get_post($post);
 
-	if ( ! comments_open( $post->ID ) ) {
+	if ( !comments_open($post->ID) )
 		return false;
-	}
 
-	if ( get_option('comment_registration') && ! is_user_logged_in() ) {
-		$link = '<a rel="nofollow" href="' . wp_login_url( get_permalink() ) . '">' . $args['login_text'] . '</a>';
-	} else {
+	if ( get_option('comment_registration') && ! is_user_logged_in() )
+		$link = '<a rel="nofollow" href="' . wp_login_url( get_permalink() ) . '">' . $login_text . '</a>';
+	else
 		$link = "<a rel='nofollow' class='comment-reply-link' href='" . get_permalink($post->ID) . "#$respond_id' onclick='return addComment.moveForm(\"$add_below-$post->ID\", \"0\", \"$respond_id\", \"$post->ID\")'>$reply_text</a>";
-	}
-	$formatted_link = $args['before'] . $link . $args['after'];
+
+	$formatted_link = $before . $link . $after;
 	/**
 	 * Filter the formatted post comments link HTML.
 	 *
@@ -1556,7 +1552,7 @@ class Walker_Comment extends Walker {
 	 * @since 2.7.0
 	 * @var string
 	 */
-	public $tree_type = 'comment';
+	var $tree_type = 'comment';
 
 	/**
 	 * DB fields to use.
@@ -1566,7 +1562,7 @@ class Walker_Comment extends Walker {
 	 * @since 2.7.0
 	 * @var array
 	 */
-	public $db_fields = array ('parent' => 'comment_parent', 'id' => 'comment_ID');
+	var $db_fields = array ('parent' => 'comment_parent', 'id' => 'comment_ID');
 
 	/**
 	 * Start the list before the elements are added.
@@ -1579,7 +1575,7 @@ class Walker_Comment extends Walker {
 	 * @param int $depth Depth of comment.
 	 * @param array $args Uses 'style' argument for type of HTML list.
 	 */
-	public function start_lvl( &$output, $depth = 0, $args = array() ) {
+	function start_lvl( &$output, $depth = 0, $args = array() ) {
 		$GLOBALS['comment_depth'] = $depth + 1;
 
 		switch ( $args['style'] ) {
@@ -1588,8 +1584,8 @@ class Walker_Comment extends Walker {
 			case 'ol':
 				$output .= '<ol class="children">' . "\n";
 				break;
-			case 'ul':
 			default:
+			case 'ul':
 				$output .= '<ul class="children">' . "\n";
 				break;
 		}
@@ -1606,7 +1602,7 @@ class Walker_Comment extends Walker {
 	 * @param int    $depth  Depth of comment.
 	 * @param array  $args   Will only append content if style argument value is 'ol' or 'ul'.
 	 */
-	public function end_lvl( &$output, $depth = 0, $args = array() ) {
+	function end_lvl( &$output, $depth = 0, $args = array() ) {
 		$GLOBALS['comment_depth'] = $depth + 1;
 
 		switch ( $args['style'] ) {
@@ -1615,8 +1611,8 @@ class Walker_Comment extends Walker {
 			case 'ol':
 				$output .= "</ol><!-- .children -->\n";
 				break;
-			case 'ul':
 			default:
+			case 'ul':
 				$output .= "</ul><!-- .children -->\n";
 				break;
 		}
@@ -1654,7 +1650,7 @@ class Walker_Comment extends Walker {
 	 * @param string $output            Passed by reference. Used to append additional content.
 	 * @return null Null on failure with no changes to parameters.
 	 */
-	public function display_element( $element, &$children_elements, $max_depth, $depth, $args, &$output ) {
+	function display_element( $element, &$children_elements, $max_depth, $depth, $args, &$output ) {
 
 		if ( !$element )
 			return;
@@ -1688,7 +1684,7 @@ class Walker_Comment extends Walker {
 	 * @param int    $depth   Depth of comment in reference to parents.
 	 * @param array  $args    An array of arguments.
 	 */
-	public function start_el( &$output, $comment, $depth = 0, $args = array(), $id = 0 ) {
+	function start_el( &$output, $comment, $depth = 0, $args = array(), $id = 0 ) {
 		$depth++;
 		$GLOBALS['comment_depth'] = $depth;
 		$GLOBALS['comment'] = $comment;
@@ -1728,7 +1724,7 @@ class Walker_Comment extends Walker {
 	 * @param int    $depth   Depth of comment.
 	 * @param array  $args    An array of arguments.
 	 */
-	public function end_el( &$output, $comment, $depth = 0, $args = array() ) {
+	function end_el( &$output, $comment, $depth = 0, $args = array() ) {
 		if ( !empty( $args['end-callback'] ) ) {
 			ob_start();
 			call_user_func( $args['end-callback'], $comment, $args, $depth );
@@ -1922,15 +1918,6 @@ function wp_list_comments( $args = array(), $comments = null ) {
 
 	$r = wp_parse_args( $args, $defaults );
 
-	/**
-	 * Filter the arguments used in retrieving the comment list.
-	 *
-	 * @since 4.0.0
-	 *
-	 * @param array $r An array of arguments for displaying comments.
-	 */
-	$r = apply_filters( 'wp_list_comments_args', $r );
-
 	// Figure out what comments we'll be looping through ($_comments)
 	if ( null !== $comments ) {
 		$comments = (array) $comments;
@@ -1990,22 +1977,20 @@ function wp_list_comments( $args = array(), $comments = null ) {
 	if ( null === $r['reverse_top_level'] )
 		$r['reverse_top_level'] = ( 'desc' == get_option('comment_order') );
 
-	if ( empty( $r['walker'] ) ) {
-		$walker = new Walker_Comment;
-	} else {
-		$walker = $r['walker'];
-	}
+	extract( $r, EXTR_SKIP );
 
-	$output = $walker->paged_walk( $_comments, $r['max_depth'], $r['page'], $r['per_page'], $r );
+	if ( empty($walker) )
+		$walker = new Walker_Comment;
+
+	$output = $walker->paged_walk($_comments, $max_depth, $page, $per_page, $r);
 	$wp_query->max_num_comment_pages = $walker->max_pages;
 
 	$in_comment_loop = false;
 
-	if ( $r['echo'] ) {
+	if ( $r['echo'] )
 		echo $output;
-	} else {
+	else
 		return $output;
-	}
 }
 
 /**
@@ -2051,6 +2036,8 @@ function wp_list_comments( $args = array(), $comments = null ) {
 function comment_form( $args = array(), $post_id = null ) {
 	if ( null === $post_id )
 		$post_id = get_the_ID();
+	else
+		$id = $post_id;
 
 	$commenter = wp_get_current_commenter();
 	$user = wp_get_current_user();

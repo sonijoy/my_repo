@@ -13,8 +13,7 @@ global $opml, $map;
 
 // columns we wish to find are: link_url, link_name, link_target, link_description
 // we need to map XML attribute names to our columns
-$opml_map = array(
-	'URL'         => 'link_url',
+$opml_map = array('URL'         => 'link_url',
 	'HTMLURL'     => 'link_url',
 	'TEXT'        => 'link_name',
 	'TITLE'       => 'link_name',
@@ -45,29 +44,24 @@ $map = $opml_map;
  * @param array $attrs XML element attributes.
  */
 function startElement($parser, $tagName, $attrs) {
+	global $updated_timestamp, $all_links, $map;
 	global $names, $urls, $targets, $descriptions, $feeds;
 
-	if ( 'OUTLINE' === $tagName ) {
-		$name = '';
-		if ( isset( $attrs['TEXT'] ) ) {
-			$name = $attrs['TEXT'];
+	if ($tagName == 'OUTLINE') {
+		foreach (array_keys($map) as $key) {
+			if (isset($attrs[$key])) {
+				$$map[$key] = $attrs[$key];
+			}
 		}
-		if ( isset( $attrs['TITLE'] ) ) {
-			$name = $attrs['TITLE'];
-		}
-		$url = '';
-		if ( isset( $attrs['URL'] ) ) {
-			$url = $attrs['URL'];
-		}
-		if ( isset( $attrs['HTMLURL'] ) ) {
-			$url = $attrs['HTMLURL'];
-		}
+
+		//echo("got data: link_url = [$link_url], link_name = [$link_name], link_target = [$link_target], link_description = [$link_description]<br />\n");
+
 		// save the data away.
-		$names[] = $name;
-		$urls[] = $url;
-		$targets[] = isset( $attrs['TARGET'] ) ? $attrs['TARGET'] :  '';
-		$feeds[] = isset( $attrs['XMLURL'] ) ? $attrs['XMLURL'] :  '';
-		$descriptions[] = isset( $attrs['DESCRIPTION'] ) ? $attrs['DESCRIPTION'] :  '';
+		$names[] = $link_name;
+		$urls[] = $link_url;
+		$targets[] = $link_target;
+		$feeds[] = $link_rss;
+		$descriptions[] = $link_description;
 	} // end if outline
 }
 

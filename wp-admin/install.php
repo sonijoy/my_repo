@@ -74,9 +74,7 @@ function display_header() {
  */
 function display_setup_form( $error = null ) {
 	global $wpdb;
-
-	$sql = $wpdb->prepare( "SHOW TABLES LIKE %s", $wpdb->esc_like( $wpdb->users ) );
-	$user_table = ( $wpdb->get_var( $sql ) != null );
+	$user_table = ( $wpdb->get_var("SHOW TABLES LIKE '$wpdb->users'") != null );
 
 	// Ensure that Blogs appear in search engines by default
 	$blog_public = 1;
@@ -85,6 +83,7 @@ function display_setup_form( $error = null ) {
 
 	$weblog_title = isset( $_POST['weblog_title'] ) ? trim( wp_unslash( $_POST['weblog_title'] ) ) : '';
 	$user_name = isset($_POST['user_name']) ? trim( wp_unslash( $_POST['user_name'] ) ) : '';
+	$admin_password = isset($_POST['admin_password']) ? trim( wp_unslash( $_POST['admin_password'] ) ) : '';
 	$admin_email  = isset( $_POST['admin_email']  ) ? trim( wp_unslash( $_POST['admin_email'] ) ) : '';
 
 	if ( ! is_null( $error ) ) {
@@ -219,7 +218,8 @@ switch($step) {
 
 		if ( $error === false ) {
 			$wpdb->show_errors();
-			$result = wp_install( $weblog_title, $user_name, $admin_email, $public, '', wp_slash( $admin_password ) );
+			$result = wp_install($weblog_title, $user_name, $admin_email, $public, '', wp_slash( $admin_password ) );
+			extract( $result, EXTR_SKIP );
 ?>
 
 <h1><?php _e( 'Success!' ); ?></h1>
@@ -234,10 +234,9 @@ switch($step) {
 	<tr>
 		<th><?php _e( 'Password' ); ?></th>
 		<td><?php
-		if ( ! empty( $result['password'] ) && empty( $admin_password_check ) ): ?>
-			<code><?php echo esc_html( $result['password'] ) ?></code><br />
-		<?php endif ?>
-			<p><?php echo $result['password_message'] ?></p>
+		if ( ! empty( $password ) && empty($admin_password_check) )
+			echo '<code>'. esc_html($password) .'</code><br />';
+		echo "<p>$password_message</p>"; ?>
 		</td>
 	</tr>
 </table>

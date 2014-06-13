@@ -18,7 +18,7 @@ class WP_Dependencies {
 	 * @since 2.6.8
 	 * @var array
 	 */
-	public $registered = array();
+	var $registered = array();
 
 	/**
 	 * An array of queued _WP_Dependency handle objects.
@@ -27,7 +27,7 @@ class WP_Dependencies {
 	 * @since 2.6.8
 	 * @var array
 	 */
-	public $queue = array();
+	var $queue = array();
 
 	/**
 	 * An array of _WP_Dependency handle objects to queue.
@@ -36,7 +36,7 @@ class WP_Dependencies {
 	 * @since 2.6.0
 	 * @var array
 	 */
-	public $to_do = array();
+	var $to_do = array();
 
 	/**
 	 * An array of _WP_Dependency handle objects already queued.
@@ -45,7 +45,7 @@ class WP_Dependencies {
 	 * @since 2.6.0
 	 * @var array
 	 */
-	public $done = array();
+	var $done = array();
 
 	/**
 	 * An array of additional arguments passed when a handle is registered.
@@ -56,7 +56,7 @@ class WP_Dependencies {
 	 * @since 2.6.0
 	 * @var array
 	 */
-	public $args = array();
+	var $args = array();
 
 	/**
 	 * An array of handle groups to enqueue.
@@ -65,7 +65,7 @@ class WP_Dependencies {
 	 * @since 2.8.0
 	 * @var array
 	 */
-	public $groups = array();
+	var $groups = array();
 
 	/**
 	 * A handle group to enqueue.
@@ -74,7 +74,7 @@ class WP_Dependencies {
 	 * @since 2.8.0
 	 * @var int
 	 */
-	public $group = 0;
+	var $group = 0;
 
 	/**
 	 * Process the items and dependencies.
@@ -401,7 +401,7 @@ class _WP_Dependency {
 	 * @since 2.6.0
 	 * @var null
 	 */
-	public $handle;
+	var $handle;
 
 	/**
 	 * The handle source.
@@ -410,7 +410,7 @@ class _WP_Dependency {
 	 * @since 2.6.0
 	 * @var null
 	 */
-	public $src;
+	var $src;
 
 	/**
 	 * An array of handle dependencies.
@@ -419,7 +419,7 @@ class _WP_Dependency {
 	 * @since 2.6.0
 	 * @var array
 	 */
-	public $deps = array();
+	var $deps = array();
 
 	/**
 	 * The handle version.
@@ -430,7 +430,7 @@ class _WP_Dependency {
 	 * @since 2.6.0
 	 * @var bool|string
 	 */
-	public $ver = false;
+	var $ver = false;
 
 	/**
 	 * Additional arguments for the handle.
@@ -439,7 +439,7 @@ class _WP_Dependency {
 	 * @since 2.6.0
 	 * @var null
 	 */
-	public $args = null;  // Custom property, such as $in_footer or $media.
+	var $args = null;  // Custom property, such as $in_footer or $media.
 
 	/**
 	 * Extra data to supply to the handle.
@@ -448,14 +448,14 @@ class _WP_Dependency {
 	 * @since 2.6.0
 	 * @var array
 	 */
-	public $extra = array();
+	var $extra = array();
 
 	/**
 	 * Setup dependencies.
 	 *
 	 * @since 2.6.0
 	 */
-	public function __construct() {
+	function __construct() {
 		@list( $this->handle, $this->src, $this->deps, $this->ver, $this->args ) = func_get_args();
 		if ( ! is_array($this->deps) )
 			$this->deps = array();
@@ -471,7 +471,7 @@ class _WP_Dependency {
 	 * @param mixed  $data The data value to add.
 	 * @return bool False if not scalar, true otherwise.
 	 */
-	public function add_data( $name, $data ) {
+	function add_data( $name, $data ) {
 		if ( !is_scalar($name) )
 			return false;
 		$this->extra[$name] = $data;

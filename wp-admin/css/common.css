@@ -252,22 +252,16 @@ a:active {
 
 a:focus {
 	color: #124964;
-    -webkit-box-shadow:
-    	0 0 0 1px #5b9dd9,
-		0 0 2px 1px rgba(30, 140, 190, .8);
-    box-shadow:
-    	0 0 0 1px #5b9dd9,
-		0 0 2px 1px rgba(30, 140, 190, .8);
 }
 
-.ie8 a:focus {
-	outline: #5b9dd9 solid 1px;
+a:focus,
+a:active {
+	outline: thin dotted;
 }
 
 #adminmenu a:focus,
+#adminmenu a:active,
 .screen-reader-text:focus {
-	-webkit-box-shadow: none;
-	box-shadow: none;
 	outline: none;
 }
 
@@ -2276,8 +2270,7 @@ img {
 
 .control-section.open .accordion-section-title:after,
 #customize-info.open .accordion-section-title:after,
-.nav-menus-php .menu-item-edit-active .item-edit:before,
-.widget.open .widget-top a.widget-action:after {
+.nav-menus-php .menu-item-edit-active .item-edit:before {
 	content: '\f142';
 }
 

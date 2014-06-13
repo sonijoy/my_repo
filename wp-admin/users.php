@@ -137,6 +137,8 @@ case 'promote':
 	wp_redirect(add_query_arg('update', $update, $redirect));
 	exit();
 
+break;
+
 case 'dodelete':
 	if ( is_multisite() )
 		wp_die( __('User deletion is not allowed from this screen.') );
@@ -185,6 +187,8 @@ case 'dodelete':
 	$redirect = add_query_arg( array('delete_count' => $delete_count, 'update' => $update), $redirect);
 	wp_redirect($redirect);
 	exit();
+
+break;
 
 case 'delete':
 	if ( is_multisite() )
@@ -289,6 +293,8 @@ case 'doremove':
 	wp_redirect($redirect);
 	exit;
 
+break;
+
 case 'remove':
 
 	check_admin_referer('bulk-users');
@@ -334,7 +340,6 @@ case 'remove':
 		}
  	}
  	?>
-</ul>
 <?php if ( $go_remove ) : ?>
 		<input type="hidden" name="action" value="doremove" />
 		<?php submit_button( __('Confirm Removal'), 'secondary' ); ?>

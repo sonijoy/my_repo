@@ -71,19 +71,22 @@ unset($menu_page, $compat);
 $_wp_submenu_nopriv = array();
 $_wp_menu_nopriv = array();
 // Loop over submenus and remove pages for which the user does not have privs.
-foreach ($submenu as $parent => $sub) {
-	foreach ($sub as $index => $data) {
-		if ( ! current_user_can($data[1]) ) {
-			unset($submenu[$parent][$index]);
-			$_wp_submenu_nopriv[$parent][$data[2]] = true;
+foreach ( array( 'submenu' ) as $sub_loop ) {
+	foreach ($$sub_loop as $parent => $sub) {
+		foreach ($sub as $index => $data) {
+			if ( ! current_user_can($data[1]) ) {
+				unset(${$sub_loop}[$parent][$index]);
+				$_wp_submenu_nopriv[$parent][$data[2]] = true;
+			}
 		}
-	}
-	unset($index, $data);
+		unset($index, $data);
 
-	if ( empty($submenu[$parent]) )
-		unset($submenu[$parent]);
+		if ( empty(${$sub_loop}[$parent]) )
+			unset(${$sub_loop}[$parent]);
+	}
+	unset($sub, $parent);
 }
-unset($sub, $parent);
+unset($sub_loop);
 
 /*
  * Loop over the top-level menu.

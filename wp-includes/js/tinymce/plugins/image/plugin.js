@@ -61,8 +61,6 @@ tinymce.PluginManager.add('image', function(editor) {
 						callback(tinymce.util.JSON.parse(text));
 					}
 				});
-			} else if (typeof(imageList) == "function") {
-				imageList(callback);
 			} else {
 				callback(imageList);
 			}
@@ -98,25 +96,17 @@ tinymce.PluginManager.add('image', function(editor) {
 		}
 
 		function buildImageList() {
-			function appendItems(values, output) {
-				output = output || [];
+			var imageListItems = [{text: 'None', value: ''}];
 
-				tinymce.each(values, function(value) {
-					var item = {text: value.text || value.title};
-
-					if (value.menu) {
-						item.menu = appendItems(value.menu);
-					} else {
-						item.value = editor.convertURL(value.value || value.url, 'src');
-					}
-
-					output.push(item);
+			tinymce.each(imageList, function(image) {
+				imageListItems.push({
+					text: image.text || image.title,
+					value: editor.convertURL(image.value || image.url, 'src'),
+					menu: image.menu
 				});
+			});
 
-				return output;
-			}
-
-			return appendItems(imageList, [{text: 'None', value: ''}]);
+			return imageListItems;
 		}
 
 		function recalcSize() {
@@ -184,7 +174,7 @@ tinymce.PluginManager.add('image', function(editor) {
 				data.height = null;
 			}
 
-			if (!data.style) {
+			if (data.style === '') {
 				data.style = null;
 			}
 
@@ -292,7 +282,7 @@ tinymce.PluginManager.add('image', function(editor) {
 						altCtrl.value(e.control.text());
 					}
 
-					win.find('#src').value(e.control.value()).fire('change');
+					win.find('#src').value(e.control.value());
 				},
 				onPostRender: function() {
 					imageListCtrl = this;

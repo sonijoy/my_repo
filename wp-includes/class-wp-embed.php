@@ -7,15 +7,15 @@
  * @since 2.9.0
  */
 class WP_Embed {
-	public $handlers = array();
-	public $post_ID;
-	public $usecache = true;
-	public $linkifunknown = true;
+	var $handlers = array();
+	var $post_ID;
+	var $usecache = true;
+	var $linkifunknown = true;
 
 	/**
 	 * Constructor
 	 */
-	public function __construct() {
+	function __construct() {
 		// Hack to get the [embed] shortcode to run before wpautop()
 		add_filter( 'the_content', array( $this, 'run_shortcode' ), 8 );
 
@@ -47,7 +47,7 @@ class WP_Embed {
 	 * @param string $content Content to parse
 	 * @return string Content with shortcode parsed
 	 */
-	public function run_shortcode( $content ) {
+	function run_shortcode( $content ) {
 		global $shortcode_tags;
 
 		// Back up current registered shortcodes and clear them all out
@@ -69,7 +69,7 @@ class WP_Embed {
 	 * If a post/page was saved, then output JavaScript to make
 	 * an AJAX request that will call WP_Embed::cache_oembed().
 	 */
-	public function maybe_run_ajax_cache() {
+	function maybe_run_ajax_cache() {
 		$post = get_post();
 
 		if ( ! $post || empty($_GET['message']) || 1 != $_GET['message'] )
@@ -95,7 +95,7 @@ class WP_Embed {
 	 * @param callback $callback The callback function that will be called if the regex is matched.
 	 * @param int $priority Optional. Used to specify the order in which the registered handlers will be tested (default: 10). Lower numbers correspond with earlier testing, and handlers with the same priority are tested in the order in which they were added to the action.
 	 */
-	public function register_handler( $id, $regex, $callback, $priority = 10 ) {
+	function register_handler( $id, $regex, $callback, $priority = 10 ) {
 		$this->handlers[$priority][$id] = array(
 			'regex'    => $regex,
 			'callback' => $callback,
@@ -108,7 +108,7 @@ class WP_Embed {
 	 * @param string $id The handler ID that should be removed.
 	 * @param int $priority Optional. The priority of the handler to be removed (default: 10).
 	 */
-	public function unregister_handler( $id, $priority = 10 ) {
+	function unregister_handler( $id, $priority = 10 ) {
 		if ( isset($this->handlers[$priority][$id]) )
 			unset($this->handlers[$priority][$id]);
 	}
@@ -139,12 +139,8 @@ class WP_Embed {
 	 * @param string $url The URL attempting to be embedded.
 	 * @return string The embed HTML on success, otherwise the original URL.
 	 */
-	public function shortcode( $attr, $url = '' ) {
+	function shortcode( $attr, $url = '' ) {
 		$post = get_post();
-
-		if ( empty( $url ) && ! empty( $attr['src'] ) ) {
-			$url = $attr['src'];
-		}
 
 		if ( empty( $url ) )
 			return '';
@@ -217,7 +213,7 @@ class WP_Embed {
 			 *
 			 * @see WP_oEmbed::discover()
 			 *
-			 * @param bool $enable Whether to enable <link> tag discovery. Default false.
+			 * @param bool false Whether to enable <link> tag discovery. Default false.
 			 */
 			$attr['discover'] = ( apply_filters( 'embed_oembed_discover', false ) && author_can( $post_ID, 'unfiltered_html' ) );
 
@@ -244,7 +240,7 @@ class WP_Embed {
 	 *
 	 * @param int $post_ID Post ID to delete the caches for.
 	 */
-	public function delete_oembed_caches( $post_ID ) {
+	function delete_oembed_caches( $post_ID ) {
 		$post_metas = get_post_custom_keys( $post_ID );
 		if ( empty($post_metas) )
 			return;
@@ -260,7 +256,7 @@ class WP_Embed {
 	 *
 	 * @param int $post_ID Post ID to do the caching for.
 	 */
-	public function cache_oembed( $post_ID ) {
+	function cache_oembed( $post_ID ) {
 		$post = get_post( $post_ID );
 
 		$post_types = array( 'post', 'page' );
@@ -294,7 +290,7 @@ class WP_Embed {
 	 * @param string $content The content to be searched.
 	 * @return string Potentially modified $content.
 	 */
-	public function autoembed( $content ) {
+	function autoembed( $content ) {
 		return preg_replace_callback( '|^\s*(https?://[^\s"]+)\s*$|im', array( $this, 'autoembed_callback' ), $content );
 	}
 
@@ -306,7 +302,7 @@ class WP_Embed {
 	 * @param array $match A regex match array.
 	 * @return string The embed HTML on success, otherwise the original URL.
 	 */
-	public function autoembed_callback( $match ) {
+	function autoembed_callback( $match ) {
 		$oldval = $this->linkifunknown;
 		$this->linkifunknown = false;
 		$return = $this->shortcode( array(), $match[1] );
@@ -321,7 +317,7 @@ class WP_Embed {
 	 * @param string $url URL to potentially be linked.
 	 * @return string Linked URL or the original URL.
 	 */
-	public function maybe_make_link( $url ) {
+	function maybe_make_link( $url ) {
 		$output = ( $this->linkifunknown ) ? '<a href="' . esc_url($url) . '">' . esc_html($url) . '</a>' : $url;
 
 		/**

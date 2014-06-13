@@ -1,0 +1,16 @@
+#misc-publishing-actions,
+#minor-publishing-actions,
+tr.show-admin-bar,
+#your-profile h3,
+.tablenav.bottom,
+.search-box,
+.wp-list-table tfoot,
+#wpfooter,
+#wp-content-media-buttons,
+#ga-dash-widget #buttons_div,
+ul.subsubsub,
+#delete-action,
+#edit-slug-box,
+a.editinline {
+	display:none;
+}

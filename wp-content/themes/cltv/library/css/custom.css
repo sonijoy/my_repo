@@ -1,0 +1,295 @@
+/*-------------------------------------------------------------
+|
+|	General
+|
+---------------------------------------------------------------*/
+
+body {
+	background-image:url('../../images/tiny_grid.png');
+}
+.easysmp_wrapper, .easysmp_wrapper object, .easysmp_wrapper video {
+	width:100%;
+}
+body .row-fluid .span1_5 {
+	width:99px;
+	margin-left:20px;
+	float:left;
+}
+body .row-fluid .span1_5:first-child {
+	margin-left:20px;
+}
+@media only screen and (max-width: 767px) {
+	body .row-fluid .span1_5 {
+		width:80px;
+		margin-left:10px;
+	}
+}
+.hidden {
+	display:none !important;
+}
+h3 {
+	font-size:20px;
+}
+.modal-header {
+	background:#007fff;
+}
+.modal-header h3 {
+	color:white;
+}
+.row-fluid ul.thumbnails li.span12 + li { margin-left : 0px; }
+.row-fluid ul.thumbnails li.span6:nth-child(2n + 3) { margin-left : 0px; }
+.row-fluid ul.thumbnails li.span4:nth-child(3n + 4) { margin-left : 0px; }
+.row-fluid ul.thumbnails li.span3:nth-child(4n + 5) { margin-left : 0px; }
+
+.channel_offline {
+    background: #000000;
+    color: #FFFFFF;
+    height: 400px;
+    line-height: 400px;
+    text-align: center;
+}
+
+#video a {
+    background: #000000;
+    color: #FFFFFF;
+    height: 200px;
+    line-height: 200px;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+.channel_offline {
+    height: 200px !important;
+    line-height: 200px !important;
+}
+}
+
+
+
+/*-------------------------------------------------------------
+|
+|	Android browser <video> controls fix
+|
+---------------------------------------------------------------*/
+
+input[type="button"]:first-child{cursor:default;-webkit-appearance:media-play-button}
+input[type="button"]{cursor:default;-webkit-appearance:media-enter-fullscreen-button}
+input[type="button"]{cursor:default}
+input{width:auto}
+input[type="button"]{width:50px}
+
+html input[type="button"],input[type="reset"],input[type="submit"]{cursor:pointer;-webkit-appearance:button}
+html input[type="button"],input[type="reset"],input[type="submit"],input[type="radio"],input[type="checkbox"]{cursor:pointer}
+html input,textarea,.uneditable-input{width:206px}
+html input[type="button"],input[type="radio"],input[type="checkbox"]{width:auto}
+
+
+
+/*-------------------------------------------------------------
+|
+|	page-homepage.php
+|
+---------------------------------------------------------------*/
+
+.page-template-page-homepage-php h2 {
+	font-size:20px;
+}
+.page-template-page-homepage-php .hero-unit {
+	padding:10px 60px;
+}
+.page-template-page-homepage-php .hero-unit p {
+	text-align:center;
+}
+.page-template-page-homepage-php .media > a {
+	width:30px;
+	height:30px;
+	overflow:hidden;
+}
+.page-template-page-homepage-php .media {
+	margin-top:5px;
+}
+.page-template-page-homepage-php .media h4 {
+	font-size:13px;
+	line-height:30px;
+}
+.page-template-page-homepage-php .all_channels ul {
+	margin:0;
+	padding:0;
+	list-style-type:none;
+	-moz-column-count: 3;
+    -moz-column-gap: 8px;
+    -webkit-column-count: 3;
+    -webkit-column-gap: 8px;
+    column-count: 3;
+    column-gap: 8px;
+	font-size:11px;
+}
+
+
+/*-------------------------------------------------------------
+|
+|	content-channel.php
+|
+---------------------------------------------------------------*/
+
+.content-channel .breadcrumb {
+	background:none;
+	padding:0;
+	margin:0 15px;
+}
+.content-channel .top_spons {
+	height:90px;
+	margin-bottom:10px;
+	text-align:center;
+	overflow:hidden;
+}
+.content-channel .top_spons img {
+	width:100%;
+}
+.content-channel .social a:hover {
+	text-decoration:none;
+	opacity:0.5;
+	filter:alpha(opacity=50);
+}
+.content-channel .social img {
+	width:25px;
+}
+.content-channel .sponsor_list {
+	margin-top:25px;
+}
+.content-channel .sponsor_list li {
+	height:125px;
+	margin-bottom:15px;
+	overflow:hidden;
+}
+.content-channel .sponsor_list .thumbnail {
+	width:100%;
+}
+.content-channel .sponsor_list .thumbnail img {
+	width:100%;
+}
+
+/*-------------------------------------------------------------
+|
+|	sidebar-channel.php
+|
+---------------------------------------------------------------*/
+
+.sidebar-channel-php h2 {
+	font-size:16px;
+	line-height:18px;
+}
+.sidebar-channel-php h3 {
+	font-size:16px;
+	margin-top:35px;
+}
+.sidebar-channel-php .sponsor {
+	height:125px;
+	margin:40px 0 35px 0;
+	overflow:hidden;
+	text-align:center;
+}
+.sidebar-channel-php .sponsor .thumbnail {
+	width:100%;
+}
+.sidebar-channel-php .sponsor img {
+	width:100%;
+}
+.sidebar-channel-php .sponsor .row-fluid {
+	display:none;
+}
+.sidebar-channel-php .channel_details {
+	font-size:12px;
+	margin-bottom:5px;
+}
+.sidebar-channel-php .contact_channel {
+	margin-bottom:5px;
+	text-align:center;
+}
+.sidebar-channel-php .contact_channel .modal {
+	text-align:left;
+}
+.sidebar-channel-php .contact_channel textarea {
+	height:100px;
+}
+.sidebar-channel-php .contact_channel input, 
+.sidebar-channel-php .contact_channel textarea, 
+.sidebar-channel-php .contact_channel .uneditable-input {
+	width: 275px;
+}
+.sidebar-channel-php .modal-header h3 {
+	font-size:20px;
+	margin-top:0;
+}
+.sidebar-channel-php .media-list img {
+	width:50px;
+}
+.sidebar-channel-php .media-list p {
+	font-size:12px;
+	line-height:15px;
+}
+.sidebar-channel-php .media {
+	margin-top:5px;
+}
+.sidebar-channel-php .archive-list {
+	height:500px;
+	overflow:auto;
+}
+
+/*-------------------------------------------------------------
+|
+|	taxonomy-channel_cat.php
+|
+---------------------------------------------------------------*/
+
+.tax-channel_cat .media {
+	margin:0;
+}
+.tax-channel_cat .media-heading {
+	margin:0;
+}
+.tax-channel_cat .media a {
+	line-height:35px;
+}
+.tax-channel_cat .media img {
+	max-height:35px;
+	max-width:35px;
+}
+.tax-channel_cat .media h4 {
+	line-height:35px;
+}
+
+/*-------------------------------------------------------------
+|
+|	search.php
+|
+---------------------------------------------------------------*/
+
+.search-results .media {
+	margin-top:5px;
+}
+.search-results .media img {
+	max-height:40px;
+}
+.search-results .media h4 {
+	line-height:40px;
+}
+.search-results .media-list li>a,
+.archive .media-list li>a {
+	width:50px;
+	height:40px;
+}
+
+/*-------------------------------------------------------------
+|
+|	page-learn-more
+|
+---------------------------------------------------------------*/
+
+.page-id-144 blockquote p:first-child {
+	font-size:21px;
+	margin-top:20%;
+}
+.page-id-144 blockquote small {
+	color:#888;
+}

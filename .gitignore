@@ -1,0 +1,9 @@
+.htaccess
+.project
+web.config
+wp-config.php
+aspnet_client/
+wp-content/cache/
+wp-content/w3tc-config/
+wp-content/uploads/
+wp-content/upgrade/

@@ -15,7 +15,7 @@ a.editinline,
 #wpadminbar #wp-admin-bar-tribe-events,
 #wpadminbar #wp-admin-bar-new-content,
 #contextual-help-link-wrap,
-#wpadminbar .ab-sub-wrapper,
+#wpadminbar #wp-admin-bar-site-name .ab-sub-wrapper,
 #wpadminbar #wp-admin-bar-wp-logo {
 	display:none !important;
 }

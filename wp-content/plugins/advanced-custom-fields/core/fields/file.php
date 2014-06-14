@@ -78,8 +78,7 @@ class acf_field_file extends acf_field
 				$o['class'] = 'active';
 				$o['icon'] = wp_mime_type_icon( $file->ID );
 				$o['title']	= $file->post_title;
-				$thesize = @filesize( get_attached_file( $file->ID ) );
-				$o['size'] = size_format($thesize);
+				$o['size'] = size_format(filesize( get_attached_file( $file->ID ) ));
 				$o['url'] = wp_get_attachment_url( $file->ID );
 				
 				$explode = explode('/', $o['url']);
@@ -107,11 +106,11 @@ class acf_field_file extends acf_field
 					<strong class="acf-file-title"><?php echo $o['title']; ?></strong>
 				</p>
 				<p>
-					<strong>Name:</strong>
+					<strong><?php _e('Name', 'acf'); ?>:</strong>
 					<a class="acf-file-name" href="<?php echo $o['url']; ?>" target="_blank"><?php echo $o['name']; ?></a>
 				</p>
 				<p>
-					<strong>Size:</strong>
+					<strong><?php _e('Size', 'acf'); ?>:</strong>
 					<span class="acf-file-size"><?php echo $o['size']; ?></span>
 				</p>
 				
@@ -247,6 +246,7 @@ class acf_field_file extends acf_field
 				'title' => $attachment->post_title,
 				'caption' => $attachment->post_excerpt,
 				'description' => $attachment->post_content,
+				'mime_type'	=> $attachment->post_mime_type,
 				'url' => wp_get_attachment_url( $attachment->ID ),
 			);
 		}

@@ -3,7 +3,7 @@
 Plugin Name: Bainternet Posts Creation Limits
 Plugin URI: http://en.bainternet.info/category/plugins
 Description: this plugin helps you to limit the number of posts/pages/custom post types each user can create on your site.
-Version: 3.0
+Version: 3.1
 Author: bainternet
 Author URI: http://en.bainternet.info
 */
@@ -495,32 +495,32 @@ if(!class_exists('bapl')){
 						return !isNaN(parseFloat(n)) && isFinite(n);
 					}
 					//add new rule
-					jQuery(".new_rule").live('click',function(e){
+					jQuery(document).on('click','.new_rule',function(e){
 						e.preventDefault();
 						add_new();
 						return false;
 					});
 					//remove rule
-					jQuery(".remove_rule").live('click',function(e){
+					jQuery(document).on('click','.remove_rule',function(e){
 						e.preventDefault();
 						jQuery(this).parent().parent().remove();
 						return false;
 					});
 					//row edit
-					jQuery(".edit_rule").live('click',function(e){
+					jQuery(document).on('click','.edit_rule',function(e){
 						e.preventDefault();
 						curr_row = jQuery(this).parent().parent()
 						pre_edit_form();
 					});
 					//save edit
-					jQuery(".save_edit").live('click',function(e){
+					jQuery(document).on('click','.save_edit',function(e){
 						e.preventDefault();
 						r_save_edit();
 						return false;
 					});
 					
 					//user id
-					jQuery("#ur").live('change',function() {
+					jQuery(document).on('change','#ur',function() {
 						if (jQuery("#ur").val() == 'USER_ID'){
 							jQuery('.ro').hide();
 							jQuery('.user_i').show();
@@ -528,7 +528,7 @@ if(!class_exists('bapl')){
 					});
 					
 					//add new button-primary
-					jQuery(".add-new-h2").live('click',function(){
+					jQuery(document).on('click','.add-new-h2',function(){
 						res_form();
 						tb_show('add a new limit rule','TB_inline?height=420&width=400&inlineId=d_e_f');
 					});
@@ -580,7 +580,7 @@ if(!class_exists('bapl')){
 						<li>
 							<label for="limit"><?php _e('Limit'); ?></label>
 							<input name="limit" type="text" id="lim" size="4"/><br/>
-							<span class="dsc"><small><?php _e('Select a user role'); ?></small></span>
+							<span class="dsc"><small><?php _e('Enter Limit'); ?></small></span>
 						</li>
 						<li>
 							<label for="Status"><?php _e('Status'); ?></label>

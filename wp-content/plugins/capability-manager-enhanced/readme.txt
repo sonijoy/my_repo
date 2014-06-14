@@ -1,44 +1,46 @@
 === Capability Manager Enhanced===
 Contributors: txanny, kevinB
-Help link: http://wordpress.org/tags/capsman-enhanced
+Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=JWZVFUDLLYQBA
 Tags: roles, capabilities, manager, editor, rights, role, capability, types, taxonomies
 Requires at least: 3.1
-Tested up to: 3.5.1
-Stable tag: 1.4.10
+Tested up to: 3.7
+Stable tag: 1.5.1
 
-A simple way to manage WordPress roles and capabilities. With this plugin you will be able to easily create and manage roles and capabilities.
+A simple way to manage WordPress roles and capabilities.
 
 == Description ==
 
-Capability Manager plugin provides a simple way to manage WordPress role definitions (Subscriber, Editor, etc.)  View or change the capabilities of any role, add new roles, copy existing roles into new ones, and add new capabilities to existing roles.
-You can also delegate capability management to other users. In this case, some restrictions apply to this users, as they can only set/unset the capabilities they have.
-With the Backup/Restore tool, you can save your Roles and Capabilities before making changes and revert them if something goes wrong. You'll find it on the Tools menu. 
+Capability Manager Enhanced provides a simple way to manage WordPress role definitions (Subscriber, Editor, etc.). View or change the capabilities of any role, add new roles, copy existing roles into new ones, and add new capabilities to existing roles. Now supports capability negation and role networking.
 
-  * Only users with 'manage_capabilities' can manage them. This capability is created at install time and assigned to Administrators.
-  * Administrator role cannot be deleted.
-  * Non-administrators can only manage roles or users with same or lower capabilities.
+= Features: =
+
+* Create roles
+* Manage role capabilities
+* Supports negation: set any capability to granted, not granted, or blocked
+* Copy any role all network sites
+* Mark any role for auto-copy to future network sites
+* Backup and restore Roles and Capabilities to revert your last changes.
+* Revert Roles and Capabilities to WordPress defaults. 
+ 
+Role management can also be delegated:
+
+* Only users with 'manage_capabilities' can manage them. This capability is created at install time and assigned to Administrators.
+* Administrator role cannot be deleted.
+* Non-administrators can only manage roles or users with same or lower capabilities.
 
 Enhanced and supported by <a href="http://agapetry.net">Kevin Behrens</a> since July 2012. The original Capability Manager author, Jordi Canals, has not updated the plugin since early 2010. Since he was unreachable by web or email, I decided to take on the project myself.
 
 The main change from the original plugin is an improved UI which organizes capabilities:
 
-  * by post type
-  * by operation (read/edit/delete)
-  * by origin (WP core or plugin)
+* by post type
+* by operation (read/edit/delete)
+* by origin (WP core or plugin)
 
-Capability Manager Enhanced also adds <a href="http://presspermit.com">Press Permit plugin</a> integration:
+Capability Manager Enhanced also adds <a href="http://wordpress.org/plugins/press-permit-core">Press Permit</a> plugin integration:
 
-  * easily specify which post types require type-specific capability definitions
-  * show capabilities which Press Permit adds to the role by supplemental type-specific role assignment
+* easily specify which post types require type-specific capability definitions
+* show capabilities which Press Permit adds to the role by supplemental type-specific role assignment
   
-= Features: =
-
-* Manage role capabilities.
-* Create new roles or delete existing ones.
-* Add new capabilities to any existing role.
-* Backup and restore Roles and Capabilities to revert your last changes.
-* Revert Roles and Capabilities to WordPress defaults. 
- 
 = Languages included: =
 
 * English
@@ -70,11 +72,12 @@ Capability Manager Enhanced also adds <a href="http://presspermit.com">Press Per
 
 1. Users Menu.
 2. View or Modify capabilities for a role.
-3. Actions on roles.
-4. Permissions Menu (Press Permit integration).
-5. View or Modify capabilities for a role (Press Permit integration).
-6. Actions on roles (Press Permit integration).
-7. Backup/Restore tool.
+3. Network: copy role to existing or future sites.
+4. Actions on roles.
+5. Permissions Menu (Press Permit integration).
+6. View or Modify capabilities for a role (with Press Permit Pro).
+7. Force type-specific capabilities (Press Permit integration).
+8. Backup/Restore tool.
 
 == Frequently Asked Questions ==
 
@@ -102,6 +105,21 @@ You should have received a copy of the GNU General Public License along with thi
 
 == Changelog ==
 
+= 1.5.1 =
+  * Fixed : Non-administrators with user editing capabilities could give new users a role with a higher level than their own (including Administrator)
+
+= 1.5 =
+  * Feature : Support negative capabilities (storage to wp_roles array with false value)
+  * Feature : Multisite - Copy a role definition to all current sites on a network
+  * Feature : Multisite - Copy a role definition to new (future) sites on a network
+  * Feature : Backup / Restore tool requires "restore_roles" capability or super admin status
+  * Fixed : Role reset to WP defaults did not work, caused a PHP error / white screen
+  * Change : Clarified English captions on Backup Tool screen
+  * Fixed : Term deletion capability was not included in taxonomies grid even if defined
+  * Fixed : jQuery notices for deprecated methods on Edit Role screen
+  * Compat : Press Permit - if a role is marked as hidden, also default it for use by PP Pro as a Pattern Role (when PP Collaborative Editing is activated and Advanced Settings enabled)
+  * Change : Press Permit promotional message includes link to display further info
+  
 = 1.4.10 =
   * Perf :  Eliminated unused framework code (reduced typical wp-admin memory usage by 0.6 MB)
   * Fixed : Failure to save capability changes, on some versions of PHP
@@ -207,6 +225,9 @@ You should have received a copy of the GNU General Public License along with thi
   * First public version.
 
 == Upgrade Notice ==
+
+= 1.5.1 =
+Fixed : Non-administrators with user editing capabilities could add new Administrators
 
 = 1.3.2 = 
 Only Swedish translation.

@@ -48,8 +48,9 @@ function change_login_logo() { ?>
         body.login div#login h1 a {
             background-image: url(<?php echo get_bloginfo( 'template_directory' ) ?>/images/logo-login.png);
             padding-bottom: 30px;
-			background-size:auto;
-			height:238px;
+            background-size:auto;
+            height:238px;
+            width:auto;
         }
     </style>
 <?php }

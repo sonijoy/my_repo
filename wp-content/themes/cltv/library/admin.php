@@ -65,30 +65,30 @@ add_action( 'login_enqueue_scripts', 'change_login_logo' );
 
 // Custom CSS, JS, and Navbar
 function my_admin_head() {
-	wp_enqueue_style( 'bootstrap_admin_css', get_template_directory_uri() . '/library/css/bootstrap.admin.min.css' );
+	/*wp_enqueue_style( 'bootstrap_admin_css', get_template_directory_uri() . '/library/css/bootstrap.admin.min.css' );
 	wp_enqueue_style( 'bootstrap-responsive', '//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css' );	
 	wp_enqueue_style( 'mCustomScrollbar', get_template_directory_uri() . '/library/css/jquery.mCustomScrollbar.css' );
 	wp_enqueue_style( 'style_css', get_template_directory_uri() . '/style.css' );
-	wp_enqueue_style( 'admin_css', get_template_directory_uri() . '/library/css/admin.css' );
+	wp_enqueue_style( 'admin_css', get_template_directory_uri() . '/library/css/admin.css' );*/
 	if(current_user_can('channel')){
 		wp_enqueue_style( 'admin_channel_css', get_template_directory_uri() . '/library/css/admin.channel.css' );
 	}
 	
-	wp_register_script('bootstrap_admin_js', get_template_directory_uri().'/library/js/bootstrap.admin.min.js');
+	/*wp_register_script('bootstrap_admin_js', get_template_directory_uri().'/library/js/bootstrap.admin.min.js');
 	wp_register_script('modernizr', get_template_directory_uri().'/library/js/modernizr.full.min.js');
 	wp_register_script('jquery-mousewheel', get_template_directory_uri().'/library/js/jquery.mousewheel.min.js');
 	wp_register_script('mCustomScrollbar', get_template_directory_uri().'/library/js/jquery.mCustomScrollbar.min.js');
-	wp_register_script('custom', get_template_directory_uri().'/library/js/custom.js');
+	wp_register_script('custom', get_template_directory_uri().'/library/js/custom.js');*/
 	wp_register_script('admin_js', get_template_directory_uri().'/library/js/admin.js');
 	
-	wp_enqueue_script('bootstrap_admin_js', array('jQuery'), '1.1', true);
+	/*wp_enqueue_script('bootstrap_admin_js', array('jQuery'), '1.1', true);
 	wp_enqueue_script('modernizr', array('jQuery'), '1.1', true);
 	wp_enqueue_script('jquery-mousewheel', array('jQuery'), '1.1', true);
 	wp_enqueue_script('mCustomScrollbar', array('jQuery'), '1.1', true);
-	wp_enqueue_script('custom', array('jQuery'), '1.1', true);
+	wp_enqueue_script('custom', array('jQuery'), '1.1', true);*/
 	wp_enqueue_script('admin_js', array('jQuery'), '1.11', true);
 }
-add_action('admin_head', 'my_admin_head');
+add_action('admin_enqueue_scripts', 'my_admin_head');
 
 // Add the header and some ie8 css (blah)
 function my_adminmenu() {
@@ -105,7 +105,7 @@ function my_adminmenu() {
 	</script>
 	<?php
 }
-add_action('adminmenu', 'my_adminmenu');
+//add_action('adminmenu', 'my_adminmenu');
 
 
 /* ------------------------------------------------------------------
@@ -199,11 +199,6 @@ add_action( 'admin_menu', 'remove_dashboard' );
 //Remove submenu items
 function remove_submenu_items() {
   $page = remove_submenu_page( 'edit.php?post_type=tribe_events', 'edit-tags.php?taxonomy=tribe_events_cat&amp;post_type=tribe_events' );
-  //$page = remove_submenu_page( 'edit.php?post_type=tribe_events', 'edit.php?post_type=tribe_events' );
-  //$page = remove_submenu_page( 'edit.php?post_type=channel', 'edit.php?post_type=channel' );
-  //$page = remove_submenu_page( 'edit.php?post_type=archive', 'edit.php?post_type=archive' );
-  //$page = remove_submenu_page( 'edit.php?post_type=commercial', 'edit.php?post_type=commercial' );
-  //$page = remove_submenu_page( 'edit.php?post_type=sponsor', 'edit.php?post_type=sponsor' );
 }
 add_action( 'admin_menu', 'remove_submenu_items' );
 
@@ -243,13 +238,13 @@ if(!$user_email){
 	add_action('admin_notices', 'admin_notice_email');
 }
 
-// Show a notice if user has no email
+/*/ Show a notice if user has no email
 function admin_notice_help(){
 	echo '<div class="error">
 	   <p>Please check out the <a href="/wp-admin/admin.php?page=wp-help-documents">help documents</a> to learn how to manage your channel</p>
 	</div>';
 }
-add_action('admin_notices', 'admin_notice_help');
+add_action('admin_notices', 'admin_notice_help');*/
 
 /* ------------------------------------------------------------------
 |

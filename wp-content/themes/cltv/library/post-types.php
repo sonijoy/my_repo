@@ -43,7 +43,7 @@ function custom_post_channel() {
 			'show_ui' => true,
 			'query_var' => true,
 			'menu_position' => 8, /* this is what order you want it to appear in on the left hand side menu */ 
-			'menu_icon' => null, /* the icon for the custom post type menu */
+			'menu_icon' => 'dashicons-video-alt', /* the icon for the custom post type menu */
 			'rewrite'	=> array( 'slug' => 'channel', 'with_front' => false ), /* you can specify its url slug */
 			'has_archive' => 'channel', /* you can rename the slug here */
 			'capability_type' => 'channel',
@@ -108,7 +108,7 @@ function custom_post_archive() {
 			'show_ui' => true,
 			'query_var' => true,
 			'menu_position' => 8, /* this is what order you want it to appear in on the left hand side menu */ 
-			'menu_icon' => null, /* the icon for the custom post type menu */
+			'menu_icon' => 'dashicons-media-video', /* the icon for the custom post type menu */
 			'rewrite'	=> array( 'slug' => 'archive', 'with_front' => false ), /* you can specify its url slug */
 			'has_archive' => 'archive', /* you can rename the slug here */
 			'capability_type' => 'archive',
@@ -145,7 +145,7 @@ function custom_post_sponsor() {
 			'show_ui' => true,
 			'query_var' => true,
 			'menu_position' => 8, /* this is what order you want it to appear in on the left hand side menu */ 
-			'menu_icon' => null, /* the icon for the custom post type menu */
+			'menu_icon' => 'dashicons-images-alt2', /* the icon for the custom post type menu */
 			'rewrite'	=> array( 'slug' => 'sponsor', 'with_front' => false ), /* you can specify its url slug */
 			'has_sponsor' => 'sponsor', /* you can rename the slug here */
 			'capability_type' => 'sponsor',
@@ -182,7 +182,7 @@ function custom_post_commercial() {
 			'show_ui' => true,
 			'query_var' => true,
 			'menu_position' => 8, /* this is what order you want it to appear in on the left hand side menu */ 
-			'menu_icon' => null, /* the icon for the custom post type menu */
+			'menu_icon' => 'dashicons-tickets', /* the icon for the custom post type menu */
 			'rewrite'	=> array( 'slug' => 'commercial', 'with_front' => false ), /* you can specify its url slug */
 			'has_archive' => 'commercial', /* you can rename the slug here */
 			'capability_type' => 'commercial',

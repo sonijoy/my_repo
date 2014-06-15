@@ -74,15 +74,6 @@
 								<?php $channel_video = cltv_channel_video(get_the_ID()); ?>
 								<?php if($channel_video['src']): ?>
 									<?php if(get_field('is_live')) $stream_type = 'live'; else $stream_type = 'recorded'; ?>
-									<?php /*echo do_shortcode(
-										'[easysmp html5_pre_roll="'.$channel_video['commercial']['html5'].
-										'" flash_pre_roll="'.$channel_video['commercial']['flash'].
-										'" html5_src="'.$channel_video['src']['html5'].
-										'" flash_src="'.$channel_video['src']['flash'].
-										'" poster="'.$channel_video['poster'].
-										'" width="715" height="402" stream_type="'.$stream_type.'"]'
-									);*/  ?>
-									<script src="http://jwpsrv.com/library/hskNKAMBEeOg6CIACusDuQ.js"></script>
 									<script>
 										$(document).ready(function(){
 											var android = /Android/i.test(navigator.userAgent);
@@ -95,9 +86,9 @@
 											        width: "100%",
 											        //height: "100%",
 											        skin: "bekle",
-                                                    <?php if($stream_type == 'live'): ?>
-                                                        autostart: true,
-                                                    <?php endif; ?>
+                              <?php if($stream_type == 'live'): ?>
+                                  autostart: true,
+                              <?php endif; ?>
 											        playlist: [<?php if(!empty($channel_video['commercial']['html5'])): ?>{
 											        	image: "<?php echo $channel_video['poster']; ?>",
 											        	sources: [{

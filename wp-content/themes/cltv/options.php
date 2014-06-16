@@ -46,6 +46,13 @@ function optionsframework_options() {
 		
 	$options[] = array( "name" => "Streaming",
 						"type" => "heading");
+            
+  $options[] = array( "name" => "Streaming Server Type",
+						"desc" => "",
+						"id" => "stream_server",
+						"std" => "",
+						"type" => "select",
+            "options" => array('flash' => 'Flash', 'wowza' => 'Wowza'));
 						
 	$options[] = array( "name" => "Archive RTMP",
 						"desc" => "",

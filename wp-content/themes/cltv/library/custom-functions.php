@@ -38,8 +38,13 @@ function cltv_states() {
 function cltv_format_video_src($video, $live=false, $http=false, $attachment_id=0) {	
 	//live videos
 	if($live){
-		$src['html5'] = of_get_option('live_http').$video.'event/'.$video.'.m3u8';
-		$src['flash'] = of_get_option('live_rtmp').$video.'?adbe-live-event='.$video.'event';
+    if(of_get_option('stream_server') == 'wowza') {
+      $src['html5'] = of_get_option('live_http').$video.'/playlist.m3u8';
+      $src['flash'] = of_get_option('live_rtmp').$video;
+    } else {
+      $src['html5'] = of_get_option('live_http').$video.'event/'.$video.'.m3u8';
+      $src['flash'] = of_get_option('live_rtmp').$video.'?adbe-live-event='.$video.'event';
+    }
 	} 
 	//archive video
 	else {

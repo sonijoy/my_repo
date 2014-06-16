@@ -344,7 +344,11 @@ add_action('wp_dashboard_setup', 'add_helpful_dashboard_widget' );
 function custom_upload_directory( $args ) { 
 	if(!empty($args['error'])) { return $args; }
 	
-	$the_dir = 'D:\www\citylinktv\uploads\channel_video';
+  if(of_get_option('media_dir')) {
+    $the_dir = of_get_option('media_dir');
+  } else {
+    $the_dir = 'D:\www\citylinktv\uploads\channel_video';
+  }
 	
 	$args['path'] = $the_dir;
 	$args['basedir'] = $the_dir;

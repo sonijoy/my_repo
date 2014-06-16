@@ -31,6 +31,12 @@ function optionsframework_options() {
 	
 	$options[] = array( "name" => "General",
 						"type" => "heading");
+            
+  $options[] = array( "name" => "Media Directory",
+						"desc" => "must have trailing slash",
+						"id" => "media_dir",
+						"std" => "",
+						"type" => "text");
 						
 	$options[] = array( "name" => "Front Page Video",
 						"desc" => "",

@@ -338,7 +338,7 @@ add_action('wp_dashboard_setup', 'add_helpful_dashboard_widget' );
 |	Uploads
 |
 |
-| -------------------------------------------------------------------*/
+| -------------------------------------------------------------------
 
 // change upload location
 function custom_upload_directory( $args ) { 
@@ -356,5 +356,5 @@ function custom_upload_directory( $args ) {
     return $args;
 }
 add_filter( 'upload_dir', 'custom_upload_directory' );
-
+*/
 ?>

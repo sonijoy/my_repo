@@ -68,10 +68,10 @@ class ReallySimpleCaptcha {
 		$this->img_type = 'png';
 
 		/* Mode of temporary image files */
-		$this->file_mode = 0755;
+		$this->file_mode = 0777;
 
 		/* Mode of temporary answer text files */
-		$this->answer_file_mode = 0755;
+		$this->answer_file_mode = 0770;
 	}
 
 	/**

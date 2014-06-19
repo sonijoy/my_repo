@@ -359,7 +359,7 @@ add_filter( 'upload_dir', 'custom_upload_directory' );
 */
 
 // delete attached media files when a post gets deleted
-function delete_post_attachments($post_id) {
+function cltv_delete_post_attachments($post_id) {
     global $wpdb;
  
     $sql = "SELECT ID FROM {$wpdb->posts} ";
@@ -369,8 +369,9 @@ function delete_post_attachments($post_id) {
     $ids = $wpdb->get_col($sql);
  
     foreach ( $ids as $id ) {
-        wp_delete_attachment($id);
+        echo $id.'<br><br>';
+        wp_delete_attachment($id, true);
     }
 }
-add_action('delete_post', 'delete_post_attachments');
+add_action('before_delete_post', 'cltv_delete_post_attachments');
 ?>

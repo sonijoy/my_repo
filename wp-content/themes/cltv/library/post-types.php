@@ -14,7 +14,6 @@ function my_register_fields()
 	include_once(dirname(__File__).'/custom-acf-fields/channel-stream-key.php');
 	include_once(dirname(__File__).'/custom-acf-fields/channel-rtmp-url.php');
 	include_once(dirname(__File__).'/custom-acf-fields/channel-embed-code.php');
-    include_once(dirname(__File__).'/custom-acf-fields/channel-wistia-upload.php');
 }
 add_action('acf/register_fields', 'my_register_fields');
 
@@ -194,39 +193,6 @@ function custom_post_commercial() {
 } 
 add_action( 'init', 'custom_post_commercial');
 
-// Custom post type icons
-function custom_post_type_icon() {
-    ?>
-    <style type="text/css" media="screen">
-    #adminmenu #menu-posts-channel .menu-icon-post.wp-has-current-submenu div.wp-menu-image,
-	#adminmenu #menu-posts-channel .menu-icon-post.wp-not-current-submenu div.wp-menu-image	{
-        background-position: -239px -33px;
-    }
-    #adminmenu #menu-posts-channel .menu-icon-post:hover div.wp-menu-image {
-        background-position: -239px -1px;
-    }
-    #icon-edit.icon32-posts-channel {background-position: -492px -5px;}
-	
-	#adminmenu #menu-posts-archive .menu-icon-post.wp-has-current-submenu div.wp-menu-image,
-	#adminmenu #menu-posts-archive .menu-icon-post.wp-not-current-submenu div.wp-menu-image	{
-        background-position: -119px -33px;
-    }
-    #adminmenu #menu-posts-archive .menu-icon-post:hover div.wp-menu-image {
-        background-position: -119px -1px;
-    }
-    #icon-edit.icon32-posts-archive {background-position: -251px -5px;}
-	
-	#adminmenu #menu-posts-sponsor .menu-icon-post.wp-has-current-submenu div.wp-menu-image,
-	#adminmenu #menu-posts-sponsor .menu-icon-post.wp-not-current-submenu div.wp-menu-image	{
-        background-position: -29px -33px;
-    }
-    #adminmenu #menu-posts-sponsor .menu-icon-post:hover div.wp-menu-image {
-        background-position: -29px -1px;
-    }
-    #icon-edit.icon32-posts-sponsor {background-position: -72px -5px;}
-    </style>
-    <?php
-}
-add_action( 'admin_head', 'custom_post_type_icon' );
+
 
 ?>

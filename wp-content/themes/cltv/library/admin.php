@@ -369,7 +369,6 @@ function cltv_delete_post_attachments($post_id) {
     $ids = $wpdb->get_col($sql);
  
     foreach ( $ids as $id ) {
-        echo $id.'<br><br>';
         wp_delete_attachment($id, true);
     }
 }

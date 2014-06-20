@@ -8,7 +8,7 @@ Template Name: Homepage
 			<div id="content" class="clearfix row-fluid">
 				
 				<div class="span3 hidden-phone">
-					<?php $popular = cltv_get_popular_channels(59); ?>
+					<?php $popular = cltv_get_popular_channels(60); ?>
 					<?php if($popular): ?>
 						<div class="row-fluid">
 						
@@ -16,8 +16,13 @@ Template Name: Homepage
 								<h2>Most Viewed (30 Days)</h2>
 								<ul class="media-list">
 									<?php foreach($popular as $slug): ?>
-										<?php $channel = new WP_Query(array('post_type'=>'channel', 'name'=>$slug, 'post__not_in'=>array(8832, 4125, 28427, 28705, 3953, 3913, 27487, 4183))); ?>
-										<?php if($channel->have_posts()): while($channel->have_posts()): $channel->the_post(); ?>
+										<?php $channel = new WP_Query(array('post_type'=>'channel', 'name'=>$slug)); ?>
+										<?php 
+                      if($channel->have_posts()): while($channel->have_posts()):                         
+                        $channel->the_post(); 
+                        $archives = get_posts(array('posts_per_page'=>1, 'post_type'=>'archive','meta_key'=>'channel','meta_value'=>get_the_ID()));
+                        if($archives):
+                    ?>
 											<li class="media">
 												<a class="pull-left" href="<?php the_permalink(); ?>">
 													<?php if(has_post_thumbnail()): ?>
@@ -34,7 +39,7 @@ Template Name: Homepage
 													</h4>
 												</div>
 											</li>
-										<?php endwhile; endif; wp_reset_postdata(); ?>
+										<?php endif; endwhile; endif; wp_reset_postdata(); ?>
 									<?php endforeach;  ?>
 								</ul>								
 							</div>

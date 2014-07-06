@@ -66,47 +66,14 @@ add_action( 'login_enqueue_scripts', 'change_login_logo' );
 
 // Custom CSS, JS, and Navbar
 function my_admin_head() {
-	/*wp_enqueue_style( 'bootstrap_admin_css', get_template_directory_uri() . '/library/css/bootstrap.admin.min.css' );
-	wp_enqueue_style( 'bootstrap-responsive', '//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css' );	
-	wp_enqueue_style( 'mCustomScrollbar', get_template_directory_uri() . '/library/css/jquery.mCustomScrollbar.css' );
-	wp_enqueue_style( 'style_css', get_template_directory_uri() . '/style.css' );
-	wp_enqueue_style( 'admin_css', get_template_directory_uri() . '/library/css/admin.css' );*/
 	if(current_user_can('channel')){
 		wp_enqueue_style( 'admin_channel_css', get_template_directory_uri() . '/library/css/admin.channel.css' );
 	}
-	
-	/*wp_register_script('bootstrap_admin_js', get_template_directory_uri().'/library/js/bootstrap.admin.min.js');
-	wp_register_script('modernizr', get_template_directory_uri().'/library/js/modernizr.full.min.js');
-	wp_register_script('jquery-mousewheel', get_template_directory_uri().'/library/js/jquery.mousewheel.min.js');
-	wp_register_script('mCustomScrollbar', get_template_directory_uri().'/library/js/jquery.mCustomScrollbar.min.js');
-	wp_register_script('custom', get_template_directory_uri().'/library/js/custom.js');*/
+  
 	wp_register_script('admin_js', get_template_directory_uri().'/library/js/admin.js');
-	
-	/*wp_enqueue_script('bootstrap_admin_js', array('jQuery'), '1.1', true);
-	wp_enqueue_script('modernizr', array('jQuery'), '1.1', true);
-	wp_enqueue_script('jquery-mousewheel', array('jQuery'), '1.1', true);
-	wp_enqueue_script('mCustomScrollbar', array('jQuery'), '1.1', true);
-	wp_enqueue_script('custom', array('jQuery'), '1.1', true);*/
 	wp_enqueue_script('admin_js', array('jQuery'), '1.11', true);
 }
 add_action('admin_enqueue_scripts', 'my_admin_head');
-
-// Add the header and some ie8 css (blah)
-function my_adminmenu() {
-	?>
-	<!--[if lt IE 9]>
-		<style type="text/css">
-			html body { margin-top:65px; }
-		</style>
-	<![endif]-->
-	<script type="text/html" id="header_navbar_php">
-	<?php
-		require_once(TEMPLATEPATH.'/header-navbar.php');
-	?>
-	</script>
-	<?php
-}
-//add_action('adminmenu', 'my_adminmenu');
 
 
 /* ------------------------------------------------------------------
@@ -153,7 +120,6 @@ add_action( 'admin_menu' , 'remove_channel_cat_meta' );
 // Add columns showing video status
 function custom_archive_columns($column_name, $id){
 	$attachment_id = get_post_meta($id, 'video_file', true);
-	$status = get_post_meta($attachment_id, 'mtc_status', true);
 	switch ($column_name) {
 	    case 'status':
 			if(empty($attachment_id)){
@@ -338,25 +304,7 @@ add_action('wp_dashboard_setup', 'add_helpful_dashboard_widget' );
 |	Uploads
 |
 |
-| -------------------------------------------------------------------
-
-// change upload location
-function custom_upload_directory( $args ) { 
-	if(!empty($args['error'])) { return $args; }
-	
-  if(of_get_option('media_dir')) {
-    $the_dir = of_get_option('media_dir');
-  } else {
-    $the_dir = 'D:\www\citylinktv\uploads\channel_video';
-  }
-	
-	$args['path'] = $the_dir;
-	$args['basedir'] = $the_dir;
-		
-    return $args;
-}
-add_filter( 'upload_dir', 'custom_upload_directory' );
-*/
+| -------------------------------------------------------------------*/
 
 // delete attached media files when a post gets deleted
 function cltv_delete_post_attachments($post_id) {
@@ -373,4 +321,32 @@ function cltv_delete_post_attachments($post_id) {
     }
 }
 add_action('before_delete_post', 'cltv_delete_post_attachments');
+
+// find recorded video files and turn them into archives
+require_once(TEMPLATEPATH.'/library/aws-sdk-php/vendor/autoload.php');
+use Aws\Common\Aws;
+function cltv_find_new_archives($columns) {
+  $aws = Aws::factory(TEMPLATEPATH.'/library/aws-config.php');
+  $client = $aws->get('s3');  
+  
+  global $current_user;
+  $channel_q = get_posts(array('post_type' => 'channel', 'author' => $current_user->ID));
+  
+  foreach($channel_q as $channel) {
+    $streamkey = $channel->ID.'-'.$channel->post_name;
+    $iterator = $client->getIterator('ListObjects', array(
+      'Bucket' => 'cltv-recordings',
+      'Prefix' => 'rola'
+    ));    
+    foreach ($iterator as $object) {
+      echo $object['Key'] . " yeahbudyy";
+    }
+  }
+  
+  wp_reset_postdata();
+  
+  return $columns;
+}
+add_filter( 'manage_edit-archive_columns', 'cltv_find_new_archives' );
+
 ?>

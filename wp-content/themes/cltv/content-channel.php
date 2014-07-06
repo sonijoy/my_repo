@@ -160,7 +160,7 @@
 					</footer>
 				</article>
 			
-			<?php endif; ?>
+			<?php endif; //if have post ?>
 			
 		</div> <!-- end #main -->
 		

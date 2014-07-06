@@ -39,7 +39,7 @@ class acf_RtmpUrl extends acf_field
 	
 	function create_field( $field )
 	{
-		$rtmp_url = 'rtmp://stream.citylinktv.com/livepkgr';
+		$rtmp_url = of_get_option('live_rtmp');
 		echo "<input id='rtmp_url' type='text' readonly='true' value='$rtmp_url' />";
 	}
 	

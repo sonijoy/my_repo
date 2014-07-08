@@ -322,24 +322,101 @@ function cltv_delete_post_attachments($post_id) {
 }
 add_action('before_delete_post', 'cltv_delete_post_attachments');
 
-// find recorded video files and turn them into archives
+// create an archive post and attach a file to it
+function cltv_create_archive($channel, $file, $status='draft') {
+  $args = array(
+    'post_author' => $channel->post_author,
+    'post_title' => $file,
+    'post_type' => 'archive',
+    'post_status' => $status
+  );
+  
+  $post_id = wp_insert_post($args);			
+  add_post_meta($post_id, 'channel', $channel->ID); 
+  add_post_meta($post_id, 'recorded', 1); 
+  
+  //insert the video
+  if($post_id) {				
+    $wp_filetype = wp_check_filetype($file, null );
+    $attachment = array(
+      'guid' => 'http://recordings.citylinktv.com/'.$file, 
+      'post_mime_type' => $wp_filetype['type'],
+      'post_title' => preg_replace('/\.[^.]+$/', '', $file),
+      'post_content' => '',
+      'post_status' => 'inherit'
+    );
+    $attach_id = wp_insert_attachment($attachment, $file, $post_id);			
+    add_post_meta($post_id, 'video_file', $attach_id); 
+  }
+}
+
+// rename an s3 object
 require_once(TEMPLATEPATH.'/library/aws-sdk-php/vendor/autoload.php');
 use Aws\Common\Aws;
+function cltv_rename_s3_object($src) {
+  $aws = Aws::factory(TEMPLATEPATH.'/library/aws-config.php');
+  $client = $aws->get('s3');  
+  
+  $path_parts = pathinfo($src);
+  $new_src = $path_parts['filename'].date('-Y-m-d-H-i-s').'.'.$path_parts['extension'];
+  
+  // Copy the original object
+  $client->copyObject(array(
+    'Bucket'     => 'cltv-recordings',
+    'Key'        => $new_src,
+    'CopySource' => "cltv-recordings/$src",
+  ));
+  
+  // Delete the original
+  $deleted = $client->deleteObject(array(
+    'Bucket' => 'cltv-recordings',
+    'Key'    => $src
+  )); 
+  
+  return $new_src;
+}
+
+// find recorded video files and turn them into archives
 function cltv_find_new_archives($columns) {
   $aws = Aws::factory(TEMPLATEPATH.'/library/aws-config.php');
   $client = $aws->get('s3');  
   
+  // get user's channels
   global $current_user;
   $channel_q = get_posts(array('post_type' => 'channel', 'author' => $current_user->ID));
   
+  // find recorded files for each channel
   foreach($channel_q as $channel) {
     $streamkey = $channel->ID.'-'.$channel->post_name;
     $iterator = $client->getIterator('ListObjects', array(
       'Bucket' => 'cltv-recordings',
-      'Prefix' => 'rola'
+      'Prefix' => $streamkey
     ));    
+    $recording = false;    
+    
     foreach ($iterator as $object) {
-      echo $object['Key'] . " yeahbudyy";
+      $path_parts = pathinfo($object['Key']);
+      $exists = true;
+      
+      // if a .tmp file exists, then the channel is currently recording, 
+      // and we need to leave their files alone
+      if($path_parts['extension'] == 'tmp') {
+        $recording = true;
+        echo 'recording<br><br><br>';
+        break;
+      }
+      
+      // skip this file it already has an archive
+      global $wpdb; 
+      $attachment = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->prefix}posts WHERE guid RLIKE %s;", $object['Key'] ) );
+      if($attachment) {
+        continue;
+      } 
+      // not recording and no archives for this file, so let's fuckin make one
+      else {
+        $new_file = cltv_rename_s3_object($object['Key']);
+        cltv_create_archive($channel, $new_file);
+      }
     }
   }
   

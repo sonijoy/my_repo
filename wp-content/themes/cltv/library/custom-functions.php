@@ -50,10 +50,15 @@ function cltv_format_video_src($video, $live=false, $http=false, $attachment_id=
 	else {
 		$path_parts = pathinfo($video);
 		$filename = $path_parts['basename'];
-		$src['html5'] = of_get_option('archive_http').$filename.'.m3u8';
-		$src['flash'] = of_get_option('archive_rtmp');
-		if($path_parts['extension'] != 'flv') $src['flash'] .= 'mp4:';
-		$src['flash'] .= $filename;
+    if(of_get_option('stream_server') == 'wowza') {
+      $src['html5'] = of_get_option('archive_http').$filename.'/playlist.m3u8';
+      $src['flash'] = of_get_option('archive_rtmp').$filename;
+    } else {
+      $src['html5'] = of_get_option('archive_http').$filename.'.m3u8';
+      $src['flash'] = of_get_option('archive_rtmp');
+      if($path_parts['extension'] != 'flv') $src['flash'] .= 'mp4:';
+      $src['flash'] .= $filename;
+    }
 	}	
 	
 	return $src;

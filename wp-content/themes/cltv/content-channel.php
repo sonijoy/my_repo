@@ -93,16 +93,16 @@
 											        	image: "<?php echo $channel_video['poster']; ?>",
 											        	sources: [{
 											        		file: "<?php echo $channel_video['commercial']['flash']; ?>",
-											        	}, {
+											        	}/*, {
 											        		file: "<?php echo $channel_video['commercial']['html5']; ?>"
-											        	}]
+											        	}*/]
 											        },<?php endif; ?> {
 											        	image: "<?php echo $channel_video['poster']; ?>",
 											        	sources: [{
 											        		file: "<?php echo $channel_video['src']['flash']; ?>",
-											        	}, {
+											        	}/*, {
 											        		file: "<?php echo $channel_video['src']['html5']; ?>"
-											        	}]
+											        	}*/]
 											        }]
 											    });
 										    }

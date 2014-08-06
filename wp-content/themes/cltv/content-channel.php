@@ -86,23 +86,23 @@
 											        width: "100%",
 											        //height: "100%",
 											        skin: "bekle",
-                              <?php if($stream_type == 'live'): ?>
-                                  autostart: true,
-                              <?php endif; ?>
+                                                    <?php if($stream_type == 'live'): ?>
+                                                        autostart: true,
+                                                    <?php endif; ?>
 											        playlist: [<?php if(!empty($channel_video['commercial']['html5'])): ?>{
 											        	image: "<?php echo $channel_video['poster']; ?>",
 											        	sources: [{
-											        		file: "<?php echo $channel_video['commercial']['flash']; ?>",
-											        	}/*, {
+											        		file: "<?php echo $channel_video['commercial']['flash']; ?>"
+											        	}, {
 											        		file: "<?php echo $channel_video['commercial']['html5']; ?>"
-											        	}*/]
+											        	}]
 											        },<?php endif; ?> {
 											        	image: "<?php echo $channel_video['poster']; ?>",
-											        	sources: [{
-											        		file: "<?php echo $channel_video['src']['flash']; ?>",
-											        	}/*, {
+											        	sources: [/*{
+											        		file: "<?php echo $channel_video['src']['flash']; ?>"
+											        	},*/ {
 											        		file: "<?php echo $channel_video['src']['html5']; ?>"
-											        	}*/]
+											        	}]
 											        }]
 											    });
 										    }

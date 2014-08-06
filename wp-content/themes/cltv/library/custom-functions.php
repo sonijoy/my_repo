@@ -38,28 +38,22 @@ function cltv_states() {
 function cltv_format_video_src($video, $live=false, $http=false, $attachment_id=0) {	
 	//live videos
 	if($live){
-    if(of_get_option('stream_server') == 'wowza') {
-      $src['html5'] = of_get_option('live_http').$video.'/playlist.m3u8';
-      $src['flash'] = of_get_option('live_rtmp').$video;
-    } else {
-      $src['html5'] = of_get_option('live_http').$video.'event/'.$video.'.m3u8';
-      $src['flash'] = of_get_option('live_rtmp').$video.'?adbe-live-event='.$video.'event';
-    }
+      $src['html5'] = of_get_option('live_http').'livepkgr/'.$video.'/playlist.m3u8';
+      $src['flash'] = false;
 	} 
 	//archive video
 	else {
-		$path_parts = pathinfo($video);
-		$filename = $path_parts['basename'];
-    if(of_get_option('stream_server') == 'wowza') {
-      $src['html5'] = of_get_option('archive_http').$filename.'/playlist.m3u8';
-      $src['flash'] = of_get_option('archive_rtmp').$filename;
-    } else {
-      $src['html5'] = of_get_option('archive_http').$filename.'.m3u8';
-      $src['flash'] = of_get_option('archive_rtmp');
-      if($path_parts['extension'] != 'flv') $src['flash'] .= 'mp4:';
-      $src['flash'] .= $filename;
-    }
-	}	
+      $recorded = get_post_meta($attachment_id, 'recorded', true);
+      $path_parts = pathinfo($video);
+      $filename = $path_parts['basename'];
+      if($recorded) {
+        $src['html5'] = of_get_option('wowza_cdn').'_definst_/vods3/mp4:amazons3/cltv-recordings/'.$filename.'/playlist.m3u8';
+        $src['flash'] = of_get_option('recorded_rtmp').$filename;
+      } else {
+        $src['html5'] = of_get_option('wowza_cdn').'_definst_/vods3/mp4:amazons3/cltv-archives/'.$filename.'/playlist.m3u8';
+        $src['flash'] = of_get_option('archive_rtmp').$filename;
+      }
+	}	 
 	
 	return $src;
 }

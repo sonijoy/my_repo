@@ -47,12 +47,18 @@ function optionsframework_options() {
 	$options[] = array( "name" => "Streaming",
 						"type" => "heading");
             
-  $options[] = array( "name" => "Streaming Server Type",
+    $options[] = array( "name" => "Streaming Server Type",
 						"desc" => "",
 						"id" => "stream_server",
 						"std" => "",
 						"type" => "select",
-            "options" => array('flash' => 'Flash', 'wowza' => 'Wowza'));
+            "options" => array('flash' => 'Flash', 'wowza' => 'Wowza')); 
+  
+    $options[] = array( "name" => "Woza CDN",
+						"desc" => "",
+						"id" => "wowza_cdn",
+						"std" => "",
+						"type" => "text");
 						
 	$options[] = array( "name" => "Archive RTMP",
 						"desc" => "",
@@ -60,21 +66,9 @@ function optionsframework_options() {
 						"std" => "",
 						"type" => "text");
 						
-	$options[] = array( "name" => "Archive HTTP",
+	$options[] = array( "name" => "Recorded RTMP",
 						"desc" => "",
-						"id" => "archive_http",
-						"std" => "",
-						"type" => "text");
-						
-	$options[] = array( "name" => "Live RTMP",
-						"desc" => "",
-						"id" => "live_rtmp",
-						"std" => "",
-						"type" => "text");
-						
-	$options[] = array( "name" => "Live HTTP",
-						"desc" => "",
-						"id" => "live_http",
+						"id" => "recorded_rtmp",
 						"std" => "",
 						"type" => "text");
 									

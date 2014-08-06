@@ -349,6 +349,7 @@ function cltv_create_archive($channel, $file, $status='draft') {
     );
     $attach_id = wp_insert_attachment($attachment, $file, $post_id);
     add_post_meta($post_id, 'video_file', $attach_id);
+    add_post_meta($attach_id, 'recorded', true);
 
     // VIDEO THUMBNAIL
     $fileinfo = pathinfo($file);

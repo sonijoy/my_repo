@@ -44,13 +44,14 @@ function cltv_format_video_src($video, $live=false, $http=false, $attachment_id=
 	//archive video
 	else {
       $recorded = get_post_meta($attachment_id, 'recorded', true);
+      var_dump($recorded);
       $path_parts = pathinfo($video);
       $filename = $path_parts['basename'];
       if($recorded) {
-        $src['html5'] = of_get_option('wowza_cdn').'_definst_/vods3/mp4:amazons3/cltv-recordings/'.$filename.'/playlist.m3u8';
+        $src['html5'] = of_get_option('wowza_cdn').'vods3/_definst_/mp4:amazons3/cltv-recordings/'.$filename.'/playlist.m3u8';
         $src['flash'] = of_get_option('recorded_rtmp').$filename;
       } else {
-        $src['html5'] = of_get_option('wowza_cdn').'_definst_/vods3/mp4:amazons3/cltv-archives/'.$filename.'/playlist.m3u8';
+        $src['html5'] = of_get_option('wowza_cdn').'vods3/_definst_/mp4:amazons3/cltv-archives/'.$filename.'/playlist.m3u8';
         $src['flash'] = of_get_option('archive_rtmp').$filename;
       }
 	}	 

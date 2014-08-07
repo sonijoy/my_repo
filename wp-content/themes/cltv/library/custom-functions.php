@@ -44,7 +44,6 @@ function cltv_format_video_src($video, $live=false, $http=false, $attachment_id=
 	//archive video
 	else {
       $recorded = get_post_meta($attachment_id, 'recorded', true);
-      var_dump($recorded);
       $path_parts = pathinfo($video);
       $filename = $path_parts['basename'];
       if($recorded) {

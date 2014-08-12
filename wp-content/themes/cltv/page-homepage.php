@@ -21,7 +21,7 @@ Template Name: Homepage
                       if($channel->have_posts()): while($channel->have_posts()):                         
                         $channel->the_post(); 
                         $archives = get_posts(array('posts_per_page'=>1, 'post_type'=>'archive','meta_key'=>'channel','meta_value'=>get_the_ID()));
-                        if($archives):
+                        if($archives && get_the_ID() != 3953):
                     ?>
 											<li class="media">
 												<a class="pull-left" href="<?php the_permalink(); ?>">

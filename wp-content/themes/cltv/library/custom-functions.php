@@ -38,7 +38,7 @@ function cltv_states() {
 function cltv_format_video_src($video, $live=false, $http=false, $attachment_id=0) {	
 	//live videos
 	if($live){
-      $src['html5'] = of_get_option('live_http').'livepkgr/'.$video.'/playlist.m3u8';
+      $src['html5'] = of_get_option('wowza_cdn').'livepkgr/'.$video.'/playlist.m3u8';
       $src['flash'] = false;
 	} 
 	//archive video

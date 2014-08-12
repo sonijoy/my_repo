@@ -39,7 +39,7 @@ function cltv_format_video_src($video, $live=false, $http=false, $attachment_id=
 	//live videos
 	if($live){
       $src['html5'] = of_get_option('wowza_cdn').'livepkgr/'.$video.'/playlist.m3u8';
-      $src['flash'] = false;
+      $src['flash'] = of_get_option('wowza_cdn').'livepkgr/'.$video.'/playlist.m3u8';
 	} 
 	//archive video
 	else {

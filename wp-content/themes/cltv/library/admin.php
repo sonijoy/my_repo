@@ -403,7 +403,7 @@ function cltv_find_new_archives($columns) {
 
   // find recorded files for each channel
   foreach($channel_q as $channel) {
-    $streamkey = $channel->ID.'-'.$channel->post_name;
+    $streamkey = get_post_meta($channel->ID, 'stream_key', true);
     $iterator = $client->getIterator('ListObjects', array(
       'Bucket' => S3_BUCKET,
       'Prefix' => $streamkey

@@ -21,7 +21,7 @@ Template Name: Homepage
                       if($channel->have_posts()): while($channel->have_posts()):                         
                         $channel->the_post(); 
                         $archives = get_posts(array('posts_per_page'=>1, 'post_type'=>'archive','meta_key'=>'channel','meta_value'=>get_the_ID()));
-                        if($archives):
+                        if($archives && get_the_ID() != 3953):
                     ?>
 											<li class="media">
 												<a class="pull-left" href="<?php the_permalink(); ?>">
@@ -75,18 +75,18 @@ Template Name: Homepage
 								        skin: "bekle",
 								        //title: "Welcome",
 								        playlist: [{
-								        	image: "<?php echo of_get_option('front_page_video_poster'); ?>",									        								        	
+								        	image: "//uploads.citylinktv.com/poster.jpg",									        								        	
 								        	sources: [{								        		
-								        		file: "<?php echo $video['flash']; ?>",
+								        		file: "rtmp://rtmpuploads.citylinktv.com/cfx/st/intro2.mp4",
 								        	}, {
-								        		file: "<?php echo $video['html5']; ?>"
+								        		file: "//streamcdn.citylinktv.com/vods3/_definst_/mp4:amazons3/cltv-archives/intro2.mp4/playlist.m3u8"
 								        	}]
 								        }]
 								    });
 							    }
 							});    
 						</script>
-						<div id="video"><a href="<?php echo $video['html5']; ?>">Tap here to watch video</a> </div>
+						<div id="video"><a href="//streamcdn.citylinktv.com/vods3/_definst_/mp4:amazons3/cltv-archives/intro2.mp4/playlist.m3u8">Tap here to watch video</a> </div>
  					
 						<p>
 							<a href="/about" class="btn btn-primary btn-large">Learn more</a>

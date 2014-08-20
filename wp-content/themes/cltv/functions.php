@@ -204,7 +204,7 @@ function first_paragraph($content){
 // Menu output mods
 class description_walker extends Walker_Nav_Menu
 {
-      function start_el(&$output, $item, $depth, $args)
+      function start_el(&$output, $item, $depth = 0, $args = array(), $id = 0)
       {
 			global $wp_query;
 			$indent = ( $depth ) ? str_repeat( "\t", $depth ) : '';
@@ -248,7 +248,7 @@ class description_walker extends Walker_Nav_Menu
             $output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
             }
             
-        function start_lvl(&$output, $depth) {
+        function start_lvl(&$output, $depth = 0, $args = array()) {
             $indent = str_repeat("\t", $depth);
             $output .= "\n$indent<ul class=\"dropdown-menu\">\n";
         }

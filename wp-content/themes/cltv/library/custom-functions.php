@@ -128,7 +128,7 @@ function cltv_channel_video($id){
 
 // Get an array of popular channels
 function cltv_get_popular_channels($max = 25) {
-	try {
+	/*try {
 		include_once('gapi.class.php');
 		// create the GAPI object
 		$email_address = 'info@citylinktv.com';
@@ -163,7 +163,7 @@ function cltv_get_popular_channels($max = 25) {
 		return $channels;
 	} catch (Exception $e) {
 		return false;
-	}
+	}*/ return false;
 }
 
 /* ------------------------------------------------------------------

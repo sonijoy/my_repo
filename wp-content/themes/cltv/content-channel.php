@@ -98,9 +98,9 @@
 											        	}]
 											        },<?php endif; ?> {
 											        	image: "<?php echo $channel_video['poster']; ?>",
-											        	sources: [{
+											        	sources: [<?php if($channel_video['src']['flash']): ?>{
 											        		file: "<?php echo $channel_video['src']['flash']; ?>"
-											        	}, {
+											        	},<?php endif; ?> {
 											        		file: "<?php echo $channel_video['src']['html5']; ?>"
 											        	}]
 											        }]

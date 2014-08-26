@@ -303,6 +303,24 @@ add_action('wp_dashboard_setup', 'add_helpful_dashboard_widget' );
 /* ------------------------------------------------------------------
 |
 |
+|	Post Update
+|
+|
+| -------------------------------------------------------------------*/
+
+function cltv_update_streamkey($post_id) {
+
+	// If this is just a revision, don't send the email.
+	if (wp_is_post_revision( $post_id ) && $_POST['post_type'] != 'channel')
+		return;
+  
+	update_post_meta($post_id, 'stream_key', $post_id . date('Hi'));
+}
+//add_action( 'save_post', 'cltv_update_streamkey' );
+
+/* ------------------------------------------------------------------
+|
+|
 |	Uploads
 |
 |
@@ -420,6 +438,7 @@ function cltv_find_new_archives($columns) {
       // if a .tmp file exists, then the channel is currently recording,
       // and we need to leave their files alone
       if($path_parts['extension'] == 'tmp') {
+        echo 'bitchrecording';
         $recording = true;
         break;
       }

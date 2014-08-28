@@ -11,8 +11,8 @@
 
 // Trim strings and add "..."
 function cltv_trim($str, $len = 19) {
-	$s = substr($str, 0, $len); 
-	if(strlen($str) > $len) 
+	$s = substr($str, 0, $len);
+	if(strlen($str) > $len)
 		$s .= '&hellip;';
 	$s = ucwords(strtolower($s));
 	return $s;
@@ -35,12 +35,13 @@ function cltv_states() {
 }
 
 // generate the src paramter for video player
-function cltv_format_video_src($video, $live=false, $http=false, $attachment_id=0) {	
+function cltv_format_video_src($video, $live=false, $http=false, $attachment_id=0) {
 	//live videos
 	if($live){
+
       $src['html5'] = of_get_option('wowza_cdn').'livepkgr/'.$video.'/playlist.m3u8';
       $src['flash'] = of_get_option('wowza_cdn').'livepkgr/'.$video.'/playlist.m3u8';
-	} 
+	}
 	//archive video
 	else {
       $recorded = get_post_meta($attachment_id, 'recorded', true);
@@ -53,8 +54,8 @@ function cltv_format_video_src($video, $live=false, $http=false, $attachment_id=
         $src['html5'] = of_get_option('wowza_cdn').'vods3/_definst_/mp4:amazons3/cltv-archives/'.$filename.'/playlist.m3u8';
         $src['flash'] = of_get_option('archive_rtmp').$filename;
       }
-	}	 
-	
+	}
+
 	return $src;
 }
 
@@ -65,31 +66,31 @@ function cltv_channel_video($id){
 	$poster = $poster[0];
 	$title = get_the_title($id);
 	$filename = false;
-	$live = false;		
+	$live = false;
 	$attachment_id = false;
-	
+
 	//if showing a specific archive
 	if(get_post_type($id) == 'archive'){
 		$attachment_id = get_post_meta($id, 'video_file', true);
 		$filename = wp_get_attachment_url(get_post_meta($id, 'video_file', true));
-		$channel = get_post_meta($id, 'channel', true); 
+		$channel = get_post_meta($id, 'channel', true);
 	}
 	//showing a channel
 	else {
 		$channel = $id;
-		
+
 		//if showing live player
-		if(get_field('is_live', $id)) {	
+		if(get_field('is_live', $id)) {
 			$filename = get_field('stream_key', $id);
 			$live = true;
-		} 
+		}
 		//showing default archive
 		else {
 			//default archive is set
 			$default_archive = get_post_meta($id, 'default_archive', true);
 			if($default_archive) {
 				$archive = $default_archive;
-			} 
+			}
 			//try to find an archive
 			else {
 				$archive_q = new WP_Query(array('post_type'=>'archive', 'meta_key'=>'channel', 'meta_value'=>$id, 'posts_per_page'=>1));
@@ -103,27 +104,27 @@ function cltv_channel_video($id){
 				$poster = wp_get_attachment_image_src(get_post_thumbnail_ID($archive), 'full');
 				$poster = $poster[0];
 				$attachment_id = get_post_meta($archive, 'video_file', true);
-				$filename = basename(get_attached_file(get_post_meta($archive, 'video_file', true))); 
+				$filename = basename(get_attached_file(get_post_meta($archive, 'video_file', true)));
 				$title = get_the_title($archive);
 			}
-		}	
+		}
 	}
-	
+
 	if($filename){
 		$http = false;
-		$src = cltv_format_video_src($filename, $live, $http, $attachment_id);		
-		$commercial_id = get_post_meta($id, 'commercial', true);	
+		$src = cltv_format_video_src($filename, $live, $http, $attachment_id);
+		$commercial_id = get_post_meta($id, 'commercial', true);
 		$commercial = false;
 		if($commercial_id) {
 			$commercial = get_post($commercial_id);
 			if($commercial) {
 				$attachment_id = get_post_meta($commercial->ID, 'commercial_video_file', true);
 				$commercial = basename(get_field('commercial_video_file', $commercial->ID));
-				$commercial = cltv_format_video_src($commercial, false, $http, $attachment_id);	
-			}	
+				$commercial = cltv_format_video_src($commercial, false, $http, $attachment_id);
+			}
 		}
 		return array('src'=>$src, 'poster'=>$poster, 'title'=>$title, 'commercial'=>$commercial);
-	} else return false;	
+	} else return false;
 }
 
 // Get an array of popular channels
@@ -134,36 +135,95 @@ function cltv_get_popular_channels($max = 25) {
 		$email_address = 'info@citylinktv.com';
 		$password = 'Joshua06';
 		$ga =new gapi($email_address, $password);
-		
+
 		// set the filters
 		$report_id = '50765226';
 		$dimensions = array('pagePath');
 		$metrics = array('pageviews');
 		$sort = '-pageviews';
 		$filter = 'ga:pagePath =@ /channel/';
-		
+
 		// make the request for popular url's
 		$ga->requestReportData($report_id, $dimensions, $metrics, $sort, $filter, null, null, null, $max);
 		$ga_results = $ga->getResults();
-		
+
 		// create an array of slugs
 		$i = 0;
 		$channels = false;
 		foreach($ga_results as $path)
-		{    
+		{
 			$tokens = explode('/', $path->getPagePath());
 			$slug = $tokens[2];
 			if($slug != 'channel' && $slug != '' && $slug != 'profile')
 			{
-				$channels[$i] = $slug;	
+				$channels[$i] = $slug;
 				$i++;
-			}			
-		}		
-		wp_reset_postdata();		
+			}
+		}
+		wp_reset_postdata();
 		return $channels;
 	} catch (Exception $e) {
 		return false;
 	}*/ return false;
+}
+
+/* ------------------------------------------------------------------
+ |
+|
+|	Create thumbnail for uploaded videos
+|
+|
+| -------------------------------------------------------------------*/
+
+add_action("add_attachment","cltv_create_video_thumbnail");
+
+function cltv_create_video_thumbnail($attachment_id, $post_id = 0){
+	error_log("cltv_create_video_thumbnail($attachment_id,$post_id)");
+	$file = get_attached_file($attachment_id);
+	error_log($file);
+	$fileinfo = pathinfo($file);
+	if ( strtoupper($fileinfo['extension']) == "M4V" || strtoupper($fileinfo['extension']) == "MP4" || strtoupper($fileinfo['extension']) == "F4V" || strtoupper($fileinfo['extension']) == "WMV" ){
+		if ( !file_exists($file) ){
+			error_log("File does not exist");
+			return false;
+		}
+		$thumbnail_file = $fileinfo['filename'] . ".jpg";
+		$thumbnail_tmp_file = get_temp_dir() . $thumbnail_file;
+
+		// GET THUMBNAIL USING FFMPEG /usr/bin/ffmpeg -i <input file> -vf 'thumbnail' -vframe <# frames to extract> -an -ss <# seconds to skip forward> <output file>
+		// vf 'thumbnail' - video filter to 'pick the best thumbnail'
+		exec("/usr/bin/ffmpeg -i " . $file . " -vf 'thumbnail' -vframes 1 -an -ss 30 " . $thumbnail_tmp_file);
+
+		// media_handle_sideload will create the various sizes of images and move them to the wordpress upload folder
+		$thumbnail_attach_id = media_handle_sideload( array("name"=>$thumbnail_file,"tmp_name"=>$thumbnail_tmp_file), $attachment_id, $fileinfo['filename'] . " Thumbnail" );
+		update_post_meta( $attachment_id, "_thumbnail_id", $thumbnail_attach_id );
+		error_log($thumbnail_attach_id);
+		return $thumbnail_attach_id;
+	} else {
+		return false;
+	}
+}
+
+/* ------------------------------------------------------------------
+|
+|
+|	Set featured images for archives on save
+|
+|
+| -------------------------------------------------------------------*/
+
+add_action("save_post","cltv_set_featured_image");
+
+function cltv_set_featured_image( $post_id ){
+	if ( has_post_thumbnail( $post_id ) )
+		return NULL;
+
+	if ( get_post_type( $post_id ) == "archive" ){
+		$attachment_id = get_post_meta($post_id, 'video_file', true);
+		$thumbnail_id  = get_post_meta($attachment_id, "_thumbnail_id", true);
+
+		set_post_thumbnail( $post_id, $thumbnail_id );
+	}
 }
 
 /* ------------------------------------------------------------------
@@ -178,13 +238,13 @@ function cltv_get_popular_channels($max = 25) {
 function channel_category_order( $query ){
 	if(!is_admin()){
 		//filter out private channels
-		if(!$query->is_single && 
-			isset($query->query_vars['post_type']) && 
-            !isset($query->query_vars['author']) && 
+		if(!$query->is_single &&
+			isset($query->query_vars['post_type']) &&
+            !isset($query->query_vars['author']) &&
 			$query->query_vars['post_type'] == 'channel')
-		{		
+		{
 			$query->set('post_status', 'publish');
-		}		
+		}
 		if( $query->is_tax ){
 			$query->set('post_type', 'channel');
 			$query->set('meta_key', 'state');
@@ -209,10 +269,10 @@ function channel_category_order( $query ){
 			$query->set('order', 'ASC');
 		}
 		//filter out channels for the events page
-		if(isset($query->query_vars['post_type']) && 
-			$query->query_vars['post_type'] == 'tribe_events' 
+		if(isset($query->query_vars['post_type']) &&
+			$query->query_vars['post_type'] == 'tribe_events'
 			&& isset($_GET['author_id']))
-		{		
+		{
 			$query->set('author', $_GET['author_id']);
 		}
 		return $query;

@@ -101,7 +101,3 @@ function cltv_update_live_status_request ( $vars ) {
 	( $vars['name'] == "cltv_update_live_status" ) and $vars['cltv_update_live_status'] = true;
 	return $vars;
 }
-
-function cltv_set_channel_live($stream_name){
-
-}

@@ -46,20 +46,19 @@ function cltv_do_update_live_status(){
 		$application = $applications;
 	}
 
-	$streams = $application->ApplicationInstance->Stream;
 	$live_streams = array();
-	// if there is more than one thing streaming
-	foreach ( $streams as $stream ){
-		$live_streams[] = (string)$stream->Name;
+	foreach ( $application->ApplicationInstance as $ai ){
+		foreach ( $ai->Stream as $stream ){
+			$live_streams[] = (string)$stream->Name;
+		}
 	}
-
 	echo "First pass<br />";
 	$updated = array();
 	// update the status of the currently live channels
 	$currently_live = cltv_get_live_channels();
 	foreach ( $currently_live as $channel ){
 		$stream_key = get_post_meta($channel->ID, "stream_key");
-		echo $stream_key[0] . " ";
+		echo $stream_key[0] . ": ";
 		$updated[] = $stream_key[0];
 		if ( in_array($stream_key[0],$live_streams) ){
 			echo "Set live<br />";
@@ -75,7 +74,7 @@ function cltv_do_update_live_status(){
 	// I couldn't figure out a way to do this in one pass...
 	$diff = array_diff($live_streams,$updated);
 	foreach ( $diff as $stream ){
-		echo $stream;
+		echo $stream . ": ";
 		$args = array("post_type"=>"channel",
 				"meta_key" => "stream_key",
 				"meta_value" => $stream,

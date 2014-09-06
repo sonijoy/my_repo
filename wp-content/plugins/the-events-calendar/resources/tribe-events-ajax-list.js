@@ -18,7 +18,8 @@
 
 	$(document).ready(function () {
 
-		var tribe_is_paged = tf.get_url_param('tribe_paged');
+		var tribe_is_paged = tf.get_url_param('tribe_paged'),
+			$venue_view = $('#tribe-events > .tribe-events-venue');
 
 		if (tribe_is_paged) {
 			ts.paged = tribe_is_paged;
@@ -31,6 +32,9 @@
 			if (td.params.length)
 				params = params + '&' + td.params;
 
+			if (ts.category)
+				params = params + '&tribe_event_category=' + ts.category;
+
 			history.replaceState({
 				"tribe_params": params,
 				"tribe_url_params": td.params
@@ -40,7 +44,7 @@
 
 				var state = event.originalEvent.state;
 
-				if (state) {
+				if (state && !$venue_view.length) {
 					ts.do_string = false;
 					ts.pushstate = false;
 					ts.popping = true;
@@ -100,7 +104,6 @@
 
 		/**
 		 * @function tribe_events_bar_listajax_actions
-		 * @since 3.0
 		 * @desc On events bar submit, this function collects the current state of the bar and sends it to the list view ajax handler.
 		 * @param {event} e The event object.
 		 */
@@ -119,12 +122,11 @@
 			}
 		}
 
-		if (tt.live_ajax() && tt.pushstate) {
+		if (tt.no_bar() || tt.live_ajax() && tt.pushstate) {
 			$('#tribe-events-bar').on('changeDate', '#tribe-bar-date', function (e) {
 				if (!tt.reset_on()) {
 					ts.popping = false;
 					tribe_events_bar_listajax_actions(e);
-
 				}
 			});
 		}
@@ -140,7 +142,6 @@
 
 		/**
 		 * @function tribe_events_list_ajax_post
-		 * @since 3.0
 		 * @desc The ajax handler for list view.
 		 * Fires the custom event 'tribe_ev_serializeBar' at start, then 'tribe_ev_collectParams' to gather any additional parameters before actually launching the ajax post request.
 		 * As post begins 'tribe_ev_ajaxStart' and 'tribe_ev_listView_AjaxStart' are fired, and then 'tribe_ev_ajaxSuccess' and 'tribe_ev_listView_ajaxSuccess' are fired on success.
@@ -149,7 +150,6 @@
 
 		function tribe_events_list_ajax_post() {
 
-			$('#tribe-events-content .tribe-events-loop').tribe_spin();
 			ts.ajax_running = true;
 
 			if (!ts.popping) {
@@ -179,6 +179,13 @@
 				}
 
 				$(te).trigger('tribe_ev_serializeBar');
+
+                if(tf.invalid_date_in_params(ts.params)){
+                    ts.ajax_running = false;
+                    return;
+                }
+
+                $('#tribe-events-content .tribe-events-loop').tribe_spin();
 
 				ts.params = $.param(ts.params);
 				ts.url_params = $.param(ts.url_params);
@@ -252,7 +259,7 @@
 					}
 				);
 			} else {
-				if (ts.do_string)
+				if (ts.url_params.length)
 					window.location = td.cur_url + '?' + ts.url_params;
 				else
 					window.location = td.cur_url;

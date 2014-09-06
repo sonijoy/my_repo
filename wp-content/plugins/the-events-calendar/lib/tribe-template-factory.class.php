@@ -4,9 +4,6 @@
  *
  * The parent class for managing the view methods in core and addons
  *
- * @since  3.0
- * @author tim@imaginesimplicity.com
- * @author jessica@
  */
 
 if ( !defined('ABSPATH') )
@@ -49,36 +46,50 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 * @static
 		 * @var array
 		 */
+		protected $comments_off = false;
+
+		/**
+		 * Static variable that holds array of vendor script handles, for adding to later deps.
+		 *
+		 * @static
+		 * @var array
+		 */
 		protected static $vendor_scripts = array();
 
 		/**
 		 * Run include packages, set up hooks
 		 *
 		 * @return void
-		 * @since 3.0
 		 **/
 		public function __construct() {
 			$this->hooks();
 			$this->asset_packages();
-			$this->body_class();
 		}
 
 		/**
 		 * Set up hooks for this template
 		 *
 		 * @return void
-		 * @since 3.0
 		 **/
 		protected function hooks() {
 
 			// set up queries, vars, etc that needs to be used in this view
-			add_action( 'tribe_events_before_view', array( $this, 'setup_view') );
+			add_action( 'tribe_events_before_view', array( $this, 'setup_view' ) );
 
-			// set notices
+			// set notices 
 			add_action( 'tribe_events_before_view', array( $this, 'set_notices') );
 
+			// Don't show the comments form inside the view (if comments are enabled, 
+			// they'll show on their own after the loop)
+			if ( ! ( tribe_get_option('tribeEventsTemplate', 'default') == '' ) ) {
+				add_filter('comments_template', array( $this, 'remove_comments_template' ) );
+			}
+
+			// Remove the comments template entirely if needed
+			add_filter('tribe_get_option', array( $this, 'comments_off' ), 10, 2 );
+
 			// set up meta used in this view
-			add_action( 'tribe_events_before_view', array( $this, 'setup_meta') );
+			add_action( 'tribe_events_before_view', array( $this, 'setup_meta' ) );
 
 			// cleanup after view (reset query, etc)
 			add_action( 'tribe_events_after_view', array( $this, 'shutdown_view' ) );
@@ -103,7 +114,6 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 * Manage the asset packages defined for this template
 		 *
 		 * @return void
-		 * @since 3.0
 		 **/
 		protected function asset_packages()	{
 			foreach ($this->asset_packages as $asset_package) {
@@ -116,7 +126,6 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 *
 		 * @param array $classes
 		 * @return void
-		 * @since 3.0
 		 **/
 		public function body_class($classes = array() )	{
 
@@ -145,42 +154,15 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 * Add classes to events on this view
 		 *
 		 * @return array
-		 * @author Jessica Yazbek
-		 * @since 3.0
 		 **/
 		public function event_classes( $classes ) {
-
-			global $post, $wp_query;
-
-			$classes = array_merge($classes, array( 'hentry', 'vevent', 'type-tribe_events', 'post-' . $post->ID, 'tribe-clearfix' ));
-			$tribe_cat_slugs = tribe_get_event_cat_slugs( $post->ID );
-
-			foreach( $tribe_cat_slugs as $tribe_cat_slug ) {
-				$classes[] = 'tribe-events-category-'. $tribe_cat_slug;
-			}
-			if ( $venue_id = tribe_get_venue_id( $post->ID ) ) {
-				$classes[] = 'tribe-events-venue-'. $venue_id;
-			}
-			if ( $organizer_id = tribe_get_organizer_id( $post->ID ) ) {
-				$classes[] = 'tribe-events-organizer-'. $organizer_id;
-			}
-			// added first class for css
-			if ( ( $wp_query->current_post == 0 ) && !tribe_is_day() ) {
-				$classes[] = 'tribe-events-first';
-			}
-			// added last class for css
-			if ( $wp_query->current_post == $wp_query->post_count-1 ) {
-				$classes[] = 'tribe-events-last';
-			}
-
-			return $classes;
+		   return $classes;
 		}
 
 		/**
 		 * Setup meta display in this template
 		 *
 		 * @return void
-		 * @since 3.0
 		 **/
 		public function setup_meta() {
 
@@ -208,47 +190,54 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 * Set up the notices for this template
 		 *
 		 * @return void
-		 * @since 3.0
 		 **/
 		public function set_notices() {
 			global $wp_query;
+			$tribe = TribeEvents::instance();
+			$geographic_term = '';
+			$search_term = '';
+			$tax_term = '';
 
-			// Look for a search query
-			if ( ! empty( $wp_query->query_vars['s'] )) {
+			// By default we only display notices if no events could be found
+			if ( have_posts() ) return;
+
+			// Do we have a keyword or place name search?
+			if ( !empty( $wp_query->query_vars['s'] ) ) {
 				$search_term = $wp_query->query_vars['s'];
-			} else if ( !empty( $_POST['tribe-bar-search'] ) ) {
-				$search_term = $_POST['tribe-bar-search'];
+			}
+			elseif ( !empty( $_REQUEST['tribe-bar-search'] ) ) {
+				$search_term = $_REQUEST['tribe-bar-search'];
+			}
+			elseif ( !empty( $_REQUEST['tribe-bar-geoloc']) ) {
+				$geographic_term = $_REQUEST['tribe-bar-geoloc'];
+			}
+			if ( is_tax( $tribe->get_event_taxonomy() ) ) {
+				$tax_term = get_term_by( 'slug', get_query_var( 'term' ), $tribe->get_event_taxonomy() );
+				$tax_term = esc_html( $tax_term->name );
 			}
 
-			// Search term based notices
-			if ( ! empty($search_term) && ! have_posts() ) {
-				TribeEvents::setNotice( 'event-search-no-results', sprintf( __( 'There  were no results found for <strong>"%s"</strong>.', 'tribe-events-calendar' ), esc_html($search_term) ) );
+			// Set an appropriate notice
+			if ( ! empty( $search_term ) ) {
+				TribeEvents::setNotice( 'event-search-no-results', sprintf( __( 'There were no results found for <strong>"%s"</strong>.', 'tribe-events-calendar' ), esc_html($search_term) ) );
 			}
-
-			// Our various messages if there are no events for the query
-			else if ( empty($search_term) && empty( $wp_query->query_vars['s'] ) && !have_posts() ) { // Messages if currently no events, and no search term
-				$tribe_ecp = TribeEvents::instance();
-				$is_cat_message = '';
-				if ( is_tax( $tribe_ecp->get_event_taxonomy() ) ) {
-					$cat = get_term_by( 'slug', get_query_var( 'term' ), $tribe_ecp->get_event_taxonomy() );
-					if( tribe_is_upcoming() ) {
-						$is_cat_message = sprintf( __( 'listed under %s. Check out past events for this category or view the full calendar.', 'tribe-events-calendar' ), esc_html($cat->name) );
-					} else if( tribe_is_past() ) {
-						$is_cat_message = sprintf( __( 'listed under %s. Check out upcoming events for this category or view the full calendar.', 'tribe-events-calendar' ), esc_html($cat->name) );
-					}
-				}
-				if( tribe_is_day() ) {
-					TribeEvents::setNotice( 'events-not-found', sprintf( __( 'No events scheduled for <strong>%s</strong>. Please try another day.', 'tribe-events-calendar' ), date_i18n( 'F d, Y', strtotime( get_query_var( 'eventDate' ) ) ) ) );
-				} elseif( tribe_is_upcoming() ) {
-					$date = date('Y-m-d', strtotime($tribe_ecp->date));
-					if ( $date == date('Y-m-d') ) {
-						TribeEvents::setNotice( 'events-not-found', __('No upcoming events ', 'tribe-events-calendar') . $is_cat_message );
-					} else {
-						TribeEvents::setNotice( 'events-not-found', __('No matching events ', 'tribe-events-calendar') . $is_cat_message );
-					}
-				} elseif( tribe_is_past() ) {
-					TribeEvents::setNotice( 'events-past-not-found', __('No previous events ', 'tribe-events-calendar') . $is_cat_message );
-				}
+			elseif ( ! empty( $geographic_term ) ) {
+				TribeEvents::setNotice( 'event-search-no-results', sprintf( __( 'No results were found for events in or near <strong>"%s"</strong>.', 'tribe-events-calendar' ), esc_html($geographic_term) ) );
+			}
+			elseif ( ! empty( $tax_term ) && tribe_is_upcoming() && ( date('Y-m-d') === date('Y-m-d', strtotime($tribe->date) ) ) ) {
+				TribeEvents::setNotice( 'events-not-found', sprintf( __('No upcoming events listed under %s. Check out upcoming events for this category or view the full calendar.', 'tribe-events-calendar'), $tax_term ) );
+			}
+			elseif ( ! empty( $tax_term ) && tribe_is_upcoming() ) {
+				TribeEvents::setNotice( 'events-not-found', sprintf( __('No matching events listed under %s. Please try viewing the full calendar for a complete list of events.', 'tribe-events-calendar'), $tax_term ) );
+			}
+			elseif ( ! empty( $tax_term ) && tribe_is_past() ) {
+				TribeEvents::setNotice( 'events-past-not-found', __('No previous events ', 'tribe-events-calendar') );
+			}
+			// if on any other view and attempting to view a category archive.
+			elseif ( ! empty( $tax_term ) ) {
+				TribeEvents::setNotice( 'events-not-found', sprintf( __('No matching events listed under %s. Please try viewing the full calendar for a complete list of events.', 'tribe-events-calendar'), $tax_term ) );
+			}
+			else {
+				TribeEvents::setNotice( 'event-search-no-results', __( 'There were no results found.', 'tribe-events-calendar' ) );
 			}
 		}
 
@@ -256,7 +245,6 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 * Setup the view, query hijacking, etc. This happens right before the view file is included
 		 *
 		 * @return void
-		 * @since 3.0
 		 **/
 		public function setup_view() {
 
@@ -273,7 +261,6 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 * Echo open tags for wrapper around view
 		 *
 		 * @return void
-		 * @since
 		 **/
 		public function view_wrapper_open() {
 			echo '<div id="tribe-events-content-wrapper" class="tribe-clearfix">';
@@ -283,7 +270,6 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 * Output an input to store the hash for the current query
 		 *
 		 * @return void
-		 * @since 3.0
 		 **/
 		public function add_input_hash() {
 			echo '<input type="hidden" id="tribe-events-list-hash" value="">';
@@ -293,7 +279,6 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 * Echo open tags for wrapper around view
 		 *
 		 * @return void
-		 * @since
 		 **/
 		public function view_wrapper_close() {
 			echo '</div> <!-- #tribe-events-content-wrapper -->';
@@ -303,19 +288,15 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 * Shutdown the view, restore the query, etc. This happens right after the view file is included
 		 *
 		 * @return void
-		 * @since 3.0
 		 **/
 		public function shutdown_view() {
-
 			$this->unhook();
-
 		}
 
 		/**
 		 * Unhook all the hooks set up on this view
 		 *
 		 * @return void
-		 * @author 
 		 **/
 		protected function unhook() {
 
@@ -332,6 +313,11 @@ if( !class_exists('Tribe_Template_Factory') ) {
 
 			// set notices
 			remove_action( 'tribe_events_before_view', array( $this, 'set_notices') );
+
+			// Remove the comments template
+			if ( ! ( tribe_get_option('tribeEventsTemplate', 'default') == '' ) ) {
+				remove_filter('comments_template', array( $this, 'remove_comments_template' ) );
+			}
 
 			// set up meta used in this view
 			remove_action( 'tribe_events_before_view', array( $this, 'setup_meta') );
@@ -360,12 +346,11 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 *
 		 * @param WP_Post $post
 		 * @return void
-		 * @since 3.0
 		 **/
 		public function manage_sensitive_info( $post ) {
 			if ( post_password_required( $post ) ) {
 				add_filter( 'tribe_events_event_schedule_details', '__return_null' );
-				add_filter( 'tribe_events_event_recurring_info_tooltip', '__return_null' );
+				add_filter( 'tribe_events_recurrence_tooltip', '__return_null' );
 				add_filter( 'tribe_event_meta_venue_name', '__return_null' );
 				add_filter( 'tribe_event_meta_venue_address', '__return_null' );
 				add_filter( 'tribe_event_featured_image', '__return_null' );
@@ -373,7 +358,7 @@ if( !class_exists('Tribe_Template_Factory') ) {
 				add_filter( 'tribe_get_venue', '__return_null' );
 			} else {
 				remove_filter( 'tribe_events_event_schedule_details', '__return_null' );
-				remove_filter( 'tribe_events_event_recurring_info_tooltip', '__return_null' );
+				remove_filter( 'tribe_events_recurrence_tooltip', '__return_null' );
 				remove_filter( 'tribe_event_meta_venue_name', '__return_null' );
 				remove_filter( 'tribe_event_meta_venue_address', '__return_null' );
 				remove_filter( 'tribe_event_featured_image', '__return_null' );
@@ -387,10 +372,8 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 *
 		 * @param string $template
 		 * @return string
-		 * @since 3.0
 		 **/
 		public function remove_comments_template( $template ) {
-			remove_filter( 'comments_template', array( $this, 'remove_comments_template' ) );
 			return TribeEvents::instance()->pluginPath . 'admin-views/no-comments.php';
 		}
 
@@ -400,7 +383,6 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 * @param $length
 		 *
 		 * @return int
-		 * @since 3.0
 		 */
 		public function excerpt_length( $length ) {
 			return $this->excerpt_length;
@@ -412,10 +394,27 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 * @param int $more
 		 *
 		 * @return int
-		 * @since 3.0
 		 */
 		public function excerpt_more( $more ) {
 			return $this->excerpt_more;
+		}
+
+		/**
+		 * Check if comments are disabled on this view
+		 *
+		 * @param int $more
+		 *
+		 * @return int
+		 */
+		public function comments_off( $option_value, $option_name ) {
+			if ( $option_name != 'showComments')
+				return $option_value;
+
+			if ( $this->comments_off == true )
+				return false;
+
+			return $option_value;
+
 		}
 
 		/**
@@ -433,6 +432,7 @@ if( !class_exists('Tribe_Template_Factory') ) {
 			$resources_url = trailingslashit( $tec->pluginUrl ) . 'resources/';
 			$vendor_url = trailingslashit( $tec->pluginUrl ) . 'vendor/';
 
+			// @TODO make this more DRY
 			switch( $name ) {
 				case 'jquery-resize':
 					$path = self::getMinFile( $vendor_url . 'jquery-resize/jquery.ba-resize.js', true );
@@ -481,6 +481,8 @@ if( !class_exists('Tribe_Template_Factory') ) {
 						'daysMin' => array_merge( $tec->daysOfWeekMin, array( $tec->daysOfWeekMin[0] ) ),
 						'months' => array_values( $tec->monthsFull ),
 						'monthsShort' => array_values( $tec->monthsShort ),
+						'clear' => 'Clear',
+						'today' => 'Today',
 					);
 					wp_localize_script( $prefix . '-bootstrap-datepicker', 'tribe_bootstrap_datepicker_strings', array( 'dates' => $localized_datepicker_array ) );
 					break;
@@ -490,7 +492,7 @@ if( !class_exists('Tribe_Template_Factory') ) {
 					break;
 				case 'admin-ui' : // Tribe Events
 					$path = self::getMinFile( $resources_url . 'events-admin.css', true );
-					wp_enqueue_style( $prefix . '-admin-ui', $path );
+					wp_enqueue_style( $prefix . '-admin-ui', $path, array(), TribeEvents::VERSION );
 					break;
 				case 'admin' :
 					$deps = array_merge( $deps, array( 'jquery', 'jquery-ui-datepicker' ) );
@@ -508,18 +510,19 @@ if( !class_exists('Tribe_Template_Factory') ) {
 					wp_enqueue_script( $prefix . '-ecp-plugins', $path, $deps, apply_filters( 'tribe_events_js_version', TribeEvents::VERSION ) );
 					break;
 				case 'tribe-events-bar' :
-					$deps = array_merge( $deps, array( 'jquery', $prefix . '-calendar-script', $prefix . '-bootstrap-datepicker', $prefix . '-jquery-resize', 'tribe-placeholder' ) );
+					$deps = array_merge( $deps, array( 'jquery', $prefix . '-calendar-script', $prefix . '-bootstrap-datepicker', $prefix . '-jquery-resize', self::get_placeholder_handle() ) );
 					$path = self::getMinFile( $resources_url . 'tribe-events-bar.js', true );
 					wp_enqueue_script( $prefix . '-bar', $path, $deps, apply_filters( 'tribe_events_js_version', TribeEvents::VERSION ) );
 					break;
 				case 'jquery-placeholder' : // Vendor: jQuery Placeholder
 					$deps = array_merge( $deps, array( 'jquery' ) );
 					$path = self::getMinFile( $vendor_url . 'jquery-placeholder/jquery.placeholder.js', true );
-					wp_enqueue_script( 'tribe-placeholder', $path, $deps, '2.0.7', false );
-					self::$vendor_scripts[] = 'tribe-placeholder';
+					$placeholder_handle = self::get_placeholder_handle();
+					wp_enqueue_script( $placeholder_handle, $path, $deps, '2.0.7', false );
+					self::$vendor_scripts[] = $placeholder_handle;
 					break;
 				case 'ajax-calendar':
-					$deps = array_merge( $deps, array( 'jquery', $prefix . '-calendar-script' ) );
+					$deps = array_merge( $deps, array( 'jquery', $prefix . '-bootstrap-datepicker', $prefix . '-calendar-script' ) );
 					$ajax_data = array( "ajaxurl"   => admin_url( 'admin-ajax.php', ( is_ssl() ? 'https' : 'http' ) ) );
 					$path = self::getMinFile( $resources_url . 'tribe-events-ajax-calendar.js', true );
 					wp_enqueue_script( 'tribe-events-calendar', $path, $deps, apply_filters( 'tribe_events_js_version', TribeEvents::VERSION ), true );
@@ -534,40 +537,79 @@ if( !class_exists('Tribe_Template_Factory') ) {
 					wp_enqueue_script( 'tribe-events-list', $path, $deps, apply_filters( 'tribe_events_js_version', TribeEvents::VERSION ), true );
 					wp_localize_script( 'tribe-events-list', 'TribeList', $ajax_data );
 					break;
+				case 'ajax-dayview':
+					$ajax_data = array( "ajaxurl"   => admin_url( 'admin-ajax.php', ( is_ssl() ? 'https' : 'http' ) ),
+										'post_type' => TribeEvents::POSTTYPE );
+					$path = self::getMinFile( $resources_url . 'tribe-events-ajax-day.js', true );
+					wp_enqueue_script( 'tribe-events-ajax-day', $path, array('tribe-events-bar'), apply_filters( 'tribe_events_js_version', TribeEvents::VERSION ), true );
+					wp_localize_script( 'tribe-events-ajax-day', 'TribeCalendar', $ajax_data );
+					break;
 				case 'events-css':
-					// Tribe Events CSS filename
-					$event_file = 'tribe-events.css';
-					$stylesheet_option = tribe_get_option( 'stylesheetOption', 'tribe' );
 
-					// What Option was selected
-					switch( $stylesheet_option ) {
+					// check if responsive should be killed
+					if ( apply_filters( 'tribe_events_kill_responsive', false ) ) {
+						add_filter( 'tribe_events_mobile_breakpoint', '__return_zero' );
+					}
+
+					$stylesheets  = array();
+					$mobile_break = tribe_get_mobile_breakpoint();
+
+					// Get the selected style option
+					$style_option = tribe_get_option( 'stylesheetOption', 'tribe' );
+
+					// Determine the stylesheet files for the selected option
+					switch ( $style_option ) {
 						case 'skeleton':
+							$stylesheets['tribe-events-calendar-style'] = 'tribe-events-skeleton.css';
+							break;
 						case 'full':
-							$event_file_option = 'tribe-events-'. $stylesheet_option .'.css';
+							$stylesheets['tribe-events-calendar-style']        = 'tribe-events-full.css';
+							if ($mobile_break > 0) {
+								$stylesheets['tribe-events-calendar-mobile-style'] = 'tribe-events-full-mobile.css';
+							}
 							break;
-						default:
-							$event_file_option = 'tribe-events-theme.css';
+						default: // tribe styles
+							$stylesheets['tribe-events-full-calendar-style']   = 'tribe-events-full.css';
+							$stylesheets['tribe-events-calendar-style']        = 'tribe-events-theme.css';
+							if ($mobile_break > 0) {
+								$stylesheets['tribe-events-calendar-full-mobile-style'] = 'tribe-events-full-mobile.css';
+								$stylesheets['tribe-events-calendar-mobile-style'] = 'tribe-events-theme-mobile.css';
+							}
 							break;
 					}
 
-					$styleUrl = trailingslashit( $tec->pluginUrl ) . 'resources/' . $event_file_option;
-					$styleUrl = self::getMinFile( $styleUrl, true );
-					$styleUrl = apply_filters( 'tribe_events_stylesheet_url', $styleUrl );
+					// put override css at the end of the array
+					$stylesheets['tribe-events-calendar-override-style'] = 'tribe-events/tribe-events.css';
 
-					// Is there a core override file in the theme?
-					$styleOverrideUrl = TribeEventsTemplates::locate_stylesheet('tribe-events/'.$event_file);
+					// do the enqueues
+					foreach ( $stylesheets as $name => $css_file ) {
+						if ( $name == 'tribe-events-calendar-override-style' ) {
+							$user_stylesheet_url = TribeEventsTemplates::locate_stylesheet( 'tribe-events/tribe-events.css' );
+							if ( $user_stylesheet_url ) {
+								wp_enqueue_style( $name, $user_stylesheet_url );
+							}
+						} else {
 
-					// Load up stylesheet from theme or plugin
-					if( $styleUrl && $stylesheet_option == 'tribe' ) {
-						$full_path = self::getMinFile( trailingslashit( $tec->pluginUrl ) . 'resources/tribe-events-full.css', true );
-						wp_enqueue_style( 'full-calendar-style', $full_path );
-						wp_enqueue_style( TribeEvents::POSTTYPE . '-calendar-style', $styleUrl );
-					} else {
-						wp_enqueue_style( TribeEvents::POSTTYPE . '-calendar-style', $styleUrl );
+							// get full URL
+							$url = tribe_events_resource_url( $css_file );
+
+							// get the minified file
+							$url = self::getMinFile( $url, true );
+
+							// apply filters
+							$url = apply_filters( 'tribe_events_stylesheet_url', $url, $name );
+
+							// set the $media attribute
+							if ( $name == 'tribe-events-calendar-mobile-style' || $name == 'tribe-events-calendar-full-mobile-style' ) {
+								$media = "(max-width: {$mobile_break}px)";
+								wp_enqueue_style( $name, $url, array('tribe-events-calendar-style'), TribeEvents::VERSION, $media );
+							} else {
+								wp_register_style( $name, $url, array(), TribeEvents::VERSION );
+								wp_enqueue_style( $name );
+							}
+						}
 					}
-					if( $styleOverrideUrl ) {
-						wp_enqueue_style( TribeEvents::POSTTYPE . '-calendar-override-style', $styleOverrideUrl );		
-					}
+
 					break;
 				default :
 					do_action($prefix . '-' . $name);
@@ -582,8 +624,6 @@ if( !class_exists('Tribe_Template_Factory') ) {
 		 * @param string $url The path or URL to the un-minified file.
 		 * @param bool $default_to_original Whether to just return original path if min version not found.
 		 * @return string|false The path/url to minified version or false, if file not found.
-		 * @author Paul Hughes
-		 * @since 3.0
 		 */
 		public static function getMinFile( $url, $default_to_original = false ) {
 			if ( !defined( 'SCRIPT_DEBUG' ) || SCRIPT_DEBUG === false ) {
@@ -600,6 +640,23 @@ if( !class_exists('Tribe_Template_Factory') ) {
 			} else {
 				return false;
 			}
+		}
+
+		/*
+		 * Playing ping-pong with WooCommerce. They keep changing their script.
+		 * See https://github.com/woothemes/woocommerce/issues/3623
+		 */
+		protected static function get_placeholder_handle() {
+			$placeholder_handle = 'jquery-placeholder';
+			global $woocommerce;
+			if (
+				class_exists( 'Woocommerce' ) &&
+				version_compare( $woocommerce->version, '2.0.11', '>=' ) &&
+				version_compare( $woocommerce->version, '2.0.13', '<=' )
+			) {
+				$placeholder_handle = 'tribe-placeholder';
+			}
+			return $placeholder_handle;
 		}
 	}
 }

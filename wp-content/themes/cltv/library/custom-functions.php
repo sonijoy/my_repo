@@ -52,7 +52,7 @@ function cltv_format_video_src($video, $live=false, $http=false, $attachment_id=
         $src['flash'] = false;
       } else {
         $src['html5'] = of_get_option('wowza_cdn').'vods3/_definst_/mp4:amazons3/cltv-archives/'.$filename.'/playlist.m3u8';
-        $src['flash'] = of_get_option('archive_rtmp').$filename;
+        $src['flash'] = false;
       }
 	}
 

@@ -313,7 +313,7 @@ function cltv_update_streamkey($post_id) {
 	// If this is just a revision, don't send the email.
 	if (wp_is_post_revision( $post_id ) && $_POST['post_type'] != 'channel')
 		return;
-  
+
 	update_post_meta($post_id, 'stream_key', $post_id . date('Hi'));
 }
 //add_action( 'save_post', 'cltv_update_streamkey' );
@@ -424,7 +424,16 @@ function cltv_find_new_archives($columns) {
 
   // find recorded files for each channel
   foreach($channel_q as $channel) {
-    $streamkey = get_post_meta($channel->ID, 'stream_key', true);
+    if(isset($_GET['stream'])) {
+      $streamkey = $_GET['stream'];
+    } else {
+      $streamkey = get_post_meta($channel->ID, 'stream_key', true);
+    }
+
+    if(empty($streamkey)) {
+      return $columns;
+    }
+
     $iterator = $client->getIterator('ListObjects', array(
       'Bucket' => S3_BUCKET,
       'Prefix' => $streamkey
@@ -467,5 +476,23 @@ function cltv_find_new_archives($columns) {
   return $columns;
 }
 add_filter( 'manage_edit-archive_columns', 'cltv_find_new_archives' );
+
+
+
+function register_archive_search_menu_page(){
+    add_submenu_page( 'edit.php?post_type=archive', 'Find Recorded Archives', 'Find Recorded', 'read', 'find-recorded', 'archive_search_menu_page' );
+}
+function archive_search_menu_page(){
+    echo '
+      <h2>Find Recorded Archives</h2>
+      <p>Enter the stream key that you used to publish the event:</p>
+      <form action="'.admin_url('edit.php').'" method="get">
+        <input type="hidden" name="post_type" value="archive">
+        <input type="text" name="stream" value="">
+        <input type="submit" value="Search">
+      </form>
+    ';
+}
+add_action( 'admin_menu', 'register_archive_search_menu_page' );
 
 ?>

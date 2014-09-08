@@ -184,7 +184,7 @@ function cltv_update_popular_cache(){
 // Get an array of popular channels
 function cltv_get_popular_channels($max = 25) {
 	global $wpdb;
-	return $wpdb->get_col( $wpdb->prepare("SELECT pop_slug FROM popular_channels ORDER BY pop_count DESC LIMIT %d",$max), 0 );
+	return $wpdb->get_col( $wpdb->prepare("SELECT DISTINCT pop_slug FROM popular_channels ORDER BY pop_count DESC LIMIT %d",$max), 0 );
 }
 
 // get an array of live channels

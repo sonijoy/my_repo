@@ -21,13 +21,13 @@ $channels = new WP_Query(array(
 				<div class="span3 hidden-phone">
 					<?php if($live && $popular): ?>
 						<ul class="nav nav-tabs" style="margin-bottom: 0px;">
-							<li class="active"><a data-toggle="tab" href="#live-content">Live</a></li>
-							<li><a data-toggle="tab" href="#popular-content">Popular</a></li>
+              <li class="active"><a data-toggle="tab" href="#popular-content">Popular</a></li>
+							<li><a data-toggle="tab" href="#live-content">Live</a></li>							
 						</ul>
 					<?php endif; ?>
 					<div class="tab-content">
 						<?php if ( $live ): ?>
-							<div class="row-fluid tab-pane fade in active" id="live-content">
+							<div class="row-fluid tab-pane fade" id="live-content">
 								<div class="span12">
 									<h2>Broadcasting Live</h2>
 									<ul class="media-list">
@@ -58,7 +58,7 @@ $channels = new WP_Query(array(
 							</div>
 						<?php endif; ?>
 						<?php if($popular): ?>
-							<div class="row-fluid tab-pane fade" id="popular-content">
+							<div class="row-fluid tab-pane fade in active" id="popular-content">
 								<div class="span12">
 									<h2>Most Viewed (30 Days)</h2>
 									<ul class="media-list">

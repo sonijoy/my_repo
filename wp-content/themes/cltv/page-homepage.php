@@ -2,7 +2,6 @@
 /*
 Template Name: Homepage
 */
-$live = cltv_get_live_channels();
 $popular = cltv_get_popular_channels(60);
 $video = cltv_format_video_src(of_get_option('front_page_video'));
 $channels = new WP_Query(array(
@@ -19,44 +18,7 @@ $channels = new WP_Query(array(
 <?php get_header(); ?>
 			<div id="content" class="clearfix row-fluid">
 				<div class="span3 hidden-phone">
-					<?php if($live && $popular): ?>
-						<ul class="nav nav-tabs" style="margin-bottom: 0px;">
-							<li class="active"><a data-toggle="tab" href="#live-content">Live</a></li>
-							<li><a data-toggle="tab" href="#popular-content">Popular</a></li>
-						</ul>
-					<?php endif; ?>
 					<div class="tab-content">
-						<?php if ( $live ): ?>
-							<div class="row-fluid tab-pane fade in active" id="live-content">
-								<div class="span12">
-									<h2>Broadcasting Live</h2>
-									<ul class="media-list">
-										<?php foreach ($live as $channel):
-											$thumbnail = get_the_post_thumbnail( $channel->ID, "thumbnail", array("class"=>"media-object") );
-											$permalink = get_permalink( $channel->ID );
-										?>
-											<li class="media">
-												<a class="pull-left" href="<?=$permalink; ?>">
-													<?php if($thumbnail): ?>
-														<?=$thumbnail; ?>
-													<?php else: ?>
-														<img class="media-object" src="<?php echo get_template_directory_uri(); ?>/images/default_logo.png" alt="" />
-													<?php endif; ?>
-												</a>
-												<div class="media-body">
-													<h4 class="media-heading">
-														<a href="<?=$permalink; ?>" title="<?php the_title(); ?>">
-															<?php echo cltv_trim($channel->post_title, 25); ?>
-														</a>
-													</h4>
-												</div>
-											</li>
-
-										<?php endforeach; ?>
-									</ul>
-								</div>
-							</div>
-						<?php endif; ?>
 						<?php if($popular): ?>
 							<div class="row-fluid tab-pane fade" id="popular-content">
 								<div class="span12">

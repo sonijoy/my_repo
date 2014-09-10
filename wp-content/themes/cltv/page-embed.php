@@ -6,7 +6,7 @@ Template Name: Channel Embed
 
 <?php if(isset($_GET['id'])): ?>
 
-<!doctype html> 
+<!doctype html>
 <html <?php language_attributes(); ?> class="no-js">
 <head>
 	<meta charset="utf-8">
@@ -15,12 +15,12 @@ Template Name: Channel Embed
 	<?php wp_head(); ?>
 </head>
 <body>
-	
+
 	<style>
 		html, html body { background:none; overflow:hidden; margin:0; padding:0; width:100%; height:100%; }
 	</style>
-	
-	<?php $id = $_GET['id']; ?>	
+
+	<?php $id = $_GET['id']; ?>
 	<?php $channel_video = cltv_channel_video($id); ?>
 	<?php if($channel_video['src']): ?>
 		<?php if(get_field('is_live')) $stream_type = 'live'; else $stream_type = 'recorded'; ?>
@@ -37,32 +37,32 @@ Template Name: Channel Embed
 			$(document).ready(function(){
 				var android = /Android/i.test(navigator.userAgent);
 				if(android && navigator.mimeTypes["application/x-shockwave-flash"] == undefined) {
-					//$('#video').html($('#android').html());			
-			    } else {
-			    	var theplayer = jwplayer("video").setup({
-				        primary: 'flash',
-				        aspectratio: "16:9",
-				        width: "100%",
-				        //height: "100%",
-				        skin: "bekle",
-				        playlist: [<?php if(!empty($channel_video['commercial']['html5'])): ?>{
-				        	image: "<?php echo $channel_video['poster']; ?>",
-				        	sources: [{
-				        		file: "<?php echo $channel_video['commercial']['flash']; ?>",
-				        	}, {
-				        		file: "<?php echo $channel_video['commercial']['html5']; ?>"
-				        	}]
-				        },<?php endif; ?> {
-				        	image: "<?php echo $channel_video['poster']; ?>",
-				        	sources: [{
-				        		file: "<?php echo $channel_video['src']['flash']; ?>",
-				        	}, {
-				        		file: "<?php echo $channel_video['src']['html5']; ?>"
-				        	}]
-				        }]
-				    });
-			    }
-			});     
+					//$('#video').html($('#android').html());
+					} else {
+						var theplayer = jwplayer("video").setup({
+								primary: 'flash',
+								aspectratio: "16:9",
+								width: "100%",
+								//height: "100%",
+								skin: "bekle",
+								playlist: [<?php if(!empty($channel_video['commercial']['html5'])): ?>{
+									image: "<?php echo $channel_video['poster']; ?>",
+									sources: [<?php if($channel_video['commercial']['flash']): ?>{
+										file: "<?php echo $channel_video['commercial']['flash']; ?>"
+									},<?php endif; ?> {
+										file: "<?php echo $channel_video['commercial']['html5']; ?>"
+									}]
+								},<?php endif; ?> {
+									image: "<?php echo $channel_video['poster']; ?>",
+									sources: [<?php if($channel_video['src']['flash']): ?>{
+										file: "<?php echo $channel_video['src']['flash']; ?>"
+									},<?php endif; ?> {
+										file: "<?php echo $channel_video['src']['html5']; ?>"
+									}]
+								}]
+						});
+					}
+			});
 		</script>
 		<div id="video">
 			<noscript>You must have javascript enabled to watch this video</noscript>
@@ -71,9 +71,9 @@ Template Name: Channel Embed
 	<?php else: ?>
 		<div class="channel_offline">Channel currently offline</div>
 	<?php endif; ?>
-	
+
 	<?php wp_footer(); // js scripts are inserted using this function ?>
 </body>
 </html>
-	
+
 <?php endif; ?>

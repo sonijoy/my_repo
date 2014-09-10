@@ -221,7 +221,7 @@ class VarnishPurger {
 			}
 
 			// Home URL
-			array_push($this->purgeUrls, home_url() );
+			//array_push($this->purgeUrls, home_url() );
 
 		} else {
 			array_push($this->purgeUrls, home_url( '?vhp=regex') );

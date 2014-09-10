@@ -20,7 +20,7 @@ $channels = new WP_Query(array(
 				<div class="span3 hidden-phone">
 					<div class="tab-content">
 						<?php if($popular): ?>
-							<div class="row-fluid tab-pane fade" id="popular-content">
+							<div class="row-fluid tab-pane fade in active" id="popular-content">
 								<div class="span12">
 									<h2>Most Viewed (30 Days)</h2>
 									<ul class="media-list">

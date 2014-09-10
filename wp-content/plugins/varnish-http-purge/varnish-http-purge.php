@@ -189,7 +189,7 @@ class VarnishPurger {
 	
 		if ( get_permalink($postId) == true && in_array($thisPostStatus, $validPostStatus) ) {
 			// Category & Tag purge based on Donnacha's work in WP Super Cache
-			$categories = get_the_category($postId);
+			/*$categories = get_the_category($postId);
 			if ( $categories ) {
 				$category_base = get_option( 'category_base');
 				if ( $category_base == '' )
@@ -209,16 +209,29 @@ class VarnishPurger {
 				foreach ($tags as $tag) {
 					array_push($this->purgeUrls, home_url( $tag_base . $tag->slug . '/' ) );
 				}
-			}
+			}*/
+ 			$post_type = get_post_type($postId);
+
+			if($post_type == 'channel') {
+			  $children = get_posts(array('post_parent' => $postId));
+			  if($children) {
+			    foreach ($children as $child) {
+			      array_push($this->purgeUrls, get_permalink($child->ID) );
+			    }
+			  }
+			} elseif ($post_type == 'archive' || $post_type == 'commercial' || $post_type == 'sponsor') {
+			  $parent_id = wp_get_post_parent_id($post_type);
+			  array_push($this->purgeUrls, get_permalink($parent_id));
+			}			
 
 			// Post URL
 			array_push($this->purgeUrls, get_permalink($postId) );
 
 			// Feeds
-			$feeds = array(get_bloginfo('rdf_url') , get_bloginfo('rss_url') , get_bloginfo('rss2_url'), get_bloginfo('atom_url'), get_bloginfo('comments_atom_url'), get_bloginfo('comments_rss2_url'), get_post_comments_feed_link($postId) );
+			/*$feeds = array(get_bloginfo('rdf_url') , get_bloginfo('rss_url') , get_bloginfo('rss2_url'), get_bloginfo('atom_url'), get_bloginfo('comments_atom_url'), get_bloginfo('comments_rss2_url'), get_post_comments_feed_link($postId) );
 			foreach ( $feeds as $feed ) {
 				array_push($this->purgeUrls, $feed );
-			}
+			}*/
 
 			// Home URL
 			//array_push($this->purgeUrls, home_url() );

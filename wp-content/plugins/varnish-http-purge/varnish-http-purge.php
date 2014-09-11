@@ -121,12 +121,12 @@ class VarnishPurger {
 
 	public function executePurge() {
 		$purgeUrls = array_unique($this->purgeUrls);
-		
+
 		if (empty($purgeUrls)) {
-			if ( isset($_GET['vhp_flush_all']) && current_user_can('manage_options') && check_admin_referer('varnish-http-purge') ) { 
+			if ( isset($_GET['vhp_flush_all']) && current_user_can('manage_options') && check_admin_referer('varnish-http-purge') ) {
 				$this->purgeUrl( home_url() .'/?vhp=regex' );
 			   // wp_cache_flush();
-			} 
+			}
 		} else {
 			foreach($purgeUrls as $url) {
 				$this->purgeUrl($url);
@@ -137,8 +137,8 @@ class VarnishPurger {
 	protected function purgeUrl($url) {
 		// Parse the URL for proxy proxies
 		$p = parse_url($url);
-		
-		
+
+
 		if ( isset($p['query']) && ( $p['query'] == 'vhp=regex' ) ) {
 			$pregex = '.*';
 			$varnish_x_purgemethod = 'regex';
@@ -154,7 +154,7 @@ class VarnishPurger {
 			$varniship = get_option('vhp_varnish_ip');
 		}
 
-		if (isset($p['path'] ) ) { 
+		if (isset($p['path'] ) ) {
 			$path = $p['path'];
 		} else {
 			$path = '';
@@ -170,7 +170,7 @@ class VarnishPurger {
 		// Cleanup CURL functions to be wp_remote_request and thus better
 		// http://wordpress.org/support/topic/incompatability-with-editorial-calendar-plugin
 		wp_remote_request($purgeme, array('method' => 'PURGE', 'headers' => array( 'host' => $p['host'], 'X-Purge-Method' => $varnish_x_purgemethod ) ) );
-		
+
 		do_action('after_purge_url', $url, $purgeme);
 	}
 
@@ -183,10 +183,10 @@ class VarnishPurger {
 
 		// If this is a valid post we want to purge the post, the home page and any associated tags & cats
 		// If not, purge everything on the site.
-	
+
 		$validPostStatus = array("publish", "trash");
 		$thisPostStatus  = get_post_status($postId);
-	
+
 		if ( get_permalink($postId) == true && in_array($thisPostStatus, $validPostStatus) ) {
 			// Category & Tag purge based on Donnacha's work in WP Super Cache
 			/*$categories = get_the_category($postId);
@@ -205,7 +205,7 @@ class VarnishPurger {
 				if ( $tag_base == '' ) {
 					$tag_base = '/tag/';
 				}
-				$tag_base = trailingslashit( str_replace( '..', '', $tag_base ) ); 
+				$tag_base = trailingslashit( str_replace( '..', '', $tag_base ) );
 				foreach ($tags as $tag) {
 					array_push($this->purgeUrls, home_url( $tag_base . $tag->slug . '/' ) );
 				}
@@ -220,9 +220,9 @@ class VarnishPurger {
 			    }
 			  }
 			} elseif ($post_type == 'archive' || $post_type == 'commercial' || $post_type == 'sponsor') {
-			  $parent_id = wp_get_post_parent_id($post_type);
+			  $parent_id = wp_get_post_parent_id($postId);
 			  array_push($this->purgeUrls, get_permalink($parent_id));
-			}			
+			}
 
 			// Post URL
 			array_push($this->purgeUrls, get_permalink($postId) );

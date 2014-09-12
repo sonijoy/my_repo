@@ -56,13 +56,13 @@
 
 						<?php if($banner): ?>
 							<div class="row-fluid">
-								<a class="span12 top_spons thumbnail" target="_blank" href="<?php echo get_field('sponsor_url', $banner->ID); ?>">
+								<a class="span12 top_spons" target="_blank" href="<?php echo get_field('sponsor_url', $banner->ID); ?>">
 										<?php echo get_the_post_thumbnail($banner->ID, 'full'); ?>
 								</a>
 							</div>
 						<?php else: ?>
 							<div class="row-fluid">
-								<a class="span12 top_spons thumbnail" href="#">
+								<a class="span12 top_spons thumbnail" href="/contact">
 									Your ad could go here
 								</a>
 							</div>

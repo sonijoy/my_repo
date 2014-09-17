@@ -213,6 +213,7 @@ class VarnishPurger {
  			$post_type = get_post_type($postId);
 
 			if($post_type == 'channel') {
+        // clear all channel children
 			  $children = get_posts(array('post_type' => array('archive', 'commercial', 'sponsor'), 'meta_key' => 'channel', 'meta_value' => $postId));
 			  if($children) {
 			    foreach ($children as $child) {
@@ -220,9 +221,13 @@ class VarnishPurger {
 			    }
 			  }
 			} elseif ($post_type == 'archive' || $post_type == 'commercial' || $post_type == 'sponsor') {
+        // clear the channel
 			  $channel_id = get_post_meta($postId, 'channel', true);
 			  array_push($this->purgeUrls, get_permalink($channel_id));
 			}
+      
+      // embed url
+      array_push($this->purgeUrls, 'http://www.citylinktv.com/channel-embed?id='.$postId );
 
 			// Post URL
 			array_push($this->purgeUrls, get_permalink($postId) );

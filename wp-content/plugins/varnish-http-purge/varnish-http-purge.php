@@ -213,15 +213,15 @@ class VarnishPurger {
  			$post_type = get_post_type($postId);
 
 			if($post_type == 'channel') {
-			  $children = get_posts(array('post_parent' => $postId));
+			  $children = get_posts(array('post_type' => array('archive', 'commercial', 'sponsor'), 'meta_key' => 'channel', 'meta_value' => $postId));
 			  if($children) {
 			    foreach ($children as $child) {
 			      array_push($this->purgeUrls, get_permalink($child->ID) );
 			    }
 			  }
 			} elseif ($post_type == 'archive' || $post_type == 'commercial' || $post_type == 'sponsor') {
-			  $parent_id = wp_get_post_parent_id($postId);
-			  array_push($this->purgeUrls, get_permalink($parent_id));
+			  $channel_id = get_post_meta($postId, 'channel', true);
+			  array_push($this->purgeUrls, get_permalink($channel_id));
 			}
 
 			// Post URL

@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 class autoptimizeScripts extends autoptimizeBase
 {
 	private $scripts = array();
-	private $dontmove = array('document.write','html5.js','show_ads.js','google_ad','blogcatalog.com/w','tweetmeme.com/i','mybloglog.com/','histats.com/js','ads.smowtion.com/ad.js','statcounter.com/counter/counter.js','widgets.amung.us','ws.amazon.com/widgets','media.fastclick.net','/ads/','comment-form-quicktags/quicktags.php','edToolbar','intensedebate.com','scripts.chitika.net/','_gaq.push','jotform.com/','admin-bar.min.js','GoogleAnalyticsObject','plupload.full.min.js','syntaxhighlighter3/scripts','adsbygoogle');
+	private $dontmove = array('document.write','html5.js','show_ads.js','google_ad','blogcatalog.com/w','tweetmeme.com/i','mybloglog.com/','histats.com/js','ads.smowtion.com/ad.js','statcounter.com/counter/counter.js','widgets.amung.us','ws.amazon.com/widgets','media.fastclick.net','/ads/','comment-form-quicktags/quicktags.php','edToolbar','intensedebate.com','scripts.chitika.net/','_gaq.push','jotform.com/','admin-bar.min.js','GoogleAnalyticsObject','plupload.full.min.js','syntaxhighlighter','adsbygoogle','potentialAction');
 	private $domove = array('gaJsHost','load_cmc','jd.gallery.transitions.js','swfobject.embedSWF(','tiny_mce.js','tinyMCEPreInit.go');
 	private $domovelast = array('addthis.com','/afsonline/show_afs_search.js','disqus.js','networkedblogs.com/getnetworkwidget','infolinks.com/js/','jd.gallery.js.php','jd.gallery.transitions.js','swfobject.embedSWF(','linkwithin.com/widget.js','tiny_mce.js','tinyMCEPreInit.go');
 	private $trycatch = false;
@@ -100,7 +100,7 @@ class autoptimizeScripts extends autoptimizeBase
 					// Inline script
 					// unhide comments, as javascript may be wrapped in comment-tags for old times' sake
 					$tag = $this->restore_comments($tag);
-					if($this->ismergeable($tag)) {
+					if($this->ismergeable($tag) && ( apply_filters('autoptimize_js_include_inline',true) )) {
 						preg_match('#<script.*>(.*)</script>#Usmi',$tag,$code);
 						$code = preg_replace('#.*<!\[CDATA\[(?:\s*\*/)?(.*)(?://|/\*)\s*?\]\]>.*#sm','$1',$code[1]);
 						$code = preg_replace('/(?:^\\s*<!--\\s*|\\s*(?:\\/\\/)?\\s*-->\\s*$)/','',$code);
@@ -139,16 +139,18 @@ class autoptimizeScripts extends autoptimizeBase
 			if(preg_match('#^INLINE;#',$script)) {
 				//Inline script
 				$script = preg_replace('#^INLINE;#','',$script);
+				$script = rtrim( $script, ";\n\t\r" ) . ';';
 				//Add try-catch?
 				if($this->trycatch) {
 					$script = 'try{'.$script.'}catch(e){}';
 				}
-				$this->jscode .= "\n".$script;
+				$this->jscode .= "\n" . $script;
 			} else {
 				//External script
 				if($script !== false && file_exists($script) && is_readable($script)) {
 					$script = file_get_contents($script);
 					$script = preg_replace('/\x{EF}\x{BB}\x{BF}/','',$script);
+					$script = rtrim($script,";\n\t\r").';';
 					//Add try-catch?
 					if($this->trycatch) {
 						$script = 'try{'.$script.'}catch(e){}';
@@ -170,7 +172,7 @@ class autoptimizeScripts extends autoptimizeBase
 		unset($ccheck);
 		
 		//$this->jscode has all the uncompressed code now. 
-		if(class_exists('JSMin')) {
+		if(class_exists('JSMin') && apply_filters( 'autoptimize_js_do_minify' , true)) {
 			if (@is_callable(array(new JSMin,"minify"))) {
 				$tmp_jscode = trim(JSMin::minify($this->jscode));
 				if (!empty($tmp_jscode)) {
@@ -208,25 +210,21 @@ class autoptimizeScripts extends autoptimizeBase
 		
 		// Add the scripts taking forcehead/ deferred (default) into account
 		if($this->forcehead == true) {
-			$replaceTag="</head>";
+			$replaceTag=array("</title>","after");
 			$defer="";
 		} else {
-			$replaceTag="</body>";
+			$replaceTag=array("</body>","before");
 			$defer="defer ";
 		}
 		
 		$defer = apply_filters( 'autoptimize_filter_js_defer', $defer );
+		$replaceTag = apply_filters( 'autoptimize_filter_js_replacetag', $replaceTag );
 
 		$bodyreplacement = implode('',$this->move['first']);
 		$bodyreplacement .= '<script type="text/javascript" '.$defer.'src="'.$this->url.'"></script>';
 		$bodyreplacement .= implode('',$this->move['last']);
 
-		if (strpos($this->content,$replaceTag)!== false) {
-			$this->content = str_replace($replaceTag,$bodyreplacement.$replaceTag,$this->content);
-		} else {
-			$this->content .= $bodyreplacement;
-			$this->warn_html();
-		}
+		$this->inject_in_html($bodyreplacement,$replaceTag);
 
 		// restore comments
 		$this->content = $this->restore_comments($this->content);

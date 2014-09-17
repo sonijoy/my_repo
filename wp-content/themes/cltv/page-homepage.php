@@ -2,7 +2,6 @@
 /*
 Template Name: Homepage
 */
-$live = cltv_get_live_channels();
 $popular = cltv_get_popular_channels(60);
 $video = cltv_format_video_src(of_get_option('front_page_video'));
 $channels = new WP_Query(array(

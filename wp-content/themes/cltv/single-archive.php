@@ -1,4 +1,4 @@
 <?php
-  define('DONOTCACHEPAGE', TRUE);
-  get_template_part( 'content', 'channel' );  
+  define( 'DONOTCACHEPAGE', true );
+  get_template_part( 'content', 'channel' );
 ?>

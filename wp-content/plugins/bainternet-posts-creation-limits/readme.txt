@@ -3,8 +3,8 @@ Contributors: bainternet,adsbycb
 Donate link: http://en.bainternet.info/donations
 Tags: limits, cpt limits, posts per user, limit pages, limit user, post creating limit, post limit, user post limit
 Requires at least: 3.0
-Tested up to: 3.6.1 
-Stable tag: 3.1
+Tested up to: 4.0.0
+Stable tag: 3.2
 
 this plugin helps you to limit the number of posts/pages/custom post types each user can create on your site.
 
@@ -118,6 +118,10 @@ that's it so far.
 3. user blocked for reaching his limits when trying to create a new post.
 
 == Changelog ==
+3.2
+Fixed locking access to press this.
+added a new action hook before the limited message is shown `post_creation_limits_before_limited_message`
+
 3.1 fixed typo
 replace jquery live() with on().
 

@@ -3,11 +3,11 @@
 Plugin Name: Bainternet Posts Creation Limits
 Plugin URI: http://en.bainternet.info/category/plugins
 Description: this plugin helps you to limit the number of posts/pages/custom post types each user can create on your site.
-Version: 3.1
+Version: 3.2
 Author: bainternet
 Author URI: http://en.bainternet.info
 */
-/*  Copyright 2012-2013 bainternet  (email : admin@bainternet.info)
+/*  Copyright 2012-2014 bainternet  (email : admin@bainternet.info)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as 
@@ -265,7 +265,7 @@ if(!class_exists('bapl')){
 		public function bapl_limit_post_count(){
 			global $pagenow ,$current_user,$typenow;
 			
-			if (is_admin() && $pagenow=='post-new.php'){
+			if (is_admin() && in_array($pagenow,array('post-new.php','press-this.php')) ){
 				$options = $this->bapl_getOptions('bapl');
 				if (!isset($options['rules']))
 					return;
@@ -618,6 +618,7 @@ if(!class_exists('bapl')){
 
 		// display error massage
 		public function bapl_not_allowed($m=null){
+			do_action('post_creation_limits_before_limited_message');
 			if ($m == null){
 				$options = $this->bapl_getOptions('bapl');
 				$m = $options['m'];

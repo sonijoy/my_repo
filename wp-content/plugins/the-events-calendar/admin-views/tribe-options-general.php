@@ -69,10 +69,12 @@ $generalTab = array(
 		 ),
 		'liveFiltersUpdate' => array(
 			'type' => 'checkbox_bool',
-			'label' => __( 'Use Javascript to control page load', 'tribe-events-calendar' ),
-			'tooltip' => __( 'Enable ajax to live refresh content.' , 'tribe-events-calendar' ),
+			'label' => __( 'Use Javascript to control date filtering', 'tribe-events-calendar' ),
+			'tooltip' => tribe_get_option('tribeDisableTribeBar', false) == true ? __( 'This option is disabled when "Disable the Event Search Bar" is checked on the Display settings tab.' , 'tribe-events-calendar' ) : __( 'Enable live ajax for datepicker on front end (User submit not required).' , 'tribe-events-calendar' ),
+			'attributes' => tribe_get_option('tribeDisableTribeBar', false) == true ? array('disabled' => 'disabled') : null,
 			'default' => true,
 			'validation_type' => 'boolean',
+			'class' => tribe_get_option('tribeDisableTribeBar', false) == true ? 'tribe-fieldset-disabled' : null,			
 		),
 		'showComments' => array(
 			'type' => 'checkbox_bool',
@@ -129,11 +131,11 @@ $generalTab = array(
 			'validation_type' => 'options',
 			'size' => 'small',
 			'default' => '12:00',
-			'options' => array( '12:00' => '12:00 am', '12:30' => '12:30 am', '01:00' => '01:00 am', '01:30' => '01:30 am', '02:00' => '02:00 am', '02:30' => '02:30 am', '03:00' => '03:00 am', '03:30' => '03:30 am', '04:00' => '04:00 am', '04:30' => '04:30 am', '05:00' => '05:00 am', '05:30' => '05:30 am', '06:00' => '06:00 am', '06:30' => '06:30 am', '07:00' => '07:00 am', '07:30' => '07:30 am', '08:00' => '08:00 am', '08:30' => '08:30 am', '09:00' => '09:00 am', '09:30' => '09:30 am', '10:00' => '10:00 am', '10:30' => '10:30 am', '11:00' => '11:00 am', '11:30' => '11:30 am' ),
+			'options' => array( '00:00' => '12:00 am', '00:30' => '12:30 am', '01:00' => '01:00 am', '01:30' => '01:30 am', '02:00' => '02:00 am', '02:30' => '02:30 am', '03:00' => '03:00 am', '03:30' => '03:30 am', '04:00' => '04:00 am', '04:30' => '04:30 am', '05:00' => '05:00 am', '05:30' => '05:30 am', '06:00' => '06:00 am', '06:30' => '06:30 am', '07:00' => '07:00 am', '07:30' => '07:30 am', '08:00' => '08:00 am', '08:30' => '08:30 am', '09:00' => '09:00 am', '09:30' => '09:30 am', '10:00' => '10:00 am', '10:30' => '10:30 am', '11:00' => '11:00 am', '11:30' => '11:30 am' ),
 		),
 		'multiDayCutoffHelper' => array(
 			'type' => 'html',
-			'html' => '<p class="tribe-field-indent tribe-field-description description">' . sprintf( __( 'Have events that run past midnight? Control when your day official ends to avoid awkwardly adding your event to the next day.', 'tribe-events-calendar' ) ) . '</p>',
+			'html' => '<p class="tribe-field-indent tribe-field-description description">' . sprintf( __( "Have an event that runs past midnight? Select a time after that event's end to avoid showing the event on the next day's calendar.", 'tribe-events-calendar' ) ) . '</p>',
 			'conditional' => ( '' != get_option( 'permalink_structure' ) ),
 		),
 		'defaultCurrencySymbol' => array(
@@ -143,6 +145,13 @@ $generalTab = array(
 			'validation_type' => 'textarea',
 			'size' => 'small',
 			'default' => '$',
+		),
+		'reverseCurrencyPosition' => array(
+			'type' => 'checkbox_bool',
+			'label' => __( 'Currency symbol follows value', 'tribe-events-calendar' ),
+			'tooltip' => __( 'The currency symbol normally precedes the value. Enabling this option positions the symbol after the value.', 'tribe-events-calendar' ),
+			'default' => false,
+			'validation_type' => 'boolean',
 		),
 		'tribeEventsDisplayTitle' => array(
 			'type' => 'html',

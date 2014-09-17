@@ -12,7 +12,6 @@ function load_tribe_debug_bar($panels) {
 		/**
 		 * Debug bar class for the Events Calendar to support debugging.
 		 *
-		 * @author Peter Chester
 		 */
 		class TribeDebugBar extends Debug_Bar_Panel {
 
@@ -29,7 +28,7 @@ function load_tribe_debug_bar($panels) {
 				$this->title( __('Tribe', 'tribe-events-calendar') );
 				remove_action( 'tribe_debug', array( TribeEvents::instance(), 'renderDebug' ), 10, 2 );
 				add_action( 'tribe_debug', array( $this, 'logDebug' ), 8, 3 );
-				wp_enqueue_style( 'tribe-debugger', TribeEvents::instance()->pluginUrl . 'resources/debugger.css' );
+				wp_enqueue_style( 'tribe-debugger', TribeEvents::instance()->pluginUrl . 'resources/debugger.css', array(), apply_filters( 'tribe_events_css_version', TribeEvents::VERSION ) );
 			}
 
 			/**
@@ -69,7 +68,6 @@ function load_tribe_debug_bar($panels) {
 			 * @param string|bool $data Optional data to display
 			 * @param string $format Optional format (log|warning|error|notice)
 			 * @return void
-			 * @author Peter Chester
 			 */
 			public function logDebug( $title, $data = false, $format = 'log' ) {
 				self::$debug_log[] = array(

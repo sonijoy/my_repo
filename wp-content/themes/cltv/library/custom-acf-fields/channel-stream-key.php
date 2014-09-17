@@ -40,11 +40,7 @@ class acf_StreamKey extends acf_field
 	function create_field( $field )
 	{
 		global $post;
-		$stream_base = get_post_meta($post->ID, 'stream_key', true);
-		if(!$stream_base){
-			$stream_base = $post->post_name;
-		}
-		$stream_key = $stream_base.'?adbe-live-event='.$stream_base.'event';
+		$stream_key = $post->ID.'-'.$post->post_name;
 		echo "<input id='stream_key' type='text' readonly='true' value='$stream_key' />";
 	}
 	

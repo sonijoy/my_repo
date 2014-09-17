@@ -8,6 +8,8 @@
 |
 | ------------------------------------------------------------------- */
 
+require_once(TEMPLATEPATH . "/library/s3_variables.php");
+
 // Redirect after login
 function change_login_redirect( $redirect_to, $request, $user ){
     //is there a user to check?
@@ -22,7 +24,7 @@ function change_login_redirect( $redirect_to, $request, $user ){
 				return admin_url('index.php');
 			} else {
 				return admin_url('post-new.php?post_type=channel');
-			}			
+			}
 		} else {
             return admin_url();
         }
@@ -30,7 +32,7 @@ function change_login_redirect( $redirect_to, $request, $user ){
 }
 add_filter("login_redirect", "change_login_redirect", 10, 3);
 
-// Redirect after logout 
+// Redirect after logout
 function change_logout_redirect($logouturl, $redir)
 {
 	$redir = home_url();
@@ -41,7 +43,7 @@ add_filter('logout_url', 'change_logout_redirect', 10, 2);
 // Change the login logo
 function change_login_logo() { ?>
     <style type="text/css">
-		
+
 		body.login div#login {
             padding-top:30px;
         }
@@ -66,47 +68,14 @@ add_action( 'login_enqueue_scripts', 'change_login_logo' );
 
 // Custom CSS, JS, and Navbar
 function my_admin_head() {
-	/*wp_enqueue_style( 'bootstrap_admin_css', get_template_directory_uri() . '/library/css/bootstrap.admin.min.css' );
-	wp_enqueue_style( 'bootstrap-responsive', '//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css' );	
-	wp_enqueue_style( 'mCustomScrollbar', get_template_directory_uri() . '/library/css/jquery.mCustomScrollbar.css' );
-	wp_enqueue_style( 'style_css', get_template_directory_uri() . '/style.css' );
-	wp_enqueue_style( 'admin_css', get_template_directory_uri() . '/library/css/admin.css' );*/
 	if(current_user_can('channel')){
 		wp_enqueue_style( 'admin_channel_css', get_template_directory_uri() . '/library/css/admin.channel.css' );
 	}
-	
-	/*wp_register_script('bootstrap_admin_js', get_template_directory_uri().'/library/js/bootstrap.admin.min.js');
-	wp_register_script('modernizr', get_template_directory_uri().'/library/js/modernizr.full.min.js');
-	wp_register_script('jquery-mousewheel', get_template_directory_uri().'/library/js/jquery.mousewheel.min.js');
-	wp_register_script('mCustomScrollbar', get_template_directory_uri().'/library/js/jquery.mCustomScrollbar.min.js');
-	wp_register_script('custom', get_template_directory_uri().'/library/js/custom.js');*/
+
 	wp_register_script('admin_js', get_template_directory_uri().'/library/js/admin.js');
-	
-	/*wp_enqueue_script('bootstrap_admin_js', array('jQuery'), '1.1', true);
-	wp_enqueue_script('modernizr', array('jQuery'), '1.1', true);
-	wp_enqueue_script('jquery-mousewheel', array('jQuery'), '1.1', true);
-	wp_enqueue_script('mCustomScrollbar', array('jQuery'), '1.1', true);
-	wp_enqueue_script('custom', array('jQuery'), '1.1', true);*/
 	wp_enqueue_script('admin_js', array('jQuery'), '1.11', true);
 }
 add_action('admin_enqueue_scripts', 'my_admin_head');
-
-// Add the header and some ie8 css (blah)
-function my_adminmenu() {
-	?>
-	<!--[if lt IE 9]>
-		<style type="text/css">
-			html body { margin-top:65px; }
-		</style>
-	<![endif]-->
-	<script type="text/html" id="header_navbar_php">
-	<?php
-		require_once(TEMPLATEPATH.'/header-navbar.php');
-	?>
-	</script>
-	<?php
-}
-//add_action('adminmenu', 'my_adminmenu');
 
 
 /* ------------------------------------------------------------------
@@ -153,12 +122,11 @@ add_action( 'admin_menu' , 'remove_channel_cat_meta' );
 // Add columns showing video status
 function custom_archive_columns($column_name, $id){
 	$attachment_id = get_post_meta($id, 'video_file', true);
-	$status = get_post_meta($attachment_id, 'mtc_status', true);
 	switch ($column_name) {
 	    case 'status':
 			if(empty($attachment_id)){
 				echo 'No file selected';
-			} else echo 'Complete'; 
+			} else echo 'Complete';
 	        break;
 	    default:
 	        break;
@@ -181,12 +149,12 @@ add_filter('manage_archive_posts_columns' , 'archive_columns', 10, 1);
 |
 | -------------------------------------------------------------------*/
 
-// Hide admin bar 
+// Hide admin bar
 show_admin_bar(false);
-remove_action( 'init', '_wp_admin_bar_init' ); 
+remove_action( 'init', '_wp_admin_bar_init' );
 
 // Hide the screen options
-add_filter('screen_options_show_screen', '__return_false'); 
+add_filter('screen_options_show_screen', '__return_false');
 
 // Remove the media tab for channel_owner
 function remove_dashboard(){
@@ -194,7 +162,7 @@ function remove_dashboard(){
 		remove_menu_page('upload.php');
 	}
 }
-add_action( 'admin_menu', 'remove_dashboard' );  
+add_action( 'admin_menu', 'remove_dashboard' );
 
 
 //Remove submenu items
@@ -214,14 +182,14 @@ add_action('admin_head', 'hide_color_scheme');
 function add_channels_submenu() {
 	if(current_user_can('channel')){
 		global $current_user;
-		global $post; 
+		global $post;
 		$original = $post;
 		$channel_q = new WP_Query(array('post_type' => 'channel', 'author' => $current_user->ID));
 		while($channel_q->have_posts()) {
 			$channel_q->the_post();
 			add_submenu_page('edit.php?post_type=channel', get_the_title(), get_the_title(), 'edit_channels', 'post.php?action=edit&post='.get_the_ID());
 		}
-		$post = $original; 
+		$post = $original;
 		wp_reset_postdata();
 	}
 }
@@ -264,11 +232,11 @@ function remove_dashboard_widgets() {
 	remove_meta_box( 'dashboard_recent_comments', 'dashboard', 'normal' );
 	remove_meta_box( 'dashboard_plugins', 'dashboard', 'normal' );
 	remove_meta_box( 'tribe_dashboard_widget', 'dashboard', 'normal' );
-} 
+}
 add_action('wp_dashboard_setup', 'remove_dashboard_widgets' );
 
 // Create the helpful links widget
-function helpful_dashboard_widget() { 
+function helpful_dashboard_widget() {
 	?>
 		<h4 style="margin-bottom:10px;"><a href="/wp-admin/admin.php?page=wp-help-documents">Help Tutorials</a></h4>
 		<div style="float:left;width:49%;">
@@ -285,31 +253,31 @@ function helpful_dashboard_widget() {
 		<h4>Equipment List:</h4>
 		<ul>
 			<li>
-				<a target="_blank" 
+				<a target="_blank"
 				href="http://www.ionaudio.com/products/details/video-2-pc">
 					Ion Video 2 PC
 				</a>
 			</li>
 			<li>
-				<a target="_blank" 
+				<a target="_blank"
 				href="http://www.bestbuy.com/site/Toshiba+-+Satellite+Laptop+/+AMD+E-Series+Processor+/+15.6%26%2334%3B+Display+-+Black/2970255.p?id=1218367938038&skuId=2970255">
 					Windows Laptop
 				</a>
 			</li>
 			<li>
-				<a target="_blank" 
+				<a target="_blank"
 				href="http://www.bestbuy.com/site/Apple%26%23174%3B+-+MacBook%26%23174%3B+Pro+/+Intel%26%23174%3B+Core%26%23153%3B+i5+Processor+/+13.3%22+Display+/+4GB+Memory+/+320GB+Hard+Drive/9755322.p?id=1218169737492&amp;skuId=9755322">
 					Macintosh Laptop
 				</a>
 			</li>
 			<li>
-				<a target="_blank" 
+				<a target="_blank"
 				href="http://www.amazon.com/Behringer-802-Premium-8-Input-Preamps/dp/B000J5XS3C/ref=sr_1_1?s=musical-instruments&amp;ie=UTF8&amp;qid=1314940317&amp;sr=1-1">
 					2 Channel Audio Mixer
 				</a>
 			</li>
-			<li>				
-				<a target="_blank" 
+			<li>
+				<a target="_blank"
 				href="http://www.amazon.com/Behringer-1202-12-Input-Mixer/dp/B000J5Y282/ref=sr_1_6?s=musical-instruments&amp;ie=UTF8&amp;qid=1314940346&amp;sr=1-6">
 					4 Channel Audio Mixer
 				</a>
@@ -317,10 +285,10 @@ function helpful_dashboard_widget() {
 		</ul>
 		</div>
 		<div style="clear:both;height:1px;width:100%;"></div>
-	<?php 
-} 
+	<?php
+}
 function add_helpful_dashboard_widget() {
-	wp_add_dashboard_widget('helpful_dashboard_widget', 'Links', 'helpful_dashboard_widget');	
+	wp_add_dashboard_widget('helpful_dashboard_widget', 'Links', 'helpful_dashboard_widget');
 	// Global the $wp_meta_boxes variable (this will allow us to alter the array)
 	global $wp_meta_boxes;
 	// Then we make a backup of your widget
@@ -329,8 +297,26 @@ function add_helpful_dashboard_widget() {
 	unset($wp_meta_boxes['dashboard']['normal']['core']['helpful_dashboard_widget']);
 	// Now we just add your widget back in
 	$wp_meta_boxes['dashboard']['side']['core']['helpful_dashboard_widget'] = $my_widget;
-} 
+}
 add_action('wp_dashboard_setup', 'add_helpful_dashboard_widget' );
+
+/* ------------------------------------------------------------------
+|
+|
+|	Post Update
+|
+|
+| -------------------------------------------------------------------*/
+
+function cltv_update_streamkey($post_id) {
+
+	// If this is just a revision, don't send the email.
+	if (wp_is_post_revision( $post_id ) && $_POST['post_type'] != 'channel')
+		return;
+
+	update_post_meta($post_id, 'stream_key', $post_id . date('Hi'));
+}
+//add_action( 'save_post', 'cltv_update_streamkey' );
 
 /* ------------------------------------------------------------------
 |
@@ -338,39 +324,175 @@ add_action('wp_dashboard_setup', 'add_helpful_dashboard_widget' );
 |	Uploads
 |
 |
-| -------------------------------------------------------------------
+| -------------------------------------------------------------------*/
 
-// change upload location
-function custom_upload_directory( $args ) { 
-	if(!empty($args['error'])) { return $args; }
-	
-  if(of_get_option('media_dir')) {
-    $the_dir = of_get_option('media_dir');
-  } else {
-    $the_dir = 'D:\www\citylinktv\uploads\channel_video';
-  }
-	
-	$args['path'] = $the_dir;
-	$args['basedir'] = $the_dir;
-		
-    return $args;
-}
-add_filter( 'upload_dir', 'custom_upload_directory' );
-*/
+require_once(TEMPLATEPATH.'/library/aws-sdk-php/vendor/autoload.php');
+use Aws\Common\Aws;
 
 // delete attached media files when a post gets deleted
 function cltv_delete_post_attachments($post_id) {
     global $wpdb;
- 
+
     $sql = "SELECT ID FROM {$wpdb->posts} ";
     $sql .= " WHERE post_parent = $post_id ";
     $sql .= " AND post_type = 'attachment'";
- 
+
     $ids = $wpdb->get_col($sql);
- 
+
     foreach ( $ids as $id ) {
         wp_delete_attachment($id, true);
     }
 }
 add_action('before_delete_post', 'cltv_delete_post_attachments');
+
+// create an archive post and attach a file to it
+function cltv_create_archive($channel, $file, $status='draft') {
+  $args = array(
+    'post_author' => $channel->post_author,
+    'post_title' => $file,
+    'post_type' => 'archive',
+    'post_status' => $status,
+    'post_parent' => $channel->ID
+  );
+
+  $post_id = wp_insert_post($args);
+  add_post_meta($post_id, 'channel', $channel->ID);
+  add_post_meta($post_id, 'recorded', 1);
+
+  //insert the video
+  if($post_id) {
+    $wp_filetype = wp_check_filetype($file, null );
+    $attachment = array(
+      'guid' => GUID_PREFIX.$file,
+      'post_mime_type' => $wp_filetype['type'],
+      'post_title' => preg_replace('/\.[^.]+$/', '', $file),
+      'post_content' => '',
+      'post_status' => 'inherit',
+      'post_parent' => $post_id
+    );
+    $attach_id = wp_insert_attachment($attachment, $file, $post_id);
+    add_post_meta($post_id, 'video_file', $attach_id);
+    add_post_meta($attach_id, 'recorded', true);
+
+    // VIDEO THUMBNAIL
+    $fileinfo = pathinfo($file);
+    $thumbnail_file = $fileinfo['filename'] . ".jpg";
+    $thumbnail_tmp_file = get_temp_dir() . DIRECTORY_SEPARATOR . $thumbnail_file;
+
+    // GET THUMBNAIL USING FFMPEG /usr/bin/ffmpeg -i <input file> -vf 'thumbnail' -vframe <# frames to extract> -an -ss <# seconds to skip forward> <output file>
+    // vf 'thumbnail' - video filter to 'pick the best thumbnail'
+    exec("/usr/bin/ffmpeg -i " . S3_LOCAL_DIR . DIRECTORY_SEPARATOR . $file . " -vf 'thumbnail' -vframes 1 -an -ss 30 " . $thumbnail_tmp_file);
+
+	// media_handle_sideload will create the various sizes of images and move them to the wordpress upload folder
+    $thumbnail_attach_id = media_handle_sideload( array("name"=>$thumbnail_file,"tmp_name"=>$thumbnail_tmp_file), $post_id, "Video Thumbnail" );
+    update_post_meta( $post_id, "_thumbnail_id", $thumbnail_attach_id );
+  }
+}
+
+/*/ rename an s3 object
+function cltv_rename_s3_object($src) {
+  $aws = Aws::factory(TEMPLATEPATH.'/library/aws-config.php');
+  $client = $aws->get('s3');
+
+  $path_parts = pathinfo($src);
+  $new_src = $path_parts['filename'].'.'.$path_parts['extension'];
+
+  // Copy the original object
+  $client->copyObject(array(
+    'Bucket'     => S3_BUCKET,
+    'Key'        => $new_src,
+    'CopySource' => S3_BUCKET . "/$src",
+  ));
+
+  // Delete the original
+  $deleted = $client->deleteObject(array(
+    'Bucket' => S3_BUCKET,
+    'Key'    => $src
+  ));
+  return $new_src;
+}*/
+
+// find recorded video files and turn them into archives
+function cltv_find_new_archives($columns) {
+	$ignore_files = array("jpg","gif","png");
+  $aws = Aws::factory(TEMPLATEPATH.'/library/aws-config.php');
+  $client = $aws->get('s3');
+
+  // get user's channels
+  global $current_user;
+  $channel_q = get_posts(array('post_type' => 'channel', 'author' => $current_user->ID));
+
+  // find recorded files for each channel
+  foreach($channel_q as $channel) {
+    if(isset($_GET['stream'])) {
+      $streamkey = $_GET['stream'];
+    } else {
+      $streamkey = get_post_meta($channel->ID, 'stream_key', true);
+    }
+
+    if(empty($streamkey)) {
+      return $columns;
+    }
+
+    $iterator = $client->getIterator('ListObjects', array(
+      'Bucket' => S3_BUCKET,
+      'Prefix' => $streamkey
+    ));
+    $recording = false;
+
+    foreach ($iterator as $object) {
+      $path_parts = pathinfo($object['Key']);
+      $exists = true;
+
+      // if a .tmp file exists, then the channel is currently recording,
+      // and we need to leave their files alone
+      if($path_parts['extension'] == 'tmp') {
+        echo 'bitchrecording';
+        $recording = true;
+        break;
+      }
+
+		  if ( in_array($path_parts['extension'],$ignore_files) )
+			   continue;
+
+      // skip this file it already has an archive
+      global $wpdb;
+      $attachment = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->prefix}posts WHERE guid LIKE %s;", 'http://recordings.citylinktv.com/'.$object['Key'] ) );
+
+      if($attachment) {
+        echo 'wtfwtf'; var_dump($attachment);
+        continue;
+      }
+      // not recording and no archives for this file, so let's fuckin make one
+      else {
+        //$new_file = cltv_rename_s3_object($object['Key']);
+        cltv_create_archive($channel, $object['Key']);
+      }
+    }
+  }
+
+  wp_reset_postdata();
+
+  return $columns;
+}
+add_filter( 'manage_edit-archive_columns', 'cltv_find_new_archives' );
+
+
+
+function register_archive_search_menu_page(){
+    add_submenu_page( 'edit.php?post_type=archive', 'Find Recorded Archives', 'Find Recorded', 'read', 'find-recorded', 'archive_search_menu_page' );
+}
+function archive_search_menu_page(){
+    echo '
+      <h2>Find Recorded Archives</h2>
+      <p>Enter the stream key that you used to publish the event:</p>
+      <form action="'.admin_url('edit.php').'" method="get">
+        <input type="hidden" name="post_type" value="archive">
+        <input type="text" name="stream" value="">
+        <input type="submit" value="Search">
+      </form>
+    ';
+}
+add_action( 'admin_menu', 'register_archive_search_menu_page' );
+
 ?>

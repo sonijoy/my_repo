@@ -1,19 +1,19 @@
 <?php get_header(); ?>
-			
+
 	<div id="content" class="clearfix row-fluid content-channel">
-	
+
 		<div id="main" class="span9 clearfix" role="main">
 
 			<?php if (have_posts()): ?>
-			
-				<?php 
+
+				<?php
 					global $channel;
-					$channel=$post->ID; 
+					$channel=$post->ID;
 					if(get_post_type() == 'archive'){
-						$channel=get_post_meta($channel, 'channel', true); 
-					} 
+						$channel=get_post_meta($channel, 'channel', true);
+					}
 					$banner = new WP_Query(array(
-						'post_type'=>'sponsor', 
+						'post_type'=>'sponsor',
 						'meta_query'=>array(
 							array(
 								'key'=>'channel',
@@ -26,16 +26,16 @@
 						),
 						'post_status'=>'published',
 						'posts_per_page'=>1
-					)); 
+					));
 					$banner = $banner->have_posts() ? $banner->posts[0] : false;
 					wp_reset_postdata();
-				?> 				
-				<?php while (have_posts()) : the_post(); ?>			
-					
+				?>
+				<?php while (have_posts()) : the_post(); ?>
+
 					<div id="post-<?php the_ID(); ?>" <?php post_class('clearfix'); ?>>
-						
+
 						<div class="row-fluid">
-							<div class="span12"> 
+							<div class="span12">
 								<ul class="breadcrumb">
 									<li><?php the_terms($channel, 'channel_cat'); ?></li>
 									<li><span class="divider">/</span></li>
@@ -53,11 +53,11 @@
 								</ul>
 							</div>
 						</div>
-						
+
 						<?php if($banner): ?>
 							<div class="row-fluid">
 								<a class="span12 top_spons thumbnail" target="_blank" href="<?php echo get_field('sponsor_url', $banner->ID); ?>">
-										<?php echo get_the_post_thumbnail($banner->ID, 'full'); ?>	
+										<?php echo get_the_post_thumbnail($banner->ID, 'full'); ?>
 								</a>
 							</div>
 						<?php else: ?>
@@ -67,7 +67,7 @@
 								</a>
 							</div>
 						<?php endif; ?>
-						
+
 						<!-- Video player -------------------------------------------------------------------->
 						<div class="row-fluid">
 							<div class="span12">
@@ -78,7 +78,7 @@
 										$(document).ready(function(){
 											var android = /Android/i.test(navigator.userAgent);
 											if(android && navigator.mimeTypes["application/x-shockwave-flash"] == undefined) {
-												//$('#video').html($('#android').html());			
+												//$('#video').html($('#android').html());
 										    } else {
 										    	var theplayer = jwplayer("video").setup({
 											        primary: 'flash',
@@ -86,27 +86,27 @@
 											        width: "100%",
 											        //height: "100%",
 											        skin: "bekle",
-                              <?php if($stream_type == 'live'): ?>
-                                  autostart: true,
-                              <?php endif; ?>
+                                                    <?php if($stream_type == 'live'): ?>
+                                                        autostart: true,
+                                                    <?php endif; ?>
 											        playlist: [<?php if(!empty($channel_video['commercial']['html5'])): ?>{
 											        	image: "<?php echo $channel_video['poster']; ?>",
-											        	sources: [{
-											        		file: "<?php echo $channel_video['commercial']['flash']; ?>",
-											        	}, {
+											        	sources: [<?php if($channel_video['commercial']['flash']): ?>{
+											        		file: "<?php echo $channel_video['commercial']['flash']; ?>"
+											        	},<?php endif; ?> {
 											        		file: "<?php echo $channel_video['commercial']['html5']; ?>"
 											        	}]
 											        },<?php endif; ?> {
 											        	image: "<?php echo $channel_video['poster']; ?>",
-											        	sources: [{
-											        		file: "<?php echo $channel_video['src']['flash']; ?>",
-											        	}, {
+											        	sources: [<?php if($channel_video['src']['flash']): ?>{
+											        		file: "<?php echo $channel_video['src']['flash']; ?>"
+											        	},<?php endif; ?> {
 											        		file: "<?php echo $channel_video['src']['html5']; ?>"
 											        	}]
 											        }]
 											    });
 										    }
-										});     
+										});
 									</script>
 									<div id="video">
 										<noscript>You must have javascript enabled to watch this video</noscript>
@@ -118,11 +118,11 @@
 							</div>
 						</div>
 						<!-- /video player -------------------------------------------------------------------->
-					
-					</div> 
-				
-				<?php endwhile; ?>		
-				
+
+					</div>
+
+				<?php endwhile; ?>
+
 				<?php $sponsors = new WP_Query(array('post_type'=>'sponsor','meta_key'=>'channel','meta_value'=>$channel, 'posts_per_page'=>30)); ?>
 
 					<?php if($sponsors->have_posts()): ?>
@@ -138,7 +138,7 @@
 													<?php else: ?>
 														<?php the_title(); ?>
 													<?php endif; ?>
-												</a>	
+												</a>
 											</li>
 										<?php endif; ?>
 									<?php endwhile; ?>
@@ -146,9 +146,9 @@
 							</div>
 						</div>
 					<?php endif; ?>
-			
+
 			<?php else : ?>
-			
+
 				<article id="post-not-found">
 					<header>
 						<h1><?php _e("Not Found", "bonestheme"); ?></h1>
@@ -159,11 +159,11 @@
 					<footer>
 					</footer>
 				</article>
-			
-			<?php endif; ?>
-			
+
+			<?php endif; //if have post ?>
+
 		</div> <!-- end #main -->
-		
+
 		<div id="channel-side" class="span3">
 			<?php include(TEMPLATEPATH . '/sidebar-channel.php'); ?>
 		</div>

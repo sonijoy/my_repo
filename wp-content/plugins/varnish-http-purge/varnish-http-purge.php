@@ -227,7 +227,7 @@ class VarnishPurger {
 			}
       
       // embed url
-      array_push($this->purgeUrls, 'http://www.citylinktv.com/channel-embed?nonav=1&id='.$postId );
+      array_push($this->purgeUrls, 'http://citylinktv.com/channel-embed?nonav=1&id='.$postId );
 
 			// Post URL
 			array_push($this->purgeUrls, get_permalink($postId) );

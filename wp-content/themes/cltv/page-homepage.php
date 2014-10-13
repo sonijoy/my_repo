@@ -13,6 +13,11 @@ $channels = new WP_Query(array(
 	'post__not_in'=>array(8832,19206,4125,28427,28705),
 								'author__not_in'=>array(454)
 ));
+if(of_get_option('use_wowza_cdn')) {
+	$wowza_base = of_get_option('wowza_cdn');
+} else {
+	$wowza_base = of_get_option('wowza_server');
+}
 ?>
 
 <?php get_header(); ?>
@@ -21,7 +26,7 @@ $channels = new WP_Query(array(
 					<?php if($live && $popular): ?>
 						<ul class="nav nav-tabs" style="margin-bottom: 0px;">
               <li class="active"><a data-toggle="tab" href="#popular-content">Popular</a></li>
-							<li><a data-toggle="tab" href="#live-content">Live</a></li>							
+							<li><a data-toggle="tab" href="#live-content">Live</a></li>
 						</ul>
 					<?php endif; ?>
 					<div class="tab-content">
@@ -115,17 +120,17 @@ $channels = new WP_Query(array(
 								        //title: "Welcome",
 								        playlist: [{
 								        	image: "//uploads.citylinktv.com/poster.jpg",
-								        	sources: [{
+								        	sources: [/*{
 								        		file: "rtmp://rtmpuploads.citylinktv.com/cfx/st/intro2.mp4",
-								        	}, {
-								        		file: "//streamcdn.citylinktv.com/vods3/_definst_/mp4:amazons3/cltv-archives/intro2.mp4/playlist.m3u8"
+								        	},*/ {
+								        		file: "<?php echo $wowza_base; ?>vods3/_definst_/mp4:amazons3/cltv-archives/intro2.mp4/playlist.m3u8"
 								        	}]
 								        }]
 								    });
 							    }
 							});
 						</script>
-						<div id="video"><a href="//streamcdn.citylinktv.com/vods3/_definst_/mp4:amazons3/cltv-archives/intro2.mp4/playlist.m3u8">Tap here to watch video</a> </div>
+						<div id="video"><a href="<?php echo $wowza_base; ?>vods3/_definst_/mp4:amazons3/cltv-archives/intro2.mp4/playlist.m3u8">Tap here to watch video</a> </div>
 
 						<p>
 							<a href="/about" class="btn btn-primary btn-large">Learn more</a>

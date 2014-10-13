@@ -94,7 +94,7 @@
 						<img src="<?php echo get_template_directory_uri(); ?>/images/pintrest.png" alt="pintrest" />
 					</a>
 				<?php endif; ?>
-				<a class="btn btn-primary btn-small" href="/events?author_id=<?php the_author_meta('ID'); ?>">Event Calendar</a>
+				<a class="btn btn-primary btn-small" href="/events/month/?author_id=<?php the_author_meta('ID'); ?>">Event Calendar</a>
 			</div>
 		</div>
 	</div>

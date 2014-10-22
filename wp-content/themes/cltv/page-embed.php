@@ -25,7 +25,6 @@ define( 'DONOTCACHEPAGE', true );
 	<?php $channel_video = cltv_channel_video($id); ?>
 	<?php if($channel_video['src']): ?>
 		<?php if(get_field('is_live')) $stream_type = 'live'; else $stream_type = 'recorded'; ?>
-		<script src="http://jwpsrv.com/library/hskNKAMBEeOg6CIACusDuQ.js"></script>
 		<script>
 			$(document).ready(function(){
 				var android = /Android/i.test(navigator.userAgent);

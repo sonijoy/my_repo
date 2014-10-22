@@ -105,7 +105,6 @@ if(of_get_option('use_wowza_cdn')) {
 					<div class="hero-unit">
 						<h1>City Link TV</h1>
 						<h2>Watch live local events for free</h2>
-						<script src="http://jwpsrv.com/library/hskNKAMBEeOg6CIACusDuQ.js"></script>
 						<script>
 							$(document).ready(function(){
 								var android = /Android/i.test(navigator.userAgent);
@@ -119,7 +118,7 @@ if(of_get_option('use_wowza_cdn')) {
 								        skin: "bekle",
 								        //title: "Welcome",
 								        playlist: [{
-								        	image: "//uploads.citylinktv.com/poster.jpg",
+								        	image: "http://uploads.citylinktv.com/poster.jpg",
 								        	sources: [/*{
 								        		file: "rtmp://rtmpuploads.citylinktv.com/cfx/st/intro2.mp4",
 								        	},*/ {

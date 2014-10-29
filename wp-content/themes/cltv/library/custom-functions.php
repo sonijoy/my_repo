@@ -74,11 +74,17 @@ function cltv_channel_video($id){
 	$filename = false;
 	$live = false;
 	$attachment_id = false;
+	$youtube_url = false;
 
 	//if showing a specific archive
 	if(get_post_type($id) == 'archive'){
-		$attachment_id = get_post_meta($id, 'video_file', true);
-		$filename = wp_get_attachment_url(get_post_meta($id, 'video_file', true));
+		$youtube_url = get_post_meta($id, 'youtube_url', true);
+		if($youtube_url) {
+			$filename = $youtube_url;
+		} else {
+			$attachment_id = get_post_meta($id, 'video_file', true);
+			$filename = wp_get_attachment_url(get_post_meta($id, 'video_file', true));
+		}
 		$channel = get_post_meta($id, 'channel', true);
 	}
 	//showing a channel
@@ -109,8 +115,15 @@ function cltv_channel_video($id){
 			if($archive){
 				$poster = wp_get_attachment_image_src(get_post_thumbnail_ID($archive), 'full');
 				$poster = $poster[0];
-				$attachment_id = get_post_meta($archive, 'video_file', true);
-				$filename = basename(get_attached_file(get_post_meta($archive, 'video_file', true)));
+				//if youtube video url
+				$youtube_url = get_post_meta($archive, 'youtube_url', true);
+				if($youtube_url) {
+					$filename = $youtube_url;
+				} else {
+					$attachment_id = get_post_meta($archive, 'video_file', true);
+					$filename = basename(get_attached_file(get_post_meta($archive, 'video_file', true)));
+				}
+
 				$title = get_the_title($archive);
 			}
 		}
@@ -118,15 +131,24 @@ function cltv_channel_video($id){
 
 	if($filename){
 		$http = false;
-		$src = cltv_format_video_src($filename, $live, $http, $attachment_id);
+		if($youtube_url) {
+			$src = array('html5'=>$youtube_url, 'flash'=>false);
+		} else {
+			$src = cltv_format_video_src($filename, $live, $http, $attachment_id);
+		}
 		$commercial_id = get_post_meta($id, 'commercial', true);
 		$commercial = false;
 		if($commercial_id) {
 			$commercial = get_post($commercial_id);
 			if($commercial) {
-				$attachment_id = get_post_meta($commercial->ID, 'commercial_video_file', true);
-				$commercial = basename(get_field('commercial_video_file', $commercial->ID));
-				$commercial = cltv_format_video_src($commercial, false, $http, $attachment_id);
+				$commercial_youtube_url = get_post_meta($commercial_id, 'youtube_url', true);
+				if($commercial_youtube_url) {
+					$commercial = $commercial_youtube_url;
+				} else {
+					$attachment_id = get_post_meta($commercial->ID, 'commercial_video_file', true);
+					$commercial = basename(get_field('commercial_video_file', $commercial->ID));
+					$commercial = cltv_format_video_src($commercial, false, $http, $attachment_id);
+				}
 			}
 		}
 		return array('src'=>$src, 'poster'=>$poster, 'title'=>$title, 'commercial'=>$commercial);

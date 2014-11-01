@@ -7,11 +7,14 @@
 			<?php if (have_posts()): ?>
 
 				<?php
-					global $channel;
+					global $post;
 					$channel=$post->ID;
+					var_dump($channel);
 					if(get_post_type() == 'archive'){
 						$channel=get_post_meta($channel, 'channel', true);
 					}
+					var_dump($channel);
+					var_dump(get_the_title(3945));
 					$banner = new WP_Query(array(
 						'post_type'=>'sponsor',
 						'meta_query'=>array(

@@ -2,9 +2,9 @@
 
 /**
  * View Own Posts Media Only plugin main class
- * 
- * @author Vladimir Garagulya	
- * @package View Own Posts Media Only 
+ *
+ * @author Vladimir Garagulya
+ * @package View Own Posts Media Only
  */
 class View_Own_Posts_Media_Only {
 
@@ -13,7 +13,7 @@ class View_Own_Posts_Media_Only {
 
 	/**
 	 * class constructor
-	 * 
+	 *
 	 */
 	function __construct() {
 
@@ -30,7 +30,7 @@ class View_Own_Posts_Media_Only {
 		// Add the translation function after the plugins loaded hook.
 		add_action('plugins_loaded', array(&$this, 'load_translation'));
 
-		// add own submenu 
+		// add own submenu
 		add_action('admin_menu', array(&$this, 'create_menu'));
 
 		$this->init();
@@ -40,7 +40,7 @@ class View_Own_Posts_Media_Only {
 
 	/**
 	 * Plugin initialization
-	 * 
+	 *
 	 */
 	function init() {
 
@@ -122,8 +122,8 @@ class View_Own_Posts_Media_Only {
 
 
 	function settings() {
-		
-  $post_types = get_post_types(array(), 'names', 'and');     
+
+  $post_types = get_post_types(array(), 'names', 'and');
 		unset($post_types['post']);
 		unset($post_types['page']);
 		unset($post_types['attachment']);
@@ -131,7 +131,7 @@ class View_Own_Posts_Media_Only {
   unset($post_types['nav_menu_item']);
   unset($post_types['wp-types-group']);
   unset($post_types['wp-types-user-group']);
-		
+
 		if (isset($_POST['view_own_posts_media_only_update'])) {  // process update from the options form
 			$nonce = $_REQUEST['_wpnonce'];
 			if (!wp_verify_nonce($nonce, 'view-own-posts-media-only')) {
@@ -143,7 +143,7 @@ class View_Own_Posts_Media_Only {
 			$this->lib->put_option('hide_attachments_type_menu', $hide_attachments_type_menu);
 			$hide_other_posts_comments = $this->lib->get_request_var('hide_other_posts_comments', 'post', 'checkbox');
 			$this->lib->put_option('hide_other_posts_comments', $hide_other_posts_comments);
-   
+
 			$exclude_custom_post_types = array();
 			if (isset($_POST['exclude_custom_post_types']) && is_array($_POST['exclude_custom_post_types']) && count($_POST['exclude_custom_post_types'])>0) {
 				// validate array content comparing with real custom post types
@@ -162,21 +162,21 @@ class View_Own_Posts_Media_Only {
    $hide_other_posts_comments = $this->lib->get_option('hide_other_posts_comments', 1);
 			$exclude_custom_post_types = $this->lib->get_option('exclude_custom_post_types', array());
 		}
-		
+
 		require_once(VOPMO_PLUGIN_DIR . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'settings-template.php');
 	}
 	// end of settings()
-	 
-	
+
+
 	// execute on plugin activation
 	function setup() {
-		
+
 	}
 
 	// end of setup()
 	// execute on plugin deactivation
 	function cleanup() {
-		
+
 	}
 
 	// end of setup()
@@ -185,7 +185,7 @@ class View_Own_Posts_Media_Only {
 	 * Show only posts and media related to logged in author
 	 * Plugin respects the query var: suppress_filters.
 	 * If you need to make a query without it being filtered, use $wp_query->set ("suppress_filters", true);
-	 * 
+	 *
 	 * @global object $current_user
 	 * @param object $query
 	 */
@@ -193,17 +193,17 @@ class View_Own_Posts_Media_Only {
 
 		global $current_user, $pagenow;
 
-  if (!($pagenow == 'edit.php' || $pagenow == 'upload.php' || 
+  if (!($pagenow == 'edit.php' || $pagenow == 'upload.php' ||
         ($pagenow=='admin-ajax.php' && !empty($_POST['action']) && $_POST['action']=='query-attachments'))) {
-     return;
+     //return;
   }
-  
+
 		// do not limit user with Administrator role
 		if (current_user_can('administrator')) {
 			return;
-		}    
+		}
 
-		$exclude_custom_post_types = $this->lib->get_option('exclude_custom_post_types', array());				
+		$exclude_custom_post_types = $this->lib->get_option('exclude_custom_post_types', array());
 		$post_type = $query->get('post_type');
 		if (in_array($post_type, $exclude_custom_post_types)) {
 			return;
@@ -211,7 +211,7 @@ class View_Own_Posts_Media_Only {
 
 		$suppressing_filters = $query->get('suppress_filters'); // Filter suppression on?
 
-		if (!$suppressing_filters && is_admin() && current_user_can('edit_posts') && !current_user_can('edit_others_posts')) {
+		if (!$suppressing_filters && is_admin() /*&& current_user_can('edit_posts') && !current_user_can('edit_others_posts')*/) {
 			$query->set('author', $current_user->ID);
 
 			add_filter('views_edit-post', array(&$this, 'fix_post_counts'));
@@ -223,11 +223,11 @@ class View_Own_Posts_Media_Only {
 
 	/**
 	 * Fix post counts after filtering by its author
-	 * 
+	 *
 	 * @global type $current_user
 	 * @global type $wp_query
 	 * @param type $views
-	 * @return type 
+	 * @return type
 	 */
 	public function fix_post_counts($views) {
 		global $current_user, $wp_query;
@@ -274,11 +274,11 @@ class View_Own_Posts_Media_Only {
 		$views = array();
 		$_num_posts = array();
 		$count = $wpdb->get_results("
-        SELECT post_mime_type, COUNT( * ) AS num_posts 
-        FROM $wpdb->posts 
-        WHERE post_type = 'attachment' 
-        AND post_author = $current_user->ID 
-        AND post_status != 'trash' 
+        SELECT post_mime_type, COUNT( * ) AS num_posts
+        FROM $wpdb->posts
+        WHERE post_type = 'attachment'
+        AND post_author = $current_user->ID
+        AND post_status != 'trash'
         GROUP BY post_mime_type
     ", ARRAY_A);
 		foreach ($count as $row)
@@ -291,11 +291,11 @@ class View_Own_Posts_Media_Only {
 		$detached = isset($_REQUEST['detached']) || isset($_REQUEST['find_detached']);
 		if (!isset($total_orphans))
 			$total_orphans = $wpdb->get_var("
-            SELECT COUNT( * ) 
-            FROM $wpdb->posts 
+            SELECT COUNT( * )
+            FROM $wpdb->posts
             WHERE post_type = 'attachment'
-            AND post_author = $current_user->ID 
-            AND post_status != 'trash' 
+            AND post_author = $current_user->ID
+            AND post_status != 'trash'
             AND post_parent < 1
         ");
 		$matches = wp_match_mime_types(array_keys($post_mime_types), array_keys($_num_posts));
@@ -321,7 +321,7 @@ class View_Own_Posts_Media_Only {
 
 	/**
 	 * set author parameter for query to current user - it will limit comments by post belongs to its author only
-	 * 
+	 *
 	 * @global object $current_user
 	 * @param object $query
 	 */
@@ -362,9 +362,9 @@ class View_Own_Posts_Media_Only {
 
 	/**
 	 * Loads style to hide media scope selection drop-down box at Media Library
-	 * 
+	 *
 	 * @param string $hook
-	 * @return void 
+	 * @return void
 	 */
 	public function admin_css($hook) {
 
@@ -380,6 +380,6 @@ class View_Own_Posts_Media_Only {
 		wp_enqueue_style('vopmo_admin_css');
 	}
 	// end of admin_css()
- 
+
 }
 // end of class View_Own_Posts_Media_Only

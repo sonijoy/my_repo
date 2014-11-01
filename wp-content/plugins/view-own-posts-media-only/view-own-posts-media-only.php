@@ -4,7 +4,7 @@
 Plugin Name: View own posts and media library items only
 Plugin URI: http://www.shinephp.com/view-own-posts-and-images-only-wordpress-plugin/
 Description: Limits posts and media library items available for contributors and authors by their own (added, uploaded, attached) only.
-Version: 1.2
+Version: 1.3
 Author: Vladimir Garagulya
 Author URI: http://www.shinephp.com
 Text Domain: view-own-posts-media-only
@@ -12,7 +12,7 @@ Domain Path: /lang/
 */
 
 /*
-Copyright 2013  Vladimir Garagulya  (email: vladimir@shinephp.com)
+Copyright 2013-2014  Vladimir Garagulya  (email: vladimir@shinephp.com)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -70,5 +70,3 @@ if ( !class_exists('View_Own_Posts_Media_Only') ) {
 	
 	$view_own_posts_media_only = new View_Own_Posts_Media_Only();
 }
-
-?>

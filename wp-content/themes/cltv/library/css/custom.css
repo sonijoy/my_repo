@@ -24,6 +24,9 @@ body .row-fluid .span1_5:first-child {
 		margin-left:10px;
 	}
 }
+header .navbar .navbar-inner {
+	background: #333;
+}
 .hidden {
 	display:none !important;
 }
@@ -308,9 +311,16 @@ html input[type="button"],input[type="radio"],input[type="checkbox"]{width:auto}
 |
 ---------------------------------------------------------------*/
 
+.page-id-144 h1,
+.page-id-5188 h1 {
+	text-align: center;
+}
+.page-id-144 .fa {
+	font-size:90px;
+}
 .page-id-144 blockquote p:first-child {
 	font-size:21px;
-	margin-top:20%;
+	margin-top:5%;
 }
 .page-id-144 blockquote small {
 	color:#888;

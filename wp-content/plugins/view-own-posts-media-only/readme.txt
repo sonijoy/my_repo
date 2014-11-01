@@ -3,7 +3,7 @@ Contributors: shinephp
 Donate link: http://www.shinephp.com/donate/
 Tags: post, media, view, own, only
 Requires at least: 3.2
-Tested up to: 3.5.2
+Tested up to: 4.0
 Stable tag: trunk
 
 Limits posts and media library items available for contributors and authors by their own (added, uploaded, attached) only.
@@ -35,6 +35,11 @@ Installing procedure:
 
 
 == Changelog ==
+
+= 1.3 =
+* 18.10.2014
+* Restriction applied to the selected admin pages only (Posts and Media Library) to exclude compatibility issues with other plugins.
+* CSS updated for WordPress 4.0.
 
 = 1.2 =
 * 09.07.2013 

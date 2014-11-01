@@ -145,7 +145,7 @@ class View_Own_Posts_Media_Only {
 			$this->lib->put_option('hide_other_posts_comments', $hide_other_posts_comments);
    
 			$exclude_custom_post_types = array();
-			if (is_array($_POST['exclude_custom_post_types']) && count($_POST['exclude_custom_post_types'])>0) {
+			if (isset($_POST['exclude_custom_post_types']) && is_array($_POST['exclude_custom_post_types']) && count($_POST['exclude_custom_post_types'])>0) {
 				// validate array content comparing with real custom post types
 				foreach ($_POST['exclude_custom_post_types'] as $custom_post_type) {
 					if (isset($post_types[$custom_post_type])) {
@@ -191,12 +191,17 @@ class View_Own_Posts_Media_Only {
 	 */
 	public function query_set_only_author($query) {
 
-		global $current_user;
+		global $current_user, $pagenow;
 
+  if (!($pagenow == 'edit.php' || $pagenow == 'upload.php' || 
+        ($pagenow=='admin-ajax.php' && !empty($_POST['action']) && $_POST['action']=='query-attachments'))) {
+     return;
+  }
+  
 		// do not limit user with Administrator role
 		if (current_user_can('administrator')) {
 			return;
-		}
+		}    
 
 		$exclude_custom_post_types = $this->lib->get_option('exclude_custom_post_types', array());				
 		$post_type = $query->get('post_type');
@@ -206,7 +211,7 @@ class View_Own_Posts_Media_Only {
 
 		$suppressing_filters = $query->get('suppress_filters'); // Filter suppression on?
 
-		if (!$suppressing_filters && is_admin() && !current_user_can('administrator')) {
+		if (!$suppressing_filters && is_admin() && current_user_can('edit_posts') && !current_user_can('edit_others_posts')) {
 			$query->set('author', $current_user->ID);
 
 			add_filter('views_edit-post', array(&$this, 'fix_post_counts'));
@@ -371,12 +376,10 @@ class View_Own_Posts_Media_Only {
 			return;
 		}
 
-		wp_register_style('vopmo_admin_css', VOPMO_PLUGIN_URL . '/css/admin.css', array(), null, 'screen');
+		wp_register_style('vopmo_admin_css', VOPMO_PLUGIN_URL . 'css/admin.css', array(), null, 'screen');
 		wp_enqueue_style('vopmo_admin_css');
 	}
-
 	// end of admin_css()
+ 
 }
-
 // end of class View_Own_Posts_Media_Only
-?>

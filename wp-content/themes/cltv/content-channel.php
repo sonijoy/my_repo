@@ -9,12 +9,9 @@
 				<?php
 					global $post;
 					$channel=$post->ID;
-					var_dump($channel);
 					if(get_post_type() == 'archive'){
 						$channel=get_post_meta($channel, 'channel', true);
 					}
-					var_dump($channel);
-					var_dump(get_the_title(3945));
 					$banner = new WP_Query(array(
 						'post_type'=>'sponsor',
 						'meta_query'=>array(
@@ -121,6 +118,14 @@
 							</div>
 						</div>
 						<!-- /video player -------------------------------------------------------------------->
+
+						<div class="row-fluid">
+							<?php $message_board = get_field('message_board', $channel); ?>
+							<?php if($message_board): ?>
+								<h3>Message Board:</h3>
+								<p><?php echo $message_board; ?></p>
+							<?php endif; ?>
+						</div>
 
 					</div>
 

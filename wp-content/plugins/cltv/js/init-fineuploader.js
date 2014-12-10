@@ -2,7 +2,7 @@ jQuery(document).ready(function () {
         jQuery("#fine-uploader").fineUploaderS3({
             debug: true,
             request: {
-                endpoint: aws_bucket + '.s3.amazonaws.com',
+                endpoint: aws_archive_bucket + '.s3.amazonaws.com',
                 accessKey: aws_access_key
             },
             objectProperties: {

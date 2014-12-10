@@ -16,7 +16,7 @@ function cltv_awsvariables_for_javascript() {
 	?>
 	<script type="text/javascript">
 		var aws_access_key = '<?=$aws['services']['default_settings']['params']['key']; ?>';  //'AKIAJIE27CTN5NUSK3VQ';
-		var aws_bucket = '<?=S3_BUCKET; ?>';
+		var aws_archive_bucket = 'cltv-archives';
 	</script>
 	<?php
 }

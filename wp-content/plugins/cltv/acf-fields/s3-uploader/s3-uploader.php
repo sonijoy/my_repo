@@ -40,7 +40,10 @@ class acf_S3Uploader extends acf_field
   function create_field( $field )
   {
     global $post;
-    include('template.php');
+    $s3_attach_id = get_post_meta($post->ID,"video_file",true);
+  	$s3_file = wp_get_attachment_url($s3_attach_id);
+
+    include(dirname(__File__).'/template.php');
   }
 
 
@@ -58,9 +61,18 @@ class acf_S3Uploader extends acf_field
   */
 
   function create_options( $field )
-  {
-    include('options.php');
-  }
+	{
+    // vars
+    $defaults = array(
+      'default_value'	=>	'',
+      'formatting' 	=>	'html',
+    );
+
+    $field = array_merge($defaults, $field);
+    $key = $field['name'];
+
+    require_once(dirname(__File__).'/options.php');
+	}
 
 
   /*

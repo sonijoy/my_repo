@@ -1,5 +1,5 @@
 jQuery(document).ready(function () {
-        jQuery("#fine-uploader").fineUploaderS3({
+        jQuery(".fine-uploader").fineUploaderS3({
             debug: true,
             request: {
                 endpoint: aws_archive_bucket + '.s3.amazonaws.com',
@@ -11,7 +11,7 @@ jQuery(document).ready(function () {
             cors: {
 	      //all requests are expected to be cross-domain requests
 	      expected: true,
- 
+
 	      //if you want cookies to be sent along with the request
 	      sendCredentials: true
 	    },

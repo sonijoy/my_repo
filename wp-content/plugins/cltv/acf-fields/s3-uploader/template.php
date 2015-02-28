@@ -1,5 +1,5 @@
 <div class="fine-uploader"></div>
-<div id="file-name">Video: <?php echo $video; ?></div>
+<div id="file-name">Video: <?php echo $s3_file; ?></div>
 <script type="text/template" id="qq-template">
     <div class="qq-uploader-selector qq-uploader">
         <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone>

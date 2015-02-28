@@ -35,9 +35,9 @@ function s3_uploader_init(){
 // enqueue javascript files for fine uploader
 // action: admin_init
 function s3_uploader_admin_init(){
-	wp_register_script("fineuploader", dirname(__File__).'/js/s3.jquery.fineuploader-5.0.8.min.js', array( 'jquery' ) );
-	wp_register_script("init-fineuploader", dirname(__File__).'/js/init-fineuploader.js' );
-	wp_register_style("fineuploader", dirname(__File__).'/css/fineuploader-5.0.8.min.css' );
+	wp_register_script("fineuploader", plugins_url( '/js/s3.jquery.fineuploader-5.0.8.min.js', __FILE__ ), array( 'jquery' ) );
+	wp_register_script("init-fineuploader", plugins_url( '/js/init-fineuploader.js', __FILE__ ) );
+	wp_register_style("fineuploader", plugins_url( '/css/fineuploader-5.0.8.min.css', __FILE__ ) );
 
 	wp_enqueue_script("fineuploader");
 	wp_enqueue_style("fineuploader");

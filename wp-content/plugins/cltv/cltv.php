@@ -8,18 +8,13 @@
  * Author URI: http://www.citylinktv.com/
  * License: Proprietary
  */
-include("update_live_status.php");
-include("archive-post-type.php");
 
-function cltv_awsvariables_for_javascript() {
-	$aws = include(get_template_directory() . "/library/aws-config.php");
-	?>
-	<script type="text/javascript">
-		var aws_access_key = '<?=$aws['services']['default_settings']['params']['key']; ?>';  //'AKIAJIE27CTN5NUSK3VQ';
-		var aws_archive_bucket = 'cltv-archives';
-	</script>
-	<?php
-}
-add_action('admin_head','cltv_awsvariables_for_javascript');
+//include("update_live_status.php");
+
+// post types
+require_once(dirname(__File__)."/post-types/archive.php");
+
+// ACF fields
+require_once(dirname(__File__)."/acf-fields/s3-uploader/bootstrap.php");
 
 ?>

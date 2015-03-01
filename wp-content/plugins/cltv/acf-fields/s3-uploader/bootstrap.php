@@ -1,15 +1,18 @@
 <?php
 require_once(get_template_directory().'/library/aws-sdk-php/vendor/autoload.php');
-use Aws\Common\Aws;
+use Aws\S3\S3Client;
+use Aws\Common\Credentials\Credentials;
 
-// endpoint for the aws cores ajax call by fineuploader
-add_action("init","s3_uploader_init");
+$environment = require_once(dirname(__File__).'/../../environment.php');
+
+// endpoint for the aws cors ajax call by fineuploader
+add_action("init", "s3_uploader_init");
 
 // enqueue javascript files for fine uploader
-add_action("admin_init","s3_uploader_admin_init");
+add_action("admin_init", "s3_uploader_admin_init");
 
 // setup javascript vars
-add_action('admin_head','s3_uploader_js_vars');
+add_action('admin_head', 's3_uploader_js_vars');
 
 // catch all requests to /s3_uploader_cors
 add_action("template_redirect", "s3_uploader_awscors");
@@ -17,8 +20,11 @@ add_action("template_redirect", "s3_uploader_awscors");
 // create an attachment on post success
 add_action( 'wp_ajax_s3_uploader_success', 's3_uploader_success' );
 
+// delete attachments from post
+add_action("before_delete_post","s3_uploader_delete_post");
+
 // delete files from s3
-add_action("before_delete_post","s3_uploader_delete");
+add_action("delete_attachment","s3_uploader_delete_attachment");
 
 // register the ACF field
 add_action('acf/register_fields', 's3_uploader_register_fields');
@@ -26,7 +32,7 @@ add_action('acf/register_fields', 's3_uploader_register_fields');
 // catch query vars
 add_filter("request", "s3_uploader_awscors_request" );
 
-// endpoint for the aws cores ajax call by fineuploader
+// endpoint for the aws cors ajax call by fineuploader
 // action: init
 function s3_uploader_init(){
 	add_rewrite_endpoint( "s3_uploader_cors", EP_PERMALINK );
@@ -47,11 +53,11 @@ function s3_uploader_admin_init(){
 // setup javascript vars
 // action: admin_head
 function s3_uploader_js_vars() {
-	$aws = include(get_template_directory() . "/library/aws-config.php");
+	global $environment;
 	?>
 	<script type="text/javascript">
-		var aws_access_key = '<?=$aws['services']['default_settings']['params']['key']; ?>';  //'AKIAJIE27CTN5NUSK3VQ';
-		var aws_archive_bucket = 'cltv-archives';
+		var s3_uploader_access_key = '<?=$environment['aws']['key']; ?>';  //'AKIAJIE27CTN5NUSK3VQ';
+		var s3_uploader_bucket = '<?=$environment['aws']['s3']['bucket']; ?>';
 	</script>
 	<?php
 }
@@ -60,10 +66,12 @@ function s3_uploader_js_vars() {
 // action: template_redirect
 function s3_uploader_awscors(){
   global $wp_query;
+	global $environment;
   if ( ! isset( $wp_query->query_vars['s3_uploader_cors'] ) ){
     return;
   }
-  $aws = include(get_template_directory() . "/library/aws-config.php");
+
+	header("HTTP/1.1 200 OK");
 
   $request_body = file_get_contents('php://input');
 
@@ -71,7 +79,7 @@ function s3_uploader_awscors(){
 
   $retVal = array();
   $retVal['policy'] = base64_encode($policy_fixed);
-  $retVal['signature'] = base64_encode(hash_hmac( 'sha1', base64_encode(utf8_encode($policy_fixed)), $aws['services']['default_settings']['params']['secret'],true));
+  $retVal['signature'] = base64_encode(hash_hmac( 'sha1', base64_encode(utf8_encode($policy_fixed)), $environment['aws']['secret'],true));
 
   echo json_encode($retVal);
   exit;
@@ -83,6 +91,7 @@ function s3_uploader_success(){
 	// TODO: see if the archive already has a video file, if it does delete it from S3 and then add the new file
 
 	$file = $_POST['key'];
+	$field = $_POST['acf_name'];
 	$guid = "https://" . $_POST['bucket'] . ".s3.amazonaws.com/" . $_POST['key'];
 	$post_id = $_POST['post_id'];
 	$attachment = array(
@@ -92,29 +101,51 @@ function s3_uploader_success(){
 			'post_status' => 'inherit',
 			'post_parent' => $post_id
 	);
+
+	// create the attachment
 	$attach_id = wp_insert_attachment($attachment, $file, $post_id);
-	update_post_meta($attach_id, 'key', $_POST['key']);
-	update_post_meta($post_id, 's3_file', $attach_id);
+
+	// set the filename on the attachment
+	update_post_meta($attach_id, 's3_uploader_key', $file);
+
+	// set the ACF field on the post using the attachment ID
+	update_post_meta($post_id, $field, $attach_id);
 
 	exit;
 }
 
-// delete files from s3
+// delete attachments from post
 // action: before_delete_post
-function s3_uploader_delete($post_id){
-  $s3_attach_id = get_post_meta($post_id,"s3_file",true);
+function s3_uploader_delete_post($post_id){
+	$attachments = get_children(array(
+		'post_parent' => $post_id,
+		'post_type'   => 'attachment',
+		'numberposts' => -1,
+		'post_status' => 'any'
+	));
 
-	if ( $s3_attach_id ){
-		$s3_file_key = get_post_meta($s3_attach_id,"key",true);
-		if ( $s3_file_key != "" ){
-			$aws = Aws::factory(get_template_directory().'/library/aws-config.php');
-			$client = $aws->get('s3');
-			$deleted = $client->deleteObject(array(
-					'Bucket' => S3_BUCKET,
-					'Key'    => $s3_file_key
-			));
-		}
+	foreach($attachments as $attachment) {
+		wp_delete_attachment($attachment->ID);
 	}
+}
+
+// delete files from s3
+// action: delete_attachment
+function s3_uploader_delete_attachment($post_id){
+	global $environment;
+	$key = get_post_meta($post_id,"s3_uploader_key",true);
+
+	if ( $key && $key != '' ){
+		$credentials = new Credentials($environment['aws']['key'], $environment['aws']['secret']);
+		$s3Client = S3Client::factory(array(
+		    'credentials' => $credentials
+		));
+		$deleted = $s3Client->deleteObject(array(
+				'Bucket' => $environment['aws']['s3']['bucket'],
+				'Key'    => $key
+		));
+	}
+
 }
 
 // catch query vars

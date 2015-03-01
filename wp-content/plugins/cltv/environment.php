@@ -5,38 +5,27 @@
     define('WP_ENV', 'production');
   }
 
-  $aws = array(
-      // Bootstrap the configuration file with AWS specific features
-      'includes' => array('_aws'),
-      'services' => array(
-          // All AWS clients extend from 'default_settings'. Here we are
-          // overriding 'default_settings' with our default credentials and
-          // providing a default region setting.
-          'default_settings' => array(
-              'params' => array(
-                  'key'    => 'AKIAJCNKDOZGQCE666OA',
-                  'secret' => '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'
-              )
-          )
-      )
-  );
-
   $s3 = array(
     'development' => array(
-      'bucket' => 'cltv-recordings-dev',
+      'bucket' => 'cltv-archives-dev',
       'dir' => '',
       'guid_prefix' => 'http://recordingsdev.citylinktv.com/'
     ),
     'production' => array(
-      'bucket' => 'cltv-recordings',
+      'bucket' => 'cltv-archives',
       'dir' => '',
       'guid_prefix' => 'http://recordings.citylinktv.com/'
     )
   );
 
-  return array(
-    'aws' => $aws,
+  $aws = array(
+    'key'    => 'AKIAIH3MCUF7CW2LMQ6Q',
+    'secret' => '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',
     's3' => $s3[WP_ENV]
+  );
+
+  return array(
+    'aws' => $aws
   );
 
 ?>

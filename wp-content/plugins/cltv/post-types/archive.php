@@ -34,8 +34,7 @@ function custom_post_archive_init() {
 			'capability_type' => 'archive',
 			'hierarchical' => false,
 			'supports' => array( 'title', 'author', 'thumbnail'),
-			'map_meta_cap' => true,
-			'register_meta_box_cb' => 'cltv_archive_metaboxes'
+			'map_meta_cap' => true
 	 	) /* end of options */
 	); /* end of register post type */
 }

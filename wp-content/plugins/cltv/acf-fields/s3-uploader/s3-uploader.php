@@ -40,7 +40,7 @@ class acf_S3Uploader extends acf_field
   function create_field( $field )
   {
     global $post;
-    $s3_attach_id = get_post_meta($post->ID,"video_file",true);
+    $s3_attach_id = get_post_meta($post->ID,$field['_name'],true);
   	$s3_file = wp_get_attachment_url($s3_attach_id);
 
     include(dirname(__File__).'/template.php');

@@ -155,8 +155,6 @@ do_meta_boxes(null, 'normal', $comment);
 </div>
 </form>
 
-<?php if ( ! wp_is_mobile() ) : ?>
 <script type="text/javascript">
 try{document.post.name.focus();}catch(e){}
 </script>
-<?php endif;

@@ -308,11 +308,9 @@ switch($step) {
 <p class="step"><a href="<?php echo $install; ?>" class="button button-large"><?php _e( 'Run the install' ); ?></a></p>
 <script>
 (function(){
-if ( ! /iPad|iPod|iPhone/.test( navigator.userAgent ) ) {
-	var el = document.getElementById('wp-config');
-	el.focus();
-	el.select();
-}
+var el=document.getElementById('wp-config');
+el.focus();
+el.select();
 })();
 </script>
 <?php

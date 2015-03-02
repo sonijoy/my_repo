@@ -11,13 +11,13 @@
  * Replaces common plain text characters into formatted entities
  *
  * As an example,
- *
- *     'cause today's effort makes it worth tomorrow's "holiday" ...
- *
+ * <code>
+ * 'cause today's effort makes it worth tomorrow's "holiday"...
+ * </code>
  * Becomes:
- *
- *     &#8217;cause today&#8217;s effort makes it worth tomorrow&#8217;s &#8220;holiday&#8221; &#8230;
- *
+ * <code>
+ * &#8217;cause today&#8217;s effort makes it worth tomorrow&#8217;s &#8220;holiday&#8221;&#8230;
+ * </code>
  * Code within certain html blocks are skipped.
  *
  * @since 0.71
@@ -215,30 +215,26 @@ function wptexturize($text, $reset = false) {
 		.     '-(?!->)' // Dash not followed by end of comment.
 		.     '[^\-]*+' // Consume non-dashes.
 		. ')*+'         // Loop possessively.
-		. '(?:-->)?';   // End of comment. If not found, match all input.
+		. '-->';        // End of comment.
 
-	$shortcode_regex =
-		  '\['              // Find start of shortcode.
-		. '[\/\[]?'         // Shortcodes may begin with [/ or [[
-		. $tagregexp        // Only match registered shortcodes, because performance.
-		. '(?:'
-		.     '[^\[\]<>]+'  // Shortcodes do not contain other shortcodes. Quantifier critical.
+	$regex =  '/('			// Capture the entire match.
+		.	'<'		// Find start of element.
+		.	'(?(?=!--)'	// Is this a comment?
+		.		$comment_regex	// Find end of comment
+		.	'|'
+		.		'[^>]+>'	// Find end of element
+		.	')'
 		. '|'
-		.     '<[^\[\]>]*>' // HTML elements permitted. Prevents matching ] before >.
-		. ')*+'             // Possessive critical.
-		. '\]'              // Find end of shortcode.
-		. '\]?';            // Shortcodes may end with ]]
-
-	$regex =
-		  '/('                   // Capture the entire match.
-		.     '<'                // Find start of element.
-		.     '(?(?=!--)'        // Is this a comment?
-		.         $comment_regex // Find end of comment.
-		.     '|'
-		.         '[^>]+>'       // Find end of element.
-		.     ')'
-		. '|'
-		.     $shortcode_regex   // Find shortcodes.
+		.	'\['		// Find start of shortcode.
+		.	'[\/\[]?'	// Shortcodes may begin with [/ or [[
+		.	$tagregexp	// Only match registered shortcodes, because performance.
+		.	'(?:'
+		.		'[^\[\]<>]+'	// Shortcodes do not contain other shortcodes. Quantifier critical.
+		.	'|'
+		.		'<[^\[\]>]*>' 	// HTML elements permitted. Prevents matching ] before >.
+		.	')*+'		// Possessive critical.
+		.	'\]'		// Find end of shortcode.
+		.	'\]?'		// Shortcodes may end with ]]
 		. ')/s';
 
 	$textarr = preg_split( $regex, $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY );
@@ -246,31 +242,30 @@ function wptexturize($text, $reset = false) {
 	foreach ( $textarr as &$curl ) {
 		// Only call _wptexturize_pushpop_element if $curl is a delimiter.
 		$first = $curl[0];
-		if ( '<' === $first && '<!--' === substr( $curl, 0, 4 ) ) {
-			// This is an HTML comment delimeter.
+		if ( '<' === $first && '>' === substr( $curl, -1 ) ) {
+			// This is an HTML delimiter.
 
-			continue;
-
-		} elseif ( '<' === $first && '>' === substr( $curl, -1 ) ) {
-			// This is an HTML element delimiter.
-
-			_wptexturize_pushpop_element( $curl, $no_texturize_tags_stack, $no_texturize_tags );
+			if ( '<!--' !== substr( $curl, 0, 4 ) ) {
+				_wptexturize_pushpop_element( $curl, $no_texturize_tags_stack, $no_texturize_tags );
+			}
 
 		} elseif ( '' === trim( $curl ) ) {
 			// This is a newline between delimiters.  Performance improves when we check this.
 
 			continue;
 
-		} elseif ( '[' === $first && 1 === preg_match( '/^' . $shortcode_regex . '$/', $curl ) ) {
+		} elseif ( '[' === $first && 1 === preg_match( '/^\[\/?' . $tagregexp . '(?:[^\[\]<>]+|<[^\[\]>]*>)*+\]$/', $curl ) ) {
 			// This is a shortcode delimiter.
 
-			if ( '[[' !== substr( $curl, 0, 2 ) && ']]' !== substr( $curl, -2 ) ) {
-				// Looks like a normal shortcode.
-				_wptexturize_pushpop_element( $curl, $no_texturize_shortcodes_stack, $no_texturize_shortcodes );
-			} else {
-				// Looks like an escaped shortcode.
-				continue;
-			}
+			_wptexturize_pushpop_element( $curl, $no_texturize_shortcodes_stack, $no_texturize_shortcodes );
+
+		} elseif ( '[' === $first && 1 === preg_match( '/^\[[\/\[]?' . $tagregexp . '(?:[^\[\]<>]+|<[^\[\]>]*>)*+\]\]?$/', $curl ) ) {
+			// This is an escaped shortcode delimiter.
+
+			// Do not texturize.
+			// Do not push to the shortcodes stack.
+
+			continue;
 
 		} elseif ( empty( $no_texturize_shortcodes_stack ) && empty( $no_texturize_tags_stack ) ) {
 			// This is neither a delimiter, nor is this content inside of no_texturize pairs.  Do texturize.
@@ -288,9 +283,9 @@ function wptexturize($text, $reset = false) {
 			}
 
 			// 9x9 (times), but never 0x9999
-			if ( 1 === preg_match( '/(?<=\d)x\d/', $curl ) ) {
+			if ( 1 === preg_match( '/(?<=\d)x-?\d/', $curl ) ) {
 				// Searching for a digit is 10 times more expensive than for the x, so we avoid doing this one!
-				$curl = preg_replace( '/\b(\d(?(?<=0)[\d\.,]+|[\d\.,]*))x(\d[\d\.,]*)\b/', '$1&#215;$2', $curl );
+				$curl = preg_replace( '/\b(\d(?(?<=0)[\d\.,]+|[\d\.,]*))x(-?\d[\d\.,]*)\b/', '$1&#215;$2', $curl );
 			}
 		}
 	}
@@ -312,7 +307,7 @@ function wptexturize($text, $reset = false) {
  * @since 2.9.0
  * @access private
  *
- * @param string $text Text to check. Must be a tag like `<html>` or `[shortcode]`.
+ * @param string $text Text to check. Must be a tag like <html> or [shortcode].
  * @param array $stack List of open tag elements.
  * @param array $disabled_elements The tag names to match against. Spaces are not allowed in tag names.
  */
@@ -331,7 +326,7 @@ function _wptexturize_pushpop_element($text, &$stack, $disabled_elements) {
 
 	// Parse out the tag name.
 	$space = strpos( $text, ' ' );
-	if ( false === $space ) {
+	if ( FALSE === $space ) {
 		$space = -1;
 	} else {
 		$space -= $name_offset;
@@ -480,7 +475,7 @@ function _autop_newline_preservation_helper( $matches ) {
 /**
  * Don't auto-p wrap shortcodes that stand alone
  *
- * Ensures that shortcodes are not wrapped in `<p>...</p>`.
+ * Ensures that shortcodes are not wrapped in <<p>>...<</p>>.
  *
  * @since 2.9.0
  *
@@ -577,7 +572,7 @@ function seems_utf8($str) {
  * @access private
  *
  * @param string $string The text which is to be encoded.
- * @param int $quote_style Optional. Converts double quotes if set to ENT_COMPAT, both single and double if set to ENT_QUOTES or none if set to ENT_NOQUOTES. Also compatible with old values; converting single quotes if set to 'single', double if set to 'double' or both if otherwise set. Default is ENT_NOQUOTES.
+ * @param mixed $quote_style Optional. Converts double quotes if set to ENT_COMPAT, both single and double if set to ENT_QUOTES or none if set to ENT_NOQUOTES. Also compatible with old values; converting single quotes if set to 'single', double if set to 'double' or both if otherwise set. Default is ENT_NOQUOTES.
  * @param string $charset Optional. The character encoding of the string. Default is false.
  * @param boolean $double_encode Optional. Whether to encode existing html entities. Default is false.
  * @return string The encoded text with HTML entities.
@@ -1072,10 +1067,10 @@ function sanitize_file_name( $filename ) {
 	 */
 	$special_chars = apply_filters( 'sanitize_file_name_chars', $special_chars, $filename_raw );
 	$filename = preg_replace( "#\x{00a0}#siu", ' ', $filename );
-	$filename = str_replace( $special_chars, '', $filename );
+	$filename = str_replace($special_chars, '', $filename);
 	$filename = str_replace( array( '%20', '+' ), '-', $filename );
-	$filename = preg_replace( '/[\r\n\t -]+/', '-', $filename );
-	$filename = trim( $filename, '.-_' );
+	$filename = preg_replace('/[\s-]+/', '-', $filename);
+	$filename = trim($filename, '.-_');
 
 	// Split the filename into a base and extension[s]
 	$parts = explode('.', $filename);
@@ -1234,6 +1229,7 @@ function sanitize_title( $title, $fallback_title = '', $context = 'save' ) {
  * Used for querying the database for a value from URL.
  *
  * @since 3.1.0
+ * @uses sanitize_title()
  *
  * @param string $title The string to be sanitized.
  * @return string The sanitized string.
@@ -1317,7 +1313,7 @@ function sanitize_title_with_dashes( $title, $raw_title = '', $context = 'displa
  * @since 2.5.1
  *
  * @param string $orderby Order by string to be checked.
- * @return false|string Returns the order by clause if it is a match, false otherwise.
+ * @return string|bool Returns the order by clause if it is a match, false otherwise.
  */
 function sanitize_sql_orderby( $orderby ){
 	preg_match('/^\s*([a-z0-9_]+(\s+(ASC|DESC))?(\s*,\s*|\s*$))+|^\s*RAND\(\s*\)\s*$/i', $orderby, $obmatches);
@@ -1366,7 +1362,7 @@ function sanitize_html_class( $class, $fallback = '' ) {
 /**
  * Converts a number of characters from a string.
  *
- * Metadata tags `<title>` and `<category>` are removed, `<br>` and `<hr>` are
+ * Metadata tags <<title>> and <<category>> are removed, <<br>> and <<hr>> are
  * converted into correct XHTML and Unicode characters are converted to the
  * valid range.
  *
@@ -1935,17 +1931,19 @@ function make_clickable( $text ) {
  *
  * Input string must have no null characters (or eventual transformations on output chunks must not care about null characters)
  *
- *     _split_str_by_whitespace( "1234 67890 1234 67890a cd 1234   890 123456789 1234567890a    45678   1 3 5 7 90 ", 10 ) ==
- *     array (
- *         0 => '1234 67890 ',  // 11 characters: Perfect split
- *         1 => '1234 ',        //  5 characters: '1234 67890a' was too long
- *         2 => '67890a cd ',   // 10 characters: '67890a cd 1234' was too long
- *         3 => '1234   890 ',  // 11 characters: Perfect split
- *         4 => '123456789 ',   // 10 characters: '123456789 1234567890a' was too long
- *         5 => '1234567890a ', // 12 characters: Too long, but no inner whitespace on which to split
- *         6 => '   45678   ',  // 11 characters: Perfect split
- *         7 => '1 3 5 7 90 ',  // 11 characters: End of $string
- *     );
+ * <code>
+ * _split_str_by_whitespace( "1234 67890 1234 67890a cd 1234   890 123456789 1234567890a    45678   1 3 5 7 90 ", 10 ) ==
+ * array (
+ *   0 => '1234 67890 ',  // 11 characters: Perfect split
+ *   1 => '1234 ',        //  5 characters: '1234 67890a' was too long
+ *   2 => '67890a cd ',   // 10 characters: '67890a cd 1234' was too long
+ *   3 => '1234   890 ',  // 11 characters: Perfect split
+ *   4 => '123456789 ',   // 10 characters: '123456789 1234567890a' was too long
+ *   5 => '1234567890a ', // 12 characters: Too long, but no inner whitespace on which to split
+ *   6 => '   45678   ',  // 11 characters: Perfect split
+ *   7 => '1 3 5 7 9',    //  9 characters: End of $string
+ * );
+ * </code>
  *
  * @since 3.4.0
  * @access private
@@ -2019,7 +2017,7 @@ function wp_rel_nofollow_callback( $matches ) {
  *
  * Callback handler for {@link convert_smilies()}.
  * Looks up one smiley code in the $wpsmiliestrans global array and returns an
- * `<img>` string for that smiley.
+ * <img> string for that smiley.
  *
  * @global array $wpsmiliestrans
  * @since 2.8.0
@@ -2219,7 +2217,7 @@ function wp_iso_descrambler($string) {
  * @access private
  *
  * @param array $match The preg_replace_callback matches array
- * @return string Converted chars
+ * @return array Converted chars
  */
 function _wp_iso_convert( $match ) {
 	return chr( hexdec( strtolower( $match[1] ) ) );
@@ -2235,6 +2233,7 @@ function _wp_iso_convert( $match ) {
  *
  * @since 1.2.0
  *
+ * @uses get_option() to retrieve the value of 'gmt_offset'.
  * @param string $string The date to be converted.
  * @param string $format The format string for the returned date (default is Y-m-d H:i:s)
  * @return string GMT version of the date provided.
@@ -3027,6 +3026,8 @@ function esc_sql( $data ) {
  * is applied to the returned cleaned URL.
  *
  * @since 2.8.0
+ * @uses wp_kses_bad_protocol() To only permit protocols in the URL set
+ *		via $protocols or the common ones set in the function.
  *
  * @param string $url The URL to be cleaned.
  * @param array $protocols Optional. An array of acceptable protocols.
@@ -3084,6 +3085,7 @@ function esc_url( $url, $protocols = null, $_context = 'display' ) {
  * Performs esc_url() for database usage.
  *
  * @since 2.8.0
+ * @uses esc_url()
  *
  * @param string $url The URL to be cleaned.
  * @param array $protocols An array of acceptable protocols.
@@ -3240,13 +3242,12 @@ function tag_escape($tag_name) {
  * beginning, so it isn't a true relative link, but from the web root base.
  *
  * @since 2.1.0
- * @since 4.1.0 Support was added for relative URLs.
  *
  * @param string $link Full URL path.
  * @return string Absolute path.
  */
 function wp_make_link_relative( $link ) {
-	return preg_replace( '|^(https?:)?//[^/]+(/.*)|i', '$2', $link );
+	return preg_replace( '|https?://[^/]+(/.*)|i', '$1', $link );
 }
 
 /**
@@ -3480,6 +3481,7 @@ function wp_parse_str( $string, &$array ) {
  *
  * KSES already converts lone greater than signs.
  *
+ * @uses wp_pre_kses_less_than_callback in the callback function.
  * @since 2.3.0
  *
  * @param string $text Text to be converted.
@@ -3492,6 +3494,7 @@ function wp_pre_kses_less_than( $text ) {
 /**
  * Callback function used by preg_replace.
  *
+ * @uses esc_html to format the $matches text.
  * @since 2.3.0
  *
  * @param array $matches Populated by matches to preg_replace.
@@ -3694,18 +3697,17 @@ function _links_add_base($m) {
 	return $m[1] . '=' . $m[2] .
 		( preg_match( '#^(\w{1,20}):#', $m[3], $protocol ) && in_array( $protocol[1], wp_allowed_protocols() ) ?
 			$m[3] :
-			WP_HTTP::make_absolute_url( $m[3], $_links_add_base )
-		)
+			path_join( $_links_add_base, $m[3] ) )
 		. $m[2];
 }
 
 /**
  * Adds a Target attribute to all links in passed content.
  *
- * This function by default only applies to `<a>` tags, however this can be
+ * This function by default only applies to <a> tags, however this can be
  * modified by the 3rd param.
  *
- * *NOTE:* Any current target attributed will be stripped and replaced.
+ * <b>NOTE:</b> Any current target attributed will be stripped and replaced.
  *
  * @since 2.7.0
  *
@@ -3756,7 +3758,7 @@ function normalize_whitespace( $str ) {
  * Properly strip all HTML tags including script and style
  *
  * This differs from strip_tags() because it removes the contents of
- * the `<script>` and `<style>` tags. E.g. `strip_tags( '<script>something</script>' )`
+ * the <script> and <style> tags. E.g. strip_tags( '<script>something</script>' )
  * will return 'something'. wp_strip_all_tags will return ''
  *
  * @since 2.9.0

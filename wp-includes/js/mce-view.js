@@ -14,9 +14,6 @@ window.wp = window.wp || {};
 	var views = {},
 		instances = {},
 		media = wp.media,
-		mediaWindows = [],
-		windowIdx = 0,
-		waitInterval = 50,
 		viewOptions = ['encodedText'];
 
 	// Create the `wp.mce` object if necessary.
@@ -56,9 +53,9 @@ window.wp = window.wp || {};
 				this.setContent(
 					'<p class="wpview-selection-before">\u00a0</p>' +
 					'<div class="wpview-body" contenteditable="false">' +
-						'<div class="toolbar mce-arrow-down">' +
+						'<div class="toolbar">' +
 							( _.isFunction( views[ this.type ].edit ) ? '<div class="dashicons dashicons-edit edit"></div>' : '' ) +
-							'<div class="dashicons dashicons-no remove"></div>' +
+							'<div class="dashicons dashicons-no-alt remove"></div>' +
 						'</div>' +
 						'<div class="wpview-content wpview-type-' + this.type + '">' +
 							( this.getHtml() || this.loadingPlaceholder() ) +
@@ -231,7 +228,7 @@ window.wp = window.wp || {};
 								iframeDoc.body.className = editor.getBody().className;
 							});
 						}
-					}, waitInterval );
+					}, 50 );
 				});
 			} else {
 				this.setContent( body );
@@ -440,9 +437,8 @@ window.wp = window.wp || {};
 		 *
 		 * @param view {object} being refreshed
 		 * @param text {string} textual representation of the view
-		 * @param force {Boolean} whether to force rendering
 		 */
-		refreshView: function( view, text, force ) {
+		refreshView: function( view, text ) {
 			var encodedText = window.encodeURIComponent( text ),
 				viewOptions,
 				result, instance;
@@ -458,7 +454,7 @@ window.wp = window.wp || {};
 				instances[ encodedText ] = instance;
 			}
 
-			instance.render( force );
+			instance.render();
 		},
 
 		getInstance: function( encodedText ) {
@@ -529,9 +525,7 @@ window.wp = window.wp || {};
 
 					_.each( attachments, function( attachment ) {
 						if ( attachment.sizes ) {
-							if ( attrs.size && attachment.sizes[ attrs.size ] ) {
-								attachment.thumbnail = attachment.sizes[ attrs.size ];
-							} else if ( attachment.sizes.thumbnail ) {
+							if ( attachment.sizes.thumbnail ) {
 								attachment.thumbnail = attachment.sizes.thumbnail;
 							} else if ( attachment.sizes.full ) {
 								attachment.thumbnail = attachment.sizes.full;
@@ -558,10 +552,9 @@ window.wp = window.wp || {};
 			frame = gallery.edit( data );
 
 			frame.state('gallery-edit').on( 'update', function( selection ) {
-				var shortcode = gallery.shortcode( selection ).string(), force;
+				var shortcode = gallery.shortcode( selection ).string();
 				$( node ).attr( 'data-wpview-text', window.encodeURIComponent( shortcode ) );
-				force = ( data !== shortcode );
-				wp.mce.views.refreshView( self, shortcode, force );
+				wp.mce.views.refreshView( self, shortcode );
 			});
 
 			frame.on( 'close', function() {
@@ -594,68 +587,13 @@ window.wp = window.wp || {};
 				this.fetch();
 
 				this.getEditors( function( editor ) {
-					editor.on( 'hide', function () {
-						mediaWindows = [];
-						windowIdx = 0;
-						self.stopPlayers();
-					} );
+					editor.on( 'hide', self.stopPlayers );
 				});
-			},
-
-			pauseOtherWindows: function ( win ) {
-				_.each( mediaWindows, function ( mediaWindow ) {
-					if ( mediaWindow.sandboxId !== win.sandboxId ) {
-						_.each( mediaWindow.mejs.players, function ( player ) {
-							player.pause();
-						} );
-					}
-				} );
-			},
-
-			iframeLoaded: function (win) {
-				return _.bind( function () {
-					var callback;
-					if ( ! win.mejs || _.isEmpty( win.mejs.players ) ) {
-						return;
-					}
-
-					win.sandboxId = windowIdx;
-					windowIdx++;
-					mediaWindows.push( win );
-
-					callback = _.bind( function () {
-						this.pauseOtherWindows( win );
-					}, this );
-
-					if ( ! _.isEmpty( win.mejs.MediaPluginBridge.pluginMediaElements ) ) {
-						_.each( win.mejs.MediaPluginBridge.pluginMediaElements, function ( mediaElement ) {
-							mediaElement.addEventListener( 'play', callback );
-						} );
-					}
-
-					_.each( win.mejs.players, function ( player ) {
-						$( player.node ).on( 'play', callback );
-					}, this );
-				}, this );
-			},
-
-			listenToSandboxes: function () {
-				_.each( this.getNodes(), function ( node ) {
-					var win, iframe = $( '.wpview-sandbox', node ).get( 0 );
-					if ( iframe && ( win = iframe.contentWindow ) ) {
-						$( win ).load( _.bind( this.iframeLoaded( win ), this ) );
-					}
-				}, this );
-			},
-
-			deferredListen: function () {
-				window.setTimeout( _.bind( this.listenToSandboxes, this ), this.getNodes().length * waitInterval );
 			},
 
 			setNodes: function () {
 				if ( this.parsed ) {
 					this.setIframes( this.parsed.head, this.parsed.body );
-					this.deferredListen();
 				} else {
 					this.fail();
 				}
@@ -675,7 +613,6 @@ window.wp = window.wp || {};
 					if ( response ) {
 						self.parsed = response;
 						self.setIframes( response.head, response.body );
-						self.deferredListen();
 					} else {
 						self.fail( true );
 					}

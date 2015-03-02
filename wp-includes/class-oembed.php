@@ -51,9 +51,8 @@ class WP_oEmbed {
 			'#https?://poll\.fm/.*#i'                             => array( 'https://polldaddy.com/oembed/',                      true  ),
 			'#https?://(www\.)?funnyordie\.com/videos/.*#i'       => array( 'http://www.funnyordie.com/oembed',                   true  ),
 			'#https?://(www\.)?twitter\.com/.+?/status(es)?/.*#i' => array( 'https://api.twitter.com/1/statuses/oembed.{format}', true  ),
-			'#https?://vine.co/v/.*#i'                            => array( 'https://vine.co/oembed.{format}',                    true  ),
  			'#https?://(www\.)?soundcloud\.com/.*#i'              => array( 'http://soundcloud.com/oembed',                       true  ),
-			'#https?://(.+?\.)?slideshare\.net/.*#i'              => array( 'https://www.slideshare.net/api/oembed/2',            true  ),
+			'#https?://(www\.)?slideshare\.net/.*#i'              => array( 'https://www.slideshare.net/api/oembed/2',            true  ),
 			'#http://instagr(\.am|am\.com)/p/.*#i'                => array( 'http://api.instagram.com/oembed',                    true  ),
 			'#https?://(www\.)?rdio\.com/.*#i'                    => array( 'http://www.rdio.com/api/oembed/',                    true  ),
 			'#https?://rd\.io/x/.*#i'                             => array( 'http://www.rdio.com/api/oembed/',                    true  ),
@@ -133,8 +132,6 @@ class WP_oEmbed {
 		 * | Polldaddy    | poll.fm              |  Yes  | 4.0.0     |
 		 * | TED          | ted.com              |  Yes  | 4.0.0     |
 		 * | YouTube      | youtube.com/playlist |  Yes  | 4.0.0     |
-		 * | ------------ | -------------------- | ----- | --------- |
-		 * | Vine         | vine.co              |  Yes  | 4.1.0     |
 		 * | ------------ | -------------------- | ----- | --------- |
 		 *
 		 * No longer supported providers:
@@ -270,7 +267,7 @@ class WP_oEmbed {
 	 *
 	 * @param string $url The URL to the content that should be attempted to be embedded.
 	 * @param array $args Optional arguments. Usually passed from a shortcode.
-	 * @return false|string False on failure, otherwise the UNSANITIZED (and potentially unsafe) HTML that should be used to embed.
+	 * @return bool|string False on failure, otherwise the UNSANITIZED (and potentially unsafe) HTML that should be used to embed.
 	 */
 	function get_html( $url, $args = '' ) {
 		$provider = $this->get_provider( $url, $args );
@@ -291,9 +288,9 @@ class WP_oEmbed {
 	}
 
 	/**
-	 * Attempts to discover link tags at the given URL for an oEmbed provider.
+	 * Attempts to find oEmbed provider discovery <link> tags at the given URL.
 	 *
-	 * @param string $url The URL that should be inspected for discovery `<link>` tags.
+	 * @param string $url The URL that should be inspected for discovery <link> tags.
 	 * @return bool|string False on failure, otherwise the oEmbed provider URL.
 	 */
 	public function discover( $url ) {
@@ -496,7 +493,7 @@ class WP_oEmbed {
 	 *
 	 * @param object $data A data object result from an oEmbed provider.
 	 * @param string $url The URL to the content that is desired to be embedded.
-	 * @return false|string False on error, otherwise the HTML needed to embed.
+	 * @return bool|string False on error, otherwise the HTML needed to embed.
 	 */
 	public function data2html( $data, $url ) {
 		if ( ! is_object( $data ) || empty( $data->type ) )
@@ -547,13 +544,13 @@ class WP_oEmbed {
 	/**
 	 * Strip any new lines from the HTML.
 	 *
-	 * @access public
+	 * @access private
 	 * @param string $html Existing HTML.
 	 * @param object $data Data object from WP_oEmbed::data2html()
 	 * @param string $url The original URL passed to oEmbed.
 	 * @return string Possibly modified $html
 	 */
-	public function _strip_newlines( $html, $data, $url ) {
+	private function _strip_newlines( $html, $data, $url ) {
 		if ( false !== strpos( $html, "\n" ) )
 			$html = str_replace( array( "\r\n", "\n" ), '', $html );
 
@@ -568,6 +565,7 @@ class WP_oEmbed {
  * @access private
  *
  * @see WP_oEmbed
+ * @uses WP_oEmbed
  *
  * @return WP_oEmbed object.
  */

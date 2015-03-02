@@ -7,10 +7,6 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 	var DOM = tinymce.DOM, wpAdvButton, modKey, style,
 		last = 0;
 
-	if ( typeof window.jQuery !== 'undefined' ) {
-		window.jQuery( document ).triggerHandler( 'tinymce-editor-setup', [ editor ] );
-	}
-
 	function toggleToolbars( state ) {
 		var iframe, initial, toolbars,
 			pixels = 0;
@@ -193,8 +189,8 @@ tinymce.PluginManager.add( 'wordpress', function( editor ) {
 			title: 'Keyboard Shortcuts',
 			width: 450,
 			height: 420,
-			classes: 'wp-help',
-			buttons: { text: 'Close', onclick: 'close' }
+			inline: 1,
+			classes: 'wp-help'
 		});
 	});
 

@@ -1,9 +1,7 @@
 <?php
-require_once(get_template_directory().'/library/aws-sdk-php/vendor/autoload.php');
+
 use Aws\S3\S3Client;
 use Aws\Common\Credentials\Credentials;
-
-$environment = require_once(dirname(__File__).'/../../environment.php');
 
 // endpoint for the aws cors ajax call by fineuploader
 add_action("init", "s3_uploader_init");
@@ -161,7 +159,7 @@ function s3_uploader_awscors_request($vars) {
 // action: acf/register_fields
 function s3_uploader_register_fields()
 {
-	include_once('s3-uploader.php');
+	include_once(dirname(__File__).'/s3-uploader.php');
 }
 
 ?>

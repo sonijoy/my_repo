@@ -1,5 +1,8 @@
 <?php
 
+use Aws\S3\S3Client;
+use Aws\Common\Credentials\Credentials;
+
 /* ------------------------------------------------------------------
 |
 |
@@ -7,8 +10,6 @@
 |
 |
 | ------------------------------------------------------------------- */
-
-require_once(TEMPLATEPATH . "/library/s3_variables.php");
 
 // Redirect after login
 function change_login_redirect( $redirect_to, $request, $user ){
@@ -119,28 +120,6 @@ function remove_channel_cat_meta() {
 }
 add_action( 'admin_menu' , 'remove_channel_cat_meta' );
 
-// Add columns showing video status
-function custom_archive_columns($column_name, $id){
-	$attachment_id = get_post_meta($id, 'video_file', true);
-	switch ($column_name) {
-	    case 'status':
-			if(empty($attachment_id)){
-				echo 'No file selected';
-			} else echo 'Complete';
-	        break;
-	    default:
-	        break;
-    } // end switch
-}
-function archive_columns($columns) {
-	$new_columns = array(
-		'status' => 'Status'
-	);
-    return array_merge($columns, $new_columns);
-}
-add_action('manage_archive_posts_custom_column', 'custom_archive_columns', 10, 2);
-add_filter('manage_archive_posts_columns' , 'archive_columns', 10, 1);
-
 /* ------------------------------------------------------------------
 |
 |
@@ -197,15 +176,16 @@ add_action('admin_menu', 'add_channels_submenu');
 
 // Show a notice if user has no email
 function admin_notice_email(){
+  global $user_email;
+  get_currentuserinfo();
+  if($user_email){
+  	return;
+  }
 	echo '<div class="updated">
 	   <p>Please go to your <a href="/wp-admin/profile.php">profile</a> and update your email address so that viewers can contact you, and so that we can notify you of new updates and features</p>
 	</div>';
 }
-global $user_email;
-get_currentuserinfo();
-if(!$user_email){
-	add_action('admin_notices', 'admin_notice_email');
-}
+add_action('admin_notices', 'admin_notice_email');
 
 /*/ Show a notice if user has no email
 function admin_notice_help(){
@@ -326,9 +306,6 @@ function cltv_update_streamkey($post_id) {
 |
 | -------------------------------------------------------------------*/
 
-require_once(TEMPLATEPATH.'/library/aws-sdk-php/vendor/autoload.php');
-use Aws\Common\Aws;
-
 // delete attached media files when a post gets deleted
 function cltv_delete_post_attachments($post_id) {
     global $wpdb;
@@ -381,7 +358,7 @@ function cltv_create_archive($channel, $file, $status='draft') {
 
     // GET THUMBNAIL USING FFMPEG /usr/bin/ffmpeg -i <input file> -vf 'thumbnail' -vframe <# frames to extract> -an -ss <# seconds to skip forward> <output file>
     // vf 'thumbnail' - video filter to 'pick the best thumbnail'
-    exec("/usr/bin/ffmpeg -i " . S3_LOCAL_DIR . DIRECTORY_SEPARATOR . $file . " -vf 'thumbnail' -vframes 1 -an -ss 30 " . $thumbnail_tmp_file);
+    exec("/usr/bin/ffmpeg -i " . $environment['aws']['s3']['dir'] . DIRECTORY_SEPARATOR . $file . " -vf 'thumbnail' -vframes 1 -an -ss 30 " . $thumbnail_tmp_file);
 
 	// media_handle_sideload will create the various sizes of images and move them to the wordpress upload folder
     $thumbnail_attach_id = media_handle_sideload( array("name"=>$thumbnail_file,"tmp_name"=>$thumbnail_tmp_file), $post_id, "Video Thumbnail" );
@@ -389,34 +366,14 @@ function cltv_create_archive($channel, $file, $status='draft') {
   }
 }
 
-/*/ rename an s3 object
-function cltv_rename_s3_object($src) {
-  $aws = Aws::factory(TEMPLATEPATH.'/library/aws-config.php');
-  $client = $aws->get('s3');
-
-  $path_parts = pathinfo($src);
-  $new_src = $path_parts['filename'].'.'.$path_parts['extension'];
-
-  // Copy the original object
-  $client->copyObject(array(
-    'Bucket'     => S3_BUCKET,
-    'Key'        => $new_src,
-    'CopySource' => S3_BUCKET . "/$src",
-  ));
-
-  // Delete the original
-  $deleted = $client->deleteObject(array(
-    'Bucket' => S3_BUCKET,
-    'Key'    => $src
-  ));
-  return $new_src;
-}*/
-
 // find recorded video files and turn them into archives
 function cltv_find_new_archives($columns) {
 	$ignore_files = array("jpg","gif","png");
-  $aws = Aws::factory(TEMPLATEPATH.'/library/aws-config.php');
-  $client = $aws->get('s3');
+  global $environment;
+  $credentials = new Credentials($environment['aws']['key'], $environment['aws']['secret']);
+  $s3Client = S3Client::factory(array(
+      'credentials' => $credentials
+  ));
 
   // get user's channels
   global $current_user;
@@ -434,8 +391,8 @@ function cltv_find_new_archives($columns) {
       return $columns;
     }
 
-    $iterator = $client->getIterator('ListObjects', array(
-      'Bucket' => S3_BUCKET,
+    $iterator = $s3Client->getIterator('ListObjects', array(
+      'Bucket' => $environment['aws']['s3']['bucket'],
       'Prefix' => $streamkey
     ));
     $recording = false;
@@ -465,7 +422,6 @@ function cltv_find_new_archives($columns) {
       }
       // not recording and no archives for this file, so let's fuckin make one
       else {
-        //$new_file = cltv_rename_s3_object($object['Key']);
         cltv_create_archive($channel, $object['Key']);
       }
     }

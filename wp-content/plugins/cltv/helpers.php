@@ -179,7 +179,7 @@ function cltv_update_popular_cache(){
 	$wpdb->query( "DELETE FROM popular_channels WHERE last_update < " . ( time() - ( 86400 * 2 ) ) );
 
 	try {
-		include_once('gapi.class.php');
+		include_once(dirname(__File__).'/vendor/gapi.class.php');
 		// create the GAPI object
 		$email_address = 'info@citylinktv.com';
 		$password = 'Joshua06';

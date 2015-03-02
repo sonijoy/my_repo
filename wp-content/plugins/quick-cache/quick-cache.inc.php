@@ -162,6 +162,7 @@ namespace quick_cache
 
 					'version'                          => $this->version,
 					'crons_setup'                      => '0', // `0` or timestamp.
+				   'zencache_notice1_enqueued'        => '0', // `0` or `1` if already enqueued
 
 					/* Primary switch; enable? */
 
@@ -369,6 +370,14 @@ namespace quick_cache
 			 */
 			public function check_version()
 			{
+				if(!$this->options['zencache_notice1_enqueued'])
+				{
+					$this->enqueue_notice(__('<strong>NOTICE:</strong> <a href="http://zencache.com/announcing-zencache-formerly-quick-cache/" target="_blank">Quick Cache is now ZenCache</a>! No further updates will be made to Quick Cache after March 6th, 2015; see <a href="http://zencache.com/kb-article/how-to-migrate-from-quick-cache-lite-to-zencache-lite/" target="_blank">migration instructions</a>.', $this->text_domain), 'persistent-class-update-nag-zencache-notice1', TRUE);
+					$this->options['zencache_notice1_enqueued'] = '1';
+					update_option(__NAMESPACE__.'_options', $this->options);
+					if(is_multisite()) update_site_option(__NAMESPACE__.'_options', $this->options);
+				}
+
 				$current_version = $prev_version = $this->options['version'];
 				if(version_compare($current_version, $this->version, '>='))
 					return; // Nothing to do; we've already upgraded them.
@@ -632,9 +641,15 @@ namespace quick_cache
 						$_dismiss     = add_query_arg(urlencode_deep(array(__NAMESPACE__ => array('dismiss_notice' => array('key' => $_key)), '_wpnonce' => wp_create_nonce())));
 						$_dismiss     = '<a style="'.esc_attr($_dismiss_css).'" href="'.esc_attr($_dismiss).'">'.__('dismiss &times;', $this->text_domain).'</a>';
 					}
-					echo apply_filters(__METHOD__.'__notice', '<div class="updated"><p>'.$_notice.$_dismiss.'</p></div>', get_defined_vars());
+					if(strpos($_key, 'class-update-nag') !== FALSE)
+						$_class = 'update-nag';
+					else if(strpos($_key, 'class-error') !== FALSE)
+						$_class = 'error';
+					else
+						$_class = 'updated';
+					echo apply_filters(__METHOD__.'__notice', '<div class="'.$_class.'"><p>'.$_notice.$_dismiss.'</p></div>', get_defined_vars());
 				}
-				unset($_key, $_notice, $_dismiss_css, $_dismiss); // Housekeeping.
+				unset($_key, $_notice, $_dismiss_css, $_dismiss, $_class); // Housekeeping.
 			}
 
 			/**
@@ -1960,27 +1975,6 @@ namespace quick_cache
 			}
 
 			/**
-			 * Finds absolute server path to `/wp-config.php` file.
-			 *
-			 * @since 140422 First documented version.
-			 *
-			 * @return string Absolute server path to `/wp-config.php` file;
-			 *    else an empty string if unable to locate the file.
-			 */
-			public function find_wp_config_file()
-			{
-				if(is_file($abspath_wp_config = ABSPATH.'wp-config.php'))
-					$wp_config_file = $abspath_wp_config;
-
-				else if(is_file($dirname_abspath_wp_config = dirname(ABSPATH).'/wp-config.php'))
-					$wp_config_file = $dirname_abspath_wp_config;
-
-				else $wp_config_file = ''; // Unable to find `/wp-config.php` file.
-
-				return apply_filters(__METHOD__, $wp_config_file, get_defined_vars());
-			}
-
-			/**
 			 * Adds `define('WP_CACHE', TRUE);` to the `/wp-config.php` file.
 			 *
 			 * @since 140422 First documented version.
@@ -2117,7 +2111,7 @@ namespace quick_cache
 				if(!$this->remove_advanced_cache())
 					return FALSE; // Still exists.
 
-				$cache_dir               = $this->cache_dir(); // Current cache directory.
+				$cache_dir               = $this->cache_dir();
 				$advanced_cache_file     = WP_CONTENT_DIR.'/advanced-cache.php';
 				$advanced_cache_template = dirname(__FILE__).'/includes/advanced-cache.tpl.php';
 
@@ -2169,19 +2163,21 @@ namespace quick_cache
 				if(!file_put_contents($advanced_cache_file, $advanced_cache_contents))
 					return FALSE; // Failure; could not write file.
 
-				if(!is_dir($cache_dir))
-					mkdir($cache_dir, 0775, TRUE);
+				$cache_lock = $this->cache_lock(); // Lock cache.
+
+				if(!is_dir($cache_dir)) mkdir($cache_dir, 0775, TRUE);
 
 				if(is_writable($cache_dir) && !is_file($cache_dir.'/.htaccess'))
 					file_put_contents($cache_dir.'/.htaccess', $this->htaccess_deny);
 
-				if(!is_file($cache_dir.'/.htaccess'))
-					return NULL; // Failure; could not write .htaccess file. Special return value (NULL) in this case.
+				if(!is_dir($cache_dir) || !is_writable($cache_dir) || !is_file($cache_dir.'/.htaccess') || !file_put_contents($cache_dir.'/qc-advanced-cache', time()))
+				{
+					$this->cache_unlock($cache_lock); // Unlock cache.
+					return NULL; // Special return value (NULL) in this case.
+				}
+				$this->cache_unlock($cache_lock); // Unlock cache.
 
-				if(!is_dir($cache_dir) || !is_writable($cache_dir) || !file_put_contents($cache_dir.'/qc-advanced-cache', time()))
-					return NULL; // Failure; could not write cache entry. Special return value (NULL) in this case.
-
-				return TRUE; // All done :-)
+				return TRUE; // Success!
 			}
 
 			/**
@@ -2309,10 +2305,10 @@ namespace quick_cache
 
 				if(!is_multisite()) return $value; // N/A.
 
-				$cache_dir = $this->cache_dir(); // cache dir.
+				$cache_dir  = $this->cache_dir(); // Cache dir.
+				$cache_lock = $this->cache_lock(); // Lock.
 
-				if(!is_dir($cache_dir))
-					mkdir($cache_dir, 0775, TRUE);
+				if(!is_dir($cache_dir)) mkdir($cache_dir, 0775, TRUE);
 
 				if(is_writable($cache_dir) && !is_file($cache_dir.'/.htaccess'))
 					file_put_contents($cache_dir.'/.htaccess', $this->htaccess_deny);
@@ -2328,6 +2324,8 @@ namespace quick_cache
 
 					file_put_contents($cache_dir.'/qc-blog-paths', serialize($paths));
 				}
+				$this->cache_unlock($cache_lock); // Unlock cache directory.
+
 				return $value; // Pass through untouched (always).
 			}
 

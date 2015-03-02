@@ -52,7 +52,7 @@ namespace quick_cache // Root namespace.
 			 *
 			 * @var string Current version of the software.
 			 */
-			public $version = '141110';
+			public $version = '150129.2';
 
 			/**
 			 * Plugin slug; based on `__NAMESPACE__`.
@@ -300,8 +300,26 @@ namespace quick_cache // Root namespace.
 				}
 				if(!($flags & $this::CACHE_PATH_NO_PATH))
 				{
+					if(isset($url['path'][201])) // Extremely long?
+					{
+						$url['_path_tmp'] = '/'; // Initialize tmp path.
+						foreach(explode('/', $url['path']) as $_path_component)
+						{
+							if(!isset($_path_component[0]))
+								continue; // Empty.
+
+							if(isset($_path_component[201]))
+								$_path_component = 'lpc-'.sha1($_path_component);
+							$url['_path_tmp'] .= $_path_component.'/';
+						}
+						$url['path'] = $url['_path_tmp']; // Shorter components.
+						unset($_path_component, $url['_path_tmp']); // Housekeeping.
+
+						if(isset($url['path'][2001])) // Overall path length is very long?
+							$url['path'] = '/lp-'.sha1($url['path']).'/';
+					}
 					if(!empty($url['path']) && strlen($url['path'] = trim($url['path'], '\\/'." \t\n\r\0\x0B")))
-						$cache_path .= $url['path'].'/';
+						$cache_path .= $url['path'].'/'; // Has a path, let's use it :-)
 					else if(!($flags & $this::CACHE_PATH_NO_PATH_INDEX)) $cache_path .= 'index/';
 				}
 				if($this->is_extension_loaded('mbstring') && mb_check_encoding($cache_path, 'UTF-8'))
@@ -322,7 +340,7 @@ namespace quick_cache // Root namespace.
 						if($with_version_salt !== '') // Allow a `0` value if desirable.
 							$cache_path = rtrim($cache_path, '/').'.v/'.str_replace(array('/', '\\'), '-', $with_version_salt).'/';
 				}
-				$cache_path = trim(preg_replace('/\/+/', '/', $cache_path), '/');
+				$cache_path = trim(preg_replace(array('/\/+/', '/\.+/'), array('/', '.'), $cache_path), '/');
 
 				if($flags & $this::CACHE_PATH_ALLOW_WILDCARDS) // Allow `*`?
 					$cache_path = preg_replace('/[^a-z0-9\/.*]/i', '-', $cache_path);
@@ -1299,6 +1317,77 @@ namespace quick_cache // Root namespace.
 				return (string)rtrim($dir_file, DIRECTORY_SEPARATOR.'\\/').'-'.str_replace('.', '', uniqid('', TRUE)).'-tmp';
 			}
 
+			/**
+			 * Acquires system tmp directory path.
+			 *
+			 * @since 141204 Refactoring cache clear/purge routines.
+			 *
+			 * @return string System tmp directory path; else an empty string.
+			 */
+			public function get_tmp_dir()
+			{
+				if(isset(static::$static[__FUNCTION__]))
+					return static::$static[__FUNCTION__];
+
+				static::$static[__FUNCTION__] = ''; // Initialize.
+				$tmp_dir                      = &static::$static[__FUNCTION__];
+
+				if(defined('WP_TEMP_DIR'))
+					$possible_tmp_dirs[] = WP_TEMP_DIR;
+
+				if($this->function_is_possible('sys_get_temp_dir'))
+					$possible_tmp_dirs[] = sys_get_temp_dir();
+
+				if($this->function_is_possible('ini_get'))
+					$possible_tmp_dirs[] = ini_get('upload_tmp_dir');
+
+				if(!empty($_SERVER['TEMP']))
+					$possible_tmp_dirs[] = $_SERVER['TEMP'];
+
+				if(!empty($_SERVER['TMPDIR']))
+					$possible_tmp_dirs[] = $_SERVER['TMPDIR'];
+
+				if(!empty($_SERVER['TMP']))
+					$possible_tmp_dirs[] = $_SERVER['TMP'];
+
+				if(stripos(PHP_OS, 'win') === 0)
+					$possible_tmp_dirs[] = 'C:/Temp';
+
+				if(stripos(PHP_OS, 'win') !== 0)
+					$possible_tmp_dirs[] = '/tmp';
+
+				if(defined('WP_CONTENT_DIR'))
+					$possible_tmp_dirs[] = WP_CONTENT_DIR;
+
+				if(!empty($possible_tmp_dirs)) foreach($possible_tmp_dirs as $_tmp_dir)
+					if(($_tmp_dir = trim((string)$_tmp_dir)) && is_dir($_tmp_dir) && is_writable($_tmp_dir))
+						return ($tmp_dir = $this->n_dir_seps($_tmp_dir));
+				unset($_tmp_dir); // Housekeeping.
+
+				return ($tmp_dir = ''); // Failed to locate.
+			}
+
+			/**
+			 * Finds absolute server path to `/wp-config.php` file.
+			 *
+			 * @since 140422 First documented version.
+			 *
+			 * @return string Absolute server path to `/wp-config.php` file;
+			 *    else an empty string if unable to locate the file.
+			 */
+			public function find_wp_config_file()
+			{
+				if(is_file($abspath_wp_config = ABSPATH.'wp-config.php'))
+					$wp_config_file = $abspath_wp_config;
+
+				else if(is_file($dirname_abspath_wp_config = dirname(ABSPATH).'/wp-config.php'))
+					$wp_config_file = $dirname_abspath_wp_config;
+
+				else $wp_config_file = ''; // Unable to find `/wp-config.php` file.
+
+				return $wp_config_file;
+			}
+
 			/* --------------------------------------------------------------------------------------
 			 * File/directory iteration utilities for Quick Cache.
 			 -------------------------------------------------------------------------------------- */
@@ -1438,11 +1527,22 @@ namespace quick_cache // Root namespace.
 				if($check_max_age && !($max_age = strtotime('-'.$this->options['cache_max_age'])))
 					return $counter; // Invalid cache expiration time.
 
+				/* ------- Begin lock state... ----------- */
+
+				$cache_lock = $this->cache_lock(); // Lock cache writes.
+
+				clearstatcache(); // Clear stat cache to be sure we have a fresh start below.
+
 				$cache_dir_tmp       = $this->add_tmp_suffix($cache_dir); // Temporary directory.
 				$cache_dir_tmp_regex = $regex; // Initialize host-specific regex pattern for the tmp directory.
+
 				$cache_dir_tmp_regex = '\\/'.ltrim($cache_dir_tmp_regex, '^\\/'); // Make sure it begins with an escaped `/`.
 				$cache_dir_tmp_regex = $this->str_ireplace_once(preg_quote($cache_dir.'/', '/'), '', $cache_dir_tmp_regex);
-				$cache_dir_tmp_regex = '/^'.preg_quote($cache_dir_tmp.'/', '/').ltrim($cache_dir_tmp_regex, '^\\/');
+
+				$cache_dir_tmp_regex = ltrim($cache_dir_tmp_regex, '^\\/');
+				if(strpos($cache_dir_tmp_regex, '(?:\/') === 0 || strpos($cache_dir_tmp_regex, '(\/') === 0)
+					$cache_dir_tmp_regex = '/^'.preg_quote($cache_dir_tmp, '/').$cache_dir_tmp_regex;
+				else $cache_dir_tmp_regex = '/^'.preg_quote($cache_dir_tmp.'/', '/').$cache_dir_tmp_regex;
 
 				# if(WP_DEBUG) file_put_contents(WP_CONTENT_DIR.'/qc-debug.log', print_r($regex, TRUE)."\n".print_r($cache_dir_tmp_regex, TRUE)."\n\n", FILE_APPEND);
 				// Uncomment the above line to debug regex pattern matching used by this routine; and others that call upon it.
@@ -1450,35 +1550,70 @@ namespace quick_cache // Root namespace.
 				if(!rename($cache_dir, $cache_dir_tmp)) // Work from tmp directory so deletions are atomic.
 					throw new \exception(sprintf(__('Unable to delete files. Rename failure on directory: `%1$s`.', $this->text_domain), $cache_dir));
 
-				/** @var $_file_dir \RecursiveDirectoryIterator Regex iterator reference for IDEs. */
-				foreach($this->dir_regex_iteration($cache_dir_tmp, $cache_dir_tmp_regex) as $_file_dir)
+				/** @var $_resource \RecursiveDirectoryIterator Regex iterator reference for IDEs. */
+				foreach(($_dir_regex_iteration = $this->dir_regex_iteration($cache_dir_tmp, $cache_dir_tmp_regex)) as $_resource)
 				{
-					if(($_file_dir->isFile() || $_file_dir->isLink()) // Files and/or symlinks only.
+					$_resource_type = $_resource->getType();
+					$_sub_path_name = $_resource->getSubpathname();
+					$_path_name     = $_resource->getPathname();
 
-					   // Don't delete files in the immediate directory; e.g. `qc-advanced-cache` or `.htaccess`, etc.
-					   // Actual `http|https/...` cache files are nested. Files in the immediate directory are for other purposes.
-					   && (strpos($_file_dir->getSubpathname(), '/') !== FALSE)
+					if($_resource_type !== 'dir' && strpos($_sub_path_name, '/') === FALSE)
+						continue; // Don't delete links/files in the immediate directory; e.g. `qc-advanced-cache` or `.htaccess`, etc.
+					// Actual `http|https/...` cache links/files are nested. Links/files in the immediate directory are for other purposes.
 
-					   // If NOT checking max age; or if we ARE, and the file has expired now.
-					   && (!$check_max_age || (!empty($max_age) && $_file_dir->getMTime() < $max_age))
-
-					) // Throw an exception if a deletion failure occurs.
+					switch($_resource_type) // Based on type; i.e. `link`, `file`, `dir`.
 					{
-						if(!unlink($_file_dir->getPathname())) // Throw exception if unable to delete.
-							throw new \exception(sprintf(__('Unable to delete file: `%1$s`.', $this->text_domain), $_file_dir->getPathname()));
-						$counter++; // Increment counter for each file we delete.
-					}
-					else if(!$check_max_age && $regex === '/^.+/i' && $_file_dir->isDir()) // Directories too?
-					{
-						if(!rmdir($_file_dir->getPathname())) // Throw exception if unable to delete the directory itself.
-							throw new \exception(sprintf(__('Unable to delete dir: `%1$s`.', $this->text_domain), $_file_dir->getPathname()));
-						# $counter++; // Increment counter for each directory we delete. ~ NO don't do that here.
+						case 'link': // Symbolic links; i.e. 404 errors.
+
+							if($check_max_age && !empty($max_age) && is_file($_resource->getLinkTarget()))
+								if(($_lstat = lstat($_path_name)) && !empty($_lstat['mtime']))
+									if($_lstat['mtime'] >= $max_age) // Still valid?
+										break; // Break switch handler.
+
+							if(!unlink($_path_name)) // Throw exception if unable to delete.
+								throw new \exception(sprintf(__('Unable to delete symlink: `%1$s`.', $this->text_domain), $_path_name));
+							$counter++; // Increment counter for each link we delete.
+
+							break; // Break switch handler.
+
+						case 'file': // Regular files; i.e. not symlinks.
+
+							if($check_max_age && !empty($max_age)) // Should check max age?
+								if($_resource->getMTime() >= $max_age) // Still valid?
+									break; // Break switch handler.
+
+							if(!unlink($_path_name)) // Throw exception if unable to delete.
+								throw new \exception(sprintf(__('Unable to delete file: `%1$s`.', $this->text_domain), $_path_name));
+							$counter++; // Increment counter for each file we delete.
+
+							break; // Break switch handler.
+
+						case 'dir': // A regular directory; i.e. not a symlink.
+
+							if($regex !== '/^.+/i') // Deleting everything?
+								break; // Break switch handler. Not deleting everything.
+
+							if($check_max_age && !empty($max_age)) // Should check max age?
+								break; // Break switch handler. Not deleting everything in this case.
+
+							if(!rmdir($_path_name)) // Throw exception if unable to delete the directory itself.
+								throw new \exception(sprintf(__('Unable to delete dir: `%1$s`.', $this->text_domain), $_path_name));
+							# $counter++; // Increment counter for each directory we delete. ~ NO don't do that here.
+
+							break; // Break switch handler.
+
+						default: // Something else that is totally unexpected here.
+							throw new \exception(sprintf(__('Unexpected resource type: `%1$s`.', $this->text_domain), $_resource_type));
 					}
 				}
-				unset($_file_dir); // Housekeeping after this `foreach()` loop.
+				unset($_dir_regex_iteration, $_resource, $_resource_type, $_sub_path_name, $_path_name, $_lstat); // Housekeeping.
 
 				if(!rename($cache_dir_tmp, $cache_dir)) // Deletions are atomic; restore original directory now.
 					throw new \exception(sprintf(__('Unable to delete files. Rename failure on tmp directory: `%1$s`.', $this->text_domain), $cache_dir_tmp));
+
+				/* ------- End lock state... ------------- */
+
+				$this->cache_unlock($cache_lock); // Unlock cache directory.
 
 				return $counter; // Total files deleted by this routine.
 			}
@@ -1534,6 +1669,12 @@ namespace quick_cache // Root namespace.
 				if($check_max_age && !($max_age = strtotime('-'.$this->options['cache_max_age'])))
 					return $counter; // Invalid cache expiration time.
 
+				/* ------- Begin lock state... ----------- */
+
+				$cache_lock = $this->cache_lock(); // Lock cache writes.
+
+				clearstatcache(); // Clear stat cache to be sure we have a fresh start below.
+
 				foreach(array('http', 'https') as $_host_scheme) // Consider `http|https` schemes.
 
 					/* This multi-scheme iteration could (alternatively) be accomplished via regex `\/https?\/`.
@@ -1554,10 +1695,15 @@ namespace quick_cache // Root namespace.
 
 					$_host_cache_dir_tmp       = $this->add_tmp_suffix($_host_cache_dir); // Temporary directory.
 					$_host_cache_dir_tmp_regex = $regex; // Initialize host-specific regex pattern for the tmp directory.
+
 					$_host_cache_dir_tmp_regex = '\\/'.ltrim($_host_cache_dir_tmp_regex, '^\\/'); // Make sure it begins with an escaped `/`.
 					$_host_cache_dir_tmp_regex = $this->str_ireplace_once(preg_quote($_host_cache_path.'/', '/'), '', $_host_cache_dir_tmp_regex);
 					$_host_cache_dir_tmp_regex = $this->str_ireplace_once(preg_quote($_host_cache_dir.'/', '/'), '', $_host_cache_dir_tmp_regex);
-					$_host_cache_dir_tmp_regex = '/^'.preg_quote($_host_cache_dir_tmp.'/', '/').ltrim($_host_cache_dir_tmp_regex, '^\\/');
+
+					$_host_cache_dir_tmp_regex = ltrim($_host_cache_dir_tmp_regex, '^\\/');
+					if(strpos($_host_cache_dir_tmp_regex, '(?:\/') === 0 || strpos($_host_cache_dir_tmp_regex, '(\/') === 0)
+						$_host_cache_dir_tmp_regex = '/^'.preg_quote($_host_cache_dir_tmp, '/').$_host_cache_dir_tmp_regex;
+					else $_host_cache_dir_tmp_regex = '/^'.preg_quote($_host_cache_dir_tmp.'/', '/').$_host_cache_dir_tmp_regex;
 
 					# if(WP_DEBUG) file_put_contents(WP_CONTENT_DIR.'/qc-debug.log', print_r($regex, TRUE)."\n".print_r($_host_cache_dir_tmp_regex, TRUE)."\n\n", FILE_APPEND);
 					// Uncomment the above line to debug regex pattern matching used by this routine; and others that call upon it.
@@ -1566,37 +1712,72 @@ namespace quick_cache // Root namespace.
 						throw new \exception(sprintf(__('Unable to delete files. Rename failure on tmp directory: `%1$s`.', $this->text_domain), $_host_cache_dir));
 
 					/** @var $_file_dir \RecursiveDirectoryIterator Regex iterator reference for IDEs. */
-					foreach($this->dir_regex_iteration($_host_cache_dir_tmp, $_host_cache_dir_tmp_regex) as $_file_dir)
+					foreach(($_dir_regex_iteration = $this->dir_regex_iteration($_host_cache_dir_tmp, $_host_cache_dir_tmp_regex)) as $_resource)
 					{
-						if(($_file_dir->isFile() || $_file_dir->isLink()) // Files and/or symlinks only.
+						$_resource_type = $_resource->getType();
+						$_sub_path_name = $_resource->getSubpathname();
+						$_path_name     = $_resource->getPathname();
 
-						   // Don't delete files in the immediate directory; e.g. `qc-advanced-cache` or `.htaccess`, etc.
-						   // Actual `http|https/...` cache files are nested. Files in the immediate directory are for other purposes.
-						   && ($_host_cache_dir !== $cache_dir || strpos($_file_dir->getSubpathname(), '/') !== FALSE)
+						if($_host_cache_dir === $cache_dir && $_resource_type !== 'dir' && strpos($_sub_path_name, '/') === FALSE)
+							continue; // Don't delete links/files in the immediate directory; e.g. `qc-advanced-cache` or `.htaccess`, etc.
+						// Actual `http|https/...` cache links/files are nested. Links/files in the immediate directory are for other purposes.
 
-						   // If NOT checking max age; or if we ARE, and the file has expired now.
-						   && (!$check_max_age || (!empty($max_age) && $_file_dir->getMTime() < $max_age))
-
-						) // Throw an exception if a deletion failure occurs.
+						switch($_resource_type) // Based on type; i.e. `link`, `file`, `dir`.
 						{
-							if(!unlink($_file_dir->getPathname())) // Throw exception if unable to delete.
-								throw new \exception(sprintf(__('Unable to delete file: `%1$s`.', $this->text_domain), $_file_dir->getPathname()));
-							$counter++; // Increment counter for each file we delete.
-						}
-						else if(!$check_max_age && $regex === '/^.+/i' && $_file_dir->isDir()) // Directories too?
-						{
-							if(!rmdir($_file_dir->getPathname())) // Throw exception if unable to delete the directory itself.
-								throw new \exception(sprintf(__('Unable to delete dir: `%1$s`.', $this->text_domain), $_file_dir->getPathname()));
-							# $counter++; // Increment counter for each directory we delete. ~ NO don't do that here.
+							case 'link': // Symbolic links; i.e. 404 errors.
+
+								if($check_max_age && !empty($max_age) && is_file($_resource->getLinkTarget()))
+									if(($_lstat = lstat($_path_name)) && !empty($_lstat['mtime']))
+										if($_lstat['mtime'] >= $max_age) // Still valid?
+											break; // Break switch handler.
+
+								if(!unlink($_path_name)) // Throw exception if unable to delete.
+									throw new \exception(sprintf(__('Unable to delete symlink: `%1$s`.', $this->text_domain), $_path_name));
+								$counter++; // Increment counter for each link we delete.
+
+								break; // Break switch handler.
+
+							case 'file': // Regular files; i.e. not symlinks.
+
+								if($check_max_age && !empty($max_age)) // Should check max age?
+									if($_resource->getMTime() >= $max_age) // Still valid?
+										break; // Break switch handler.
+
+								if(!unlink($_path_name)) // Throw exception if unable to delete.
+									throw new \exception(sprintf(__('Unable to delete file: `%1$s`.', $this->text_domain), $_path_name));
+								$counter++; // Increment counter for each file we delete.
+
+								break; // Break switch handler.
+
+							case 'dir': // A regular directory; i.e. not a symlink.
+
+								if($regex !== '/^.+/i') // Deleting everything?
+									break; // Break switch handler. Not deleting everything.
+
+								if($check_max_age && !empty($max_age)) // Should check max age?
+									break; // Break switch handler. Not deleting everything in this case.
+
+								if(!rmdir($_path_name)) // Throw exception if unable to delete the directory itself.
+									throw new \exception(sprintf(__('Unable to delete dir: `%1$s`.', $this->text_domain), $_path_name));
+								# $counter++; // Increment counter for each directory we delete. ~ NO don't do that here.
+
+								break; // Break switch handler.
+
+							default: // Something else that is totally unexpected here.
+								throw new \exception(sprintf(__('Unexpected resource type: `%1$s`.', $this->text_domain), $_resource_type));
 						}
 					}
-					unset($_file_dir); // Housekeeping after this `foreach()` loop.
+					unset($_dir_regex_iteration, $_resource, $_resource_type, $_sub_path_name, $_path_name, $_lstat); // Housekeeping.
 
 					if(!rename($_host_cache_dir_tmp, $_host_cache_dir)) // Deletions are atomic; restore original directory now.
 						throw new \exception(sprintf(__('Unable to delete files. Rename failure on tmp directory: `%1$s`.', $this->text_domain), $_host_cache_dir_tmp));
 				}
 				unset($_host_scheme, $_host_url, $_host_cache_path_flags, $_host_cache_path,
 					$_host_cache_dir, $_host_cache_dir_tmp, $_host_cache_dir_tmp_regex); // Housekeeping.
+
+				/* ------- End lock state... ------------- */
+
+				$this->cache_unlock($cache_lock); // Unlock cache directory.
 
 				return $counter; // Total files deleted by this routine.
 			}
@@ -1636,26 +1817,53 @@ namespace quick_cache // Root namespace.
 				if(preg_match('/^'.$wp_content_dir_regex.'\/(?:mu\-plugins|themes|plugins)(?:\/|$)/i', $dir))
 					return $counter; // Security flag; do nothing in this case.
 
+				/* ------- Begin lock state... ----------- */
+
+				$cache_lock = $this->cache_lock(); // Lock cache writes.
+
+				clearstatcache(); // Clear stat cache to be sure we have a fresh start below.
+
 				if(!rename($dir, $dir_temp)) // Work from tmp directory so deletions are atomic.
 					throw new \exception(sprintf(__('Unable to delete all files/dirs. Rename failure on tmp directory: `%1$s`.', $this->text_domain), $dir));
 
 				/** @var $_file_dir \RecursiveDirectoryIterator for IDEs. */
-				foreach($this->dir_regex_iteration($dir_temp, '/.+/') as $_file_dir)
+				foreach(($_dir_regex_iteration = $this->dir_regex_iteration($dir_temp, '/.+/')) as $_resource)
 				{
-					if(($_file_dir->isFile() || $_file_dir->isLink())) // Files and/or symlinks.
+					$_resource_type = $_resource->getType();
+					$_sub_path_name = $_resource->getSubpathname();
+					$_path_name     = $_resource->getPathname();
+
+					switch($_resource_type) // Based on type; i.e. `link`, `file`, `dir`.
 					{
-						if(!unlink($_file_dir->getPathname())) // Throw exception if unable to delete.
-							throw new \exception(sprintf(__('Unable to delete file: `%1$s`.', $this->text_domain), $_file_dir->getPathname()));
-						$counter++; // Increment counter for each file we delete.
-					}
-					else if($_file_dir->isDir()) // Directories are last in the iteration; it should be empty now.
-					{
-						if(!rmdir($_file_dir->getPathname())) // Throw exception if unable to delete the directory itself.
-							throw new \exception(sprintf(__('Unable to delete dir: `%1$s`.', $this->text_domain), $_file_dir->getPathname()));
-						$counter++; // Increment counter for each directory we delete.
+						case 'link': // Symbolic links; i.e. 404 errors.
+
+							if(!unlink($_path_name)) // Throw exception if unable to delete.
+								throw new \exception(sprintf(__('Unable to delete symlink: `%1$s`.', $this->text_domain), $_path_name));
+							$counter++; // Increment counter for each link we delete.
+
+							break; // Break switch handler.
+
+						case 'file': // Regular files; i.e. not symlinks.
+
+							if(!unlink($_path_name)) // Throw exception if unable to delete.
+								throw new \exception(sprintf(__('Unable to delete file: `%1$s`.', $this->text_domain), $_path_name));
+							$counter++; // Increment counter for each file we delete.
+
+							break; // Break switch handler.
+
+						case 'dir': // A regular directory; i.e. not a symlink.
+
+							if(!rmdir($_path_name)) // Throw exception if unable to delete the directory itself.
+								throw new \exception(sprintf(__('Unable to delete dir: `%1$s`.', $this->text_domain), $_path_name));
+							$counter++; // Increment counter for each directory we delete.
+
+							break; // Break switch handler.
+
+						default: // Something else that is totally unexpected here.
+							throw new \exception(sprintf(__('Unexpected resource type: `%1$s`.', $this->text_domain), $_resource_type));
 					}
 				}
-				unset($_file_dir); // Housekeeping after this `foreach()` loop.
+				unset($_dir_regex_iteration, $_resource, $_resource_type, $_sub_path_name, $_path_name); // Housekeeping.
 
 				if(!rename($dir_temp, $dir)) // Deletions are atomic; restore original directory now.
 					throw new \exception(sprintf(__('Unable to delete all files/dirs. Rename failure on tmp directory: `%1$s`.', $this->text_domain), $dir_temp));
@@ -1666,7 +1874,93 @@ namespace quick_cache // Root namespace.
 						throw new \exception(sprintf(__('Unable to delete directory: `%1$s`.', $this->text_domain), $dir));
 					$counter++; // Increment counter for each directory we delete.
 				}
+				/* ------- End lock state... ------------- */
+
+				$this->cache_unlock($cache_lock); // Unlock cache directory.
+
 				return $counter; // Total files deleted by this routine.
+			}
+
+			/* --------------------------------------------------------------------------------------
+			 * Cache locking utilities.
+			 -------------------------------------------------------------------------------------- */
+
+			/**
+			 * Get an exclusive lock on the cache directory.
+			 *
+			 * @since 140422 First documented version.
+			 *
+			 * @return array Lock type & resource handle needed to unlock later or FALSE if disabled by filter.
+			 *
+			 * @throws \exception If {@link \sem_get()} not available and there's
+			 *    no writable tmp directory for {@link \flock()} either.
+			 *
+			 * @throws \exception If unable to obtain an exclusive lock by any available means.
+			 *
+			 * @note This call is blocking; i.e. it will not return a lock until a lock becomes possible.
+			 *    In short, this will block the caller until such time as write access becomes possible.
+			 */
+			public function cache_lock()
+			{
+				if($this->apply_filters(__CLASS__.'_disable_cache_locking', FALSE))
+					return FALSE;
+
+				if(!($wp_config_file = $this->find_wp_config_file()))
+					throw new \exception(__('Unable to find the wp-config.php file.', $this->text_domain));
+
+				$locking_method = $this->apply_filters(__METHOD__.'_lock_type', 'flock');
+
+				if(!in_array($locking_method, array('flock', 'sem')))
+					$locking_method = 'flock';
+
+				if($locking_method === 'sem')
+					if($this->function_is_possible('sem_get'))
+						if(($ipc_key = ftok($wp_config_file, 'w')))
+							if(($resource = sem_get($ipc_key, 1)) && sem_acquire($resource))
+								return array('type' => 'sem', 'resource' => $resource);
+
+				// Use `flock()` as a decent fallback when `sem_get()` is not not forced or is not possible.
+
+				if(!($tmp_dir = $this->get_tmp_dir()))
+					throw new \exception(__('No writable tmp directory.', $this->text_domain));
+
+				$inode_key = fileinode($wp_config_file);
+				$mutex     = $tmp_dir.'/'.$this->slug.'-'.$inode_key.'.lock';
+				if(!($resource = fopen($mutex, 'w')) || !flock($resource, LOCK_EX))
+					throw new \exception(__('Unable to obtain an exclusive lock.', $this->text_domain));
+
+				return array('type' => 'flock', 'resource' => $resource);
+			}
+
+			/**
+			 * Release an exclusive lock on the cache directory.
+			 *
+			 * @since 140422 First documented version.
+			 *
+			 * @param array $lock Type & resource that we are unlocking.
+			 */
+			public function cache_unlock(array $lock)
+			{
+				if($this->apply_filters(__CLASS__.'_disable_cache_locking', FALSE))
+					return;
+
+				if(!is_array($lock))
+					return; // Not possible.
+
+				if(empty($lock['type']) || empty($lock['resource']))
+					return; // Not possible.
+
+				if(!is_resource($lock['resource']))
+					return; // Not possible.
+
+				if($lock['type'] === 'sem')
+					sem_release($lock['resource']);
+
+				else if($lock['type'] === 'flock')
+				{
+					flock($lock['resource'], LOCK_UN);
+					fclose($lock['resource']);
+				}
 			}
 
 			/* --------------------------------------------------------------------------------------

@@ -1,20 +1,22 @@
 === Quick Cache (Speed Without Compromise) ===
 
-Stable tag: 141110
+Stable tag: 150129.2
 Requires at least: 3.7
-Tested up to: 4.0
+Tested up to: 4.1.1
 Text Domain: quick-cache
 
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Contributors: WebSharks, JasWSInc, raamdev, anguz
+Contributors: WebSharks, JasWSInc, raamdev
 Donate link: http://www.websharks-inc.com/r/wp-theme-plugin-donation/
 Tags: cache, quick cache, quick-cache, quickcache, speed, performance, loading, generation, execution, benchmark, benchmarking, debug, debugging, caching, cash, caching, cacheing, super cache, advanced cache, advanced-cache, wp-cache, wp cache, options panel included, websharks framework, w3c validated code, includes extensive documentation, highly extensible
 
 Speed up your site (BIG time!) — Quick Cache provides reliable page caching for WordPress. Easy-to-use (very simple installation).
 
 == Description ==
+
+**NOTICE:** [Quick Cache is now ZenCache](http://zencache.com/announcing-zencache-formerly-quick-cache/)! No further updates will be made to Quick Cache after March 6th, 2015.
 
 If you care about the speed of your site, Quick Cache is one of those plugins that you absolutely MUST have installed :-) Quick Cache takes a real-time snapshot (building a cache) of every Page, Post, Category, Link, etc. These snapshots are then stored (cached) intuitively, so they can be referenced later, in order to save all of that processing time that has been dragging your site down and costing you money.
 
@@ -318,7 +320,44 @@ Released under the terms of the [GNU General Public License](http://www.gnu.org/
 
 Requires PHP v5.3+. The latest version of Quick Cache is a complete rewrite (OOP design). Faster! and even more dependable. NOTE: the free version of Quick Cache (this new LITE version); while it remains fully functional and is more-than-adequate for most sites; is now limited in some ways. The following advanced features from the previous release are no longer available in the lite version: a custom MD5 Version Salt, custom Exclusion Patterns, a Clear Cache button in admin bar. These, and other features; are now available only in the pro version of the plugin. For further details, please see: <http://www.websharks-inc.com/product/quick-cache/>.
 
+= v141205 =
+
+- **Quick Cache is changing its name to ZenCache!** See [the blog post](http://www.websharks-inc.com/post/quick-cache-is-changing-its-name/) for full details.
+
+= v150129.2 =
+
+- **NOTICE:** [Quick Cache is now ZenCache](http://zencache.com/announcing-zencache-formerly-quick-cache/)! No further updates will be made to Quick Cache after March 6th, 2015; see [migration instructions](http://zencache.com/kb-article/how-to-migrate-from-quick-cache-lite-to-zencache-lite/).
+
 == Changelog ==
+
+= v150129.2 =
+
+- **NOTICE:** [Quick Cache is now ZenCache](http://zencache.com/announcing-zencache-formerly-quick-cache/)! No further updates will be made to Quick Cache after March 6th, 2015; see [migration instructions](http://zencache.com/kb-article/how-to-migrate-from-quick-cache-lite-to-zencache-lite/).
+- **Enhancement**: Improved the handling of long cache filenames, where especially long URLs were generating cache filenames that were too long for some file systems to handle. Props @jaswsinc. See [#275](https://github.com/websharks/quick-cache/issues/275).
+- **Bug Fix**: Removed erroneous call to `from_lt_v150129_1()`. See: [this GitHub issue](https://github.com/websharks/quick-cache/issues/425) for technical details.
+
+= v150129.1 =
+
+- **NOTICE:** [Quick Cache is now ZenCache](http://zencache.com/announcing-zencache-formerly-quick-cache/)! No further updates will be made to Quick Cache after March 6th, 2015; see [migration instructions](http://zencache.com/kb-article/how-to-migrate-from-quick-cache-lite-to-zencache-lite/).
+- **Enhancement**: Improved the handling of long cache filenames, where especially long URLs were generating cache filenames that were too long for some file systems to handle. Props @jaswsinc. See [#275](https://github.com/websharks/quick-cache/issues/275).
+
+= v150129 =
+
+- **Bug Fix** (Pro): Fixed a bug where the Pro Updater would fail when FTP or SFTP details via the WordPress Dashboard are required to perform updates. Props @jaswsinc. See [#389](https://github.com/websharks/quick-cache/issues/389).
+- **Bug Fix**: Several fixes for a stubborn bug related to "Fatal Error: 'Unable to clear dir'" error messages and errors referencing "SplFileInfo::getMTime(): stat failed". Props @jaswsinc. See [#397](https://github.com/websharks/quick-cache/issues/397).
+- **Bug Fix** (Pro): Fixed a bug where the `qcAC` variable (used to force-enable/disable GET Request caching) was not respected properly whenever a URL contained a query string and a user was currently logged into the site. Props @jaswsinc. See [#401](https://github.com/websharks/quick-cache/issues/401).
+
+= v141231 =
+
+- **Bug Fix**: Addressed another issue related to "Fatal Error: 'Unable to clear dir'" and tmp directories that don't get cleared by Quick Cache. This fix discards iteration references before renaming the tmp directories. Props @jaswsinc. See [#288](https://github.com/websharks/quick-cache/issues/288).
+- **Bug Fix**: We have had a few reports of getMTime Stat failing when clearing the cache. This fix clears the Stat Cache before iteration when deleting files from the cache directory. Props @jaswsinc. See [#385](https://github.com/websharks/quick-cache/issues/385).
+- **Enhancement**: Added a new filter (`quick_cache\\share_disable_cache_locking`) to allow disabling cache locking. Simply return boolean `TRUE` to this filter to disable cache locking. This may be useful for site owners who are experiencing issues with cache locking on web hosting platforms with filesystems that don't properly support locking. Note that this filter must be applied using an Advanced Cache Plugin (see **Dashboard → Quick Cache → Plugin Options → Theme/Plugin Developers**). See also [#387](https://github.com/websharks/quick-cache/issues/387).
+- **Enhancement**: Added a new filter that allows forcing Semaphore cache locking on hosting platforms where `sem_get()` is available and would result in improved performance. Return `sem` to the `quick_cache\\share::cache_lock_lock_type` filter to force Semaphore cache locking, or `flock` to use the default method that uses `flock()`. Note that this filter must be applied using an Advanced Cache Plugin (see **Dashboard → Quick Cache → Plugin Options → Theme/Plugin Developers**). See also [#387](https://github.com/websharks/quick-cache/issues/387).
+
+= v141205 =
+
+- **Bug Fix**: Addressed another issue with "Fatal Error: 'Unable to clear dir'" messages by adding new blocking methods for cache lock and unlock, making it so that cache writes (including clearing, purging, wiping) all gain an exclusive lock on the cache directory while work is underway. Props @jaswsinc. See [#288](https://github.com/websharks/quick-cache/issues/288).
+- **Bug Fix**: Fixed a Home Page clearing bug that arose in the previous release as the result of an extra leading `\/` in one of our regex patterns. Props @jaswsinc. See [#365](https://github.com/websharks/quick-cache/issues/365).
 
 = v141110 =
 

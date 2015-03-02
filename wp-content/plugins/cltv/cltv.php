@@ -22,13 +22,13 @@ require_once(dirname(__File__)."/post-types/commercial.php");
 require_once(dirname(__File__)."/post-types/sponsor.php");
 
 // ACF fields
-add_action('acf/register_fields', 'my_register_fields');
-function my_register_fields()
+require_once(dirname(__File__)."/acf-fields/s3-uploader/bootstrap.php");
+add_action('acf/register_fields', 'cltv_register_fields');
+function cltv_register_fields()
 {
-	include_once(dirname(__File__).'/acf-fields/channel-stream-key.php');
-	include_once(dirname(__File__).'/acf-fields/channel-rtmp-url.php');
-	include_once(dirname(__File__).'/acf-fields/channel-embed-code.php');
-  require_once(dirname(__File__)."/acf-fields/s3-uploader/bootstrap.php");
+  require_once(dirname(__File__).'/acf-fields/channel-stream-key.php');
+  require_once(dirname(__File__).'/acf-fields/channel-rtmp-url.php');
+  require_once(dirname(__File__).'/acf-fields/channel-embed-code.php');
 }
 
 // wp-admin customization

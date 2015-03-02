@@ -120,7 +120,7 @@ function s3_uploader_delete_post($post_id){
 	$attachments = get_children(array(
 		'post_parent' => $post_id,
 		'post_type'   => 'attachment',
-		'numberposts' => -1,
+		'numberposts' => 10,
 		'post_status' => 'any'
 	));
 
@@ -132,10 +132,10 @@ function s3_uploader_delete_post($post_id){
 // delete files from s3
 // action: delete_attachment
 function s3_uploader_delete_attachment($post_id){
-	global $environment;
 	$key = get_post_meta($post_id,"s3_uploader_key",true);
 
 	if ( $key && $key != '' ){
+		global $environment;
 		$credentials = new Credentials($environment['aws']['key'], $environment['aws']['secret']);
 		$s3Client = S3Client::factory(array(
 		    'credentials' => $credentials
@@ -150,8 +150,10 @@ function s3_uploader_delete_attachment($post_id){
 
 // catch query vars
 // filter: request
-function s3_uploader_awscors_request ( $vars ) {
-	( $vars['name'] == "s3_uploader_cors" ) and $vars['s3_uploader_cors'] = true;
+function s3_uploader_awscors_request($vars) {
+	if(isset($vars['name']) && $vars['name'] == "s3_uploader_cors") {
+		$vars['s3_uploader_cors'] = true;
+	}
 	return $vars;
 }
 

@@ -56,7 +56,12 @@ function cltv_format_video_src($video, $live=false, $http=false, $attachment_id=
       if($recorded) {
         $src['html5'] = $wowza_base.'vods3/_definst_/mp4:amazons3/cltv-recordings/'.$filename.'/playlist.m3u8';
         $src['flash'] = false;
-      } else {
+      }
+			else if(defined('WP_ENV') && WP_ENV == 'development') {
+				$src['html5'] = $wowza_base.'vods3/_definst_/mp4:amazons3/cltv-archives-dev/'.$filename.'/playlist.m3u8';
+        $src['flash'] = false;
+		  }
+			else {
         $src['html5'] = $wowza_base.'vods3/_definst_/mp4:amazons3/cltv-archives/'.$filename.'/playlist.m3u8';
         $src['flash'] = false;
       }

@@ -46,3 +46,13 @@ function theme_js(){
 	wp_enqueue_script('main');
 }
 add_action('wp_enqueue_scripts', 'theme_js');
+
+function my_admin_head() {
+	if(current_user_can('channel')){
+		wp_enqueue_style( 'admin_channel_css', get_template_directory_uri() . '/library/css/admin.channel.css' );
+	}
+
+	wp_register_script('admin_js', get_template_directory_uri().'/library/js/admin.js');
+	wp_enqueue_script('admin_js', array('jQuery'), '1.11', true);
+}
+add_action('admin_enqueue_scripts', 'my_admin_head');

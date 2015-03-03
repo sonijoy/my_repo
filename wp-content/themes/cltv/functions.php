@@ -14,6 +14,8 @@ require_once(TEMPLATEPATH.'/library/scripts.php');
 // Options panel
 require_once('library/options-panel.php');
 
+add_theme_support( 'post-thumbnails' ); 
+
 // Set content width
 if ( ! isset( $content_width ) ) $content_width = 580;
 

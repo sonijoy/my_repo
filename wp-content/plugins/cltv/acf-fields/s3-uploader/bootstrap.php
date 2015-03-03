@@ -7,7 +7,7 @@ use Aws\Common\Credentials\Credentials;
 add_action("init", "s3_uploader_init");
 
 // enqueue javascript files for fine uploader
-add_action("admin_init", "s3_uploader_admin_init");
+add_action("admin_enqueue_scripts", "s3_uploader_admin_enqueue_scripts");
 
 // setup javascript vars
 add_action('admin_head', 's3_uploader_js_vars');
@@ -37,8 +37,8 @@ function s3_uploader_init(){
 }
 
 // enqueue javascript files for fine uploader
-// action: admin_init
-function s3_uploader_admin_init(){
+// action: admin_enqueue_scripts
+function s3_uploader_admin_enqueue_scripts(){
 	wp_register_script("fineuploader", plugins_url( '/js/s3.jquery.fineuploader-5.0.8.min.js', __FILE__ ), array( 'jquery' ) );
 	wp_register_script("init-fineuploader", plugins_url( '/js/init-fineuploader.js', __FILE__ ) );
 	wp_register_style("fineuploader", plugins_url( '/css/fineuploader-5.0.8.min.css', __FILE__ ) );

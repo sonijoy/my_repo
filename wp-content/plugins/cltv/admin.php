@@ -373,7 +373,7 @@ function cltv_find_new_archives($columns) {
     }
 
     $iterator = $s3Client->getIterator('ListObjects', array(
-      'Bucket' => $environment['aws']['s3']['bucket'],
+      'Bucket' => 'cltv-recordings',
       'Prefix' => $streamkey
     ));
     $recording = false;

@@ -305,6 +305,7 @@ add_action('before_delete_post', 'cltv_delete_post_attachments');
 
 // create an archive post and attach a file to it
 function cltv_create_archive($channel, $file, $status='draft') {
+  global $environment;
   $args = array(
     'post_author' => $channel->post_author,
     'post_title' => $file,
@@ -321,7 +322,7 @@ function cltv_create_archive($channel, $file, $status='draft') {
   if($post_id) {
     $wp_filetype = wp_check_filetype($file, null );
     $attachment = array(
-      'guid' => GUID_PREFIX.$file,
+      'guid' => 'http://recordings.citylinktv.com/'.$file,
       'post_mime_type' => $wp_filetype['type'],
       'post_title' => preg_replace('/\.[^.]+$/', '', $file),
       'post_content' => '',
@@ -385,7 +386,6 @@ function cltv_find_new_archives($columns) {
       // if a .tmp file exists, then the channel is currently recording,
       // and we need to leave their files alone
       if($path_parts['extension'] == 'tmp') {
-        echo 'bitchrecording';
         $recording = true;
         break;
       }
@@ -403,6 +403,7 @@ function cltv_find_new_archives($columns) {
       }
       // not recording and no archives for this file, so let's fuckin make one
       else {
+        echo 'found an object';
         cltv_create_archive($channel, $object['Key']);
       }
     }

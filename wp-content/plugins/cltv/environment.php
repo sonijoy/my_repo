@@ -9,12 +9,12 @@
     'development' => array(
       'bucket' => 'cltv-archives-dev',
       'dir' => '',
-      'guid_prefix' => 'http://recordingsdev.citylinktv.com/'
+      'guid_prefix' => 'http://uploads-dev.citylinktv.com/'
     ),
     'production' => array(
       'bucket' => 'cltv-archives',
       'dir' => '',
-      'guid_prefix' => 'http://recordings.citylinktv.com/'
+      'guid_prefix' => 'http://uploads.citylinktv.com/'
     )
   );
 

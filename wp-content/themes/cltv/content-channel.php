@@ -1,3 +1,88 @@
+<?php
+
+	// get the channel
+	global $post;
+	$channel=$post->ID;
+	if(get_post_type() == 'archive'){
+		$channel=get_post_meta($channel, 'channel', true);
+	}
+
+	// channel's banner image
+	$banner = new WP_Query(array(
+		'post_type'=>'sponsor',
+		'meta_query'=>array(
+			array(
+				'key'=>'channel',
+				'value'=>"$channel"
+			),
+			array(
+				'key'=>'banner_ad',
+				'value'=>'1'
+			)
+		),
+		'post_status'=>'published',
+		'posts_per_page'=>1
+	));
+	$banner = $banner->have_posts() ? $banner->posts[0] : false;
+
+	// channel video
+	$channel_video = cltv_channel_video($channel);
+	if(get_field('is_live', $channel)) {
+		$stream_type = 'live';
+	}
+	else {
+		$stream_type = 'recorded';
+	}
+
+	// message board
+	$message_board = get_field('message_board', $channel);
+
+	// sponsors
+	$sponsors = new WP_Query(array(
+		'post_type'=>'sponsor',
+		'meta_key'=>'channel',
+		'meta_value'=>$channel,
+		'posts_per_page'=>30
+	));
+
+	// get archive terms
+	$archive_terms = get_terms('archive_cat', array('hide_empty' => 0));
+	$archive_term_names = array();
+	$archives = array();
+
+	// find all archives
+	$archives['All'] = new WP_Query(array(
+		'posts_per_page'=>60,
+		'post_type'=>'archive',
+		'meta_query' => array(array(
+			'key'=>'channel',
+			'value'=>$channel
+		))
+	));
+
+	// find all archives in categories
+	foreach($archive_terms as $term) {
+		// build an array of slugs for the non-category archives
+		array_push($archive_term_names, $term->name);
+
+		$archives[$term->name] = new WP_Query(array(
+			'posts_per_page'=>60,
+			'post_type'=>'archive',
+			'meta_query' => array(array(
+				'key'=>'channel',
+				'value'=>$channel
+			)),
+			'tax_query' => array(array(
+		    'taxonomy' => 'archive_cat',
+		    'field' => 'name',
+		    'terms' => $term->name
+			))
+		));
+	}
+
+	wp_reset_postdata();
+?>
+
 <?php get_header(); ?>
 
 	<div id="content" class="clearfix row-fluid content-channel">
@@ -6,30 +91,6 @@
 
 			<?php if (have_posts()): ?>
 
-				<?php
-					global $post;
-					$channel=$post->ID;
-					if(get_post_type() == 'archive'){
-						$channel=get_post_meta($channel, 'channel', true);
-					}
-					$banner = new WP_Query(array(
-						'post_type'=>'sponsor',
-						'meta_query'=>array(
-							array(
-								'key'=>'channel',
-								'value'=>"$channel"
-							),
-							array(
-								'key'=>'banner_ad',
-								'value'=>'1'
-							)
-						),
-						'post_status'=>'published',
-						'posts_per_page'=>1
-					));
-					$banner = $banner->have_posts() ? $banner->posts[0] : false;
-					wp_reset_postdata();
-				?>
 				<?php while (have_posts()) : the_post(); ?>
 
 					<div id="post-<?php the_ID(); ?>" <?php post_class('clearfix'); ?>>
@@ -71,9 +132,8 @@
 						<!-- Video player -------------------------------------------------------------------->
 						<div class="row-fluid">
 							<div class="span12">
-								<?php $channel_video = cltv_channel_video(get_the_ID()); ?>
+								<?php  ?>
 								<?php if($channel_video['src']): ?>
-									<?php if(get_field('is_live')) $stream_type = 'live'; else $stream_type = 'recorded'; ?>
 									<script>
 										$(document).ready(function(){
 											var android = /Android/i.test(navigator.userAgent);
@@ -120,7 +180,6 @@
 						<!-- /video player -------------------------------------------------------------------->
 
 						<div class="row-fluid">
-							<?php $message_board = get_field('message_board', $channel); ?>
 							<?php if($message_board): ?>
 								<h3>Message Board:</h3>
 								<p><?php echo $message_board; ?></p>
@@ -130,8 +189,6 @@
 					</div>
 
 				<?php endwhile; ?>
-
-				<?php $sponsors = new WP_Query(array('post_type'=>'sponsor','meta_key'=>'channel','meta_value'=>$channel, 'posts_per_page'=>30)); ?>
 
 					<?php if($sponsors->have_posts()): ?>
 						<div class="sponsor_list">
@@ -146,6 +203,7 @@
 													<?php else: ?>
 														<?php the_title(); ?>
 													<?php endif; ?>
+													<br><?php the_ID(); ?>
 												</a>
 											</li>
 										<?php endif; ?>

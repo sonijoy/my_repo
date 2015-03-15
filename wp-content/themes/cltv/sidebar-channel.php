@@ -1,6 +1,6 @@
 <div class="sidebar-channel-php">
 	<?php if($sponsors->have_posts()): ?>
-		<div class="sponsor" data-max="<?php echo $sponsors->post_count; ?>">
+		<div class="sponsor">
 			<?php $i=1; while($sponsors->have_posts()): $sponsors->the_post(); ?>
 				<?php if(!get_field('banner_ad')): ?>
 				<div class="row-fluid" data-sponsor="<?php echo $i; ?>">
@@ -50,27 +50,6 @@
 		</div>
 	<?php endif; ?>
 
-	<?php
-		/*global $post;
-		$author_email = get_the_author_meta('user_email',$post->post_author);
-		if(!empty($author_email)):
-	?>
-		<div class="row-fluid">
-			<div class="span12 contact_channel">
-				<a href="#modal_contact" role="button" class="btn btn-primary" data-toggle="modal">Contact Channel</a>
-				<div id="modal_contact" data-channel="<?php echo get_the_title($channel); ?>" data-author="<?php echo $author_email; ?>" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modal_contact_label" aria-hidden="true">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
-						<h3 id="modal_contact_label">Contact Channel</h3>
-					</div>
-					<div class="modal-body">
-						<?php //echo do_shortcode( '[contact-form-7 id="7755" title="Contact Channel"]' ); ?>
-					</div>
-				</div>
-			</div>
-		</div>
-	<?php endif;*/ ?>
-
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="social">
@@ -99,33 +78,61 @@
 		</div>
 	</div>
 
-	<?php $archives = new WP_Query(array('posts_per_page'=>60, 'post_type'=>'archive','meta_key'=>'channel','meta_value'=>$channel)); ?>
-	<?php if($archives->have_posts()): ?>
+	<?php if($archives['All']->have_posts()): ?>
 		<div class="row-fluid">
 			<div class="span12">
-				<h3>Archived Videos:</h3>
-				<ul class="media-list archive-list">
-					<?php while($archives->have_posts()): $archives->the_post(); ?>
-						<li class="media">
-							<a class="pull-left" href="<?php the_permalink(); ?>">
-								<?php if(has_post_thumbnail()): ?>
-									<?php the_post_thumbnail('thumbnail'); ?>
-								<?php else: ?>
-									<img src="<?php echo get_template_directory_uri(); ?>/images/default_logo.png" alt="" />
-								<?php endif; ?>
+
+				<h3>Archived Categories:</h3>
+
+				<ul class="nav nav-tabs">
+					<?php foreach($archives as $cat => $archive_query): ?>
+						<li>
+							<a a href="#archive-<?php echo $cat; ?>" data-toggle="tab">
+								<label class="radio">
+								  <input type="radio" name="archiveCategories"
+											id="archiveCategories-<?php echo $cat; ?>"
+											value="<?php echo $cat; ?>"
+											<?php if($cat == 'All') echo 'checked'; ?>>
+											<?php echo $cat; ?>
+								</label>
 							</a>
-							<div class="media-body">
-								<div class="media-heading">
-									<p>
-										<a href="<?php the_permalink(); ?>">
-											<?php echo cltv_trim(get_the_title(), 28); ?>
-										</a>
-									</p>
-								</div>
-							</div>
 						</li>
-					<?php endwhile; ?>
+					<?php endforeach; ?>
 				</ul>
+
+				<div class="tab-content">
+
+					<?php foreach($archives as $cat => $archive_query): ?>
+
+						<div class="tab-pane <?php if($cat == 'All') echo 'active'; ?>" id="archive-<?php echo $cat; ?>">
+							<ul class="media-list archive-list">
+								<?php while($archive_query->have_posts()): $archive_query->the_post(); ?>
+									<li class="media">
+										<a class="pull-left" href="<?php the_permalink(); ?>">
+											<?php if(has_post_thumbnail()): ?>
+												<?php the_post_thumbnail('thumbnail'); ?>
+											<?php else: ?>
+												<img src="<?php echo get_template_directory_uri(); ?>/images/default_logo.png" alt="" />
+											<?php endif; ?>
+										</a>
+										<div class="media-body">
+											<div class="media-heading">
+												<p>
+													<a href="<?php the_permalink(); ?>">
+														<?php echo cltv_trim(get_the_title(), 28); ?>
+													</a>
+												</p>
+											</div>
+										</div>
+									</li>
+								<?php endwhile; ?>
+							</ul>
+						</div>
+
+					<?php endforeach; ?>
+
+				</div>
+
 			</div>
 		</div>
 	<?php endif; wp_reset_postdata(); ?>

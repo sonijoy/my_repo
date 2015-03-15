@@ -251,7 +251,11 @@ function channel_category_order( $query ){
 		{
 			$query->set('post_status', 'publish');
 		}
-		if( $query->is_tax ){
+		// only worry about channel taxonomies
+		if($query->is_tax &&
+			isset($query->query_vars['post_type']) &&
+			!$query->query_vars['post_type'] == 'archive')
+		{
 			$query->set('post_type', 'channel');
 			$query->set('meta_key', 'state');
 			$query->set('orderby', 'meta_value');

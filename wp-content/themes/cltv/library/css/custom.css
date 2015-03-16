@@ -246,6 +246,19 @@ html input[type="button"],input[type="radio"],input[type="checkbox"]{width:auto}
 	font-size:20px;
 	margin-top:0;
 }
+.sidebar-channel-php .nav-tabs>li {
+	height: 37px;
+	width: 50%;
+}
+.sidebar-channel-php .nav-tabs>.active>a,
+.nav-tabs>.active>a:hover,
+.nav-tabs>.active>a:focus {
+	border-bottom: 1px solid #ddd;
+	color: #999;
+}
+.sidebar-channel-php .nav-tabs>li>a {
+	padding: 5px 5px 1px 5px;
+}
 .sidebar-channel-php .media-list img {
 	width:50px;
 }

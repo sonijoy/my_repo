@@ -82,11 +82,11 @@
 		<div class="row-fluid">
 			<div class="span12">
 
-				<h3>Archived Categories:</h3>
+				<h3>Archived Videos:</h3>
 
 				<ul class="nav nav-tabs">
 					<?php foreach($archives as $cat => $archive_query): ?>
-						<li>
+						<li class="<?php if($cat == 'All') echo 'active'; ?>">
 							<a a href="#archive-<?php echo $cat; ?>" data-toggle="tab">
 								<label class="radio">
 								  <input type="radio" name="archiveCategories"

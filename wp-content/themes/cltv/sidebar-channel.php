@@ -86,49 +86,53 @@
 
 				<ul class="nav nav-tabs">
 					<?php foreach($archives as $cat => $archive_query): ?>
-						<li class="<?php if($cat == 'All') echo 'active'; ?>">
-							<a a href="#archive-<?php echo $cat; ?>" data-toggle="tab">
-								<label class="radio">
-								  <input type="radio" name="archiveCategories"
-											id="archiveCategories-<?php echo $cat; ?>"
-											value="<?php echo $cat; ?>"
-											<?php if($cat == 'All') echo 'checked'; ?>>
-											<?php echo $cat; ?>
-								</label>
-							</a>
-						</li>
+						<?php if($archive_query->have_posts()): ?>
+							<li class="<?php if($cat == 'All') echo 'active'; ?>">
+								<a a href="#archive-<?php echo $cat; ?>" data-toggle="tab">
+									<label class="radio">
+									  <input type="radio" name="archiveCategories"
+												id="archiveCategories-<?php echo $cat; ?>"
+												value="<?php echo $cat; ?>"
+												<?php if($cat == 'All') echo 'checked'; ?>>
+												<?php echo $cat; ?>
+									</label>
+								</a>
+							</li>
+						<?php endif; ?>
 					<?php endforeach; ?>
 				</ul>
 
 				<div class="tab-content">
 
 					<?php foreach($archives as $cat => $archive_query): ?>
+						<?php if($archive_query->have_posts()): ?>
 
-						<div class="tab-pane <?php if($cat == 'All') echo 'active'; ?>" id="archive-<?php echo $cat; ?>">
-							<ul class="media-list archive-list">
-								<?php while($archive_query->have_posts()): $archive_query->the_post(); ?>
-									<li class="media">
-										<a class="pull-left" href="<?php the_permalink(); ?>">
-											<?php if(has_post_thumbnail()): ?>
-												<?php the_post_thumbnail('thumbnail'); ?>
-											<?php else: ?>
-												<img src="<?php echo get_template_directory_uri(); ?>/images/default_logo.png" alt="" />
-											<?php endif; ?>
-										</a>
-										<div class="media-body">
-											<div class="media-heading">
-												<p>
-													<a href="<?php the_permalink(); ?>">
-														<?php echo cltv_trim(get_the_title(), 28); ?>
-													</a>
-												</p>
+							<div class="tab-pane <?php if($cat == 'All') echo 'active'; ?>" id="archive-<?php echo $cat; ?>">
+								<ul class="media-list archive-list">
+									<?php while($archive_query->have_posts()): $archive_query->the_post(); ?>
+										<li class="media">
+											<a class="pull-left" href="<?php the_permalink(); ?>">
+												<?php if(has_post_thumbnail()): ?>
+													<?php the_post_thumbnail('thumbnail'); ?>
+												<?php else: ?>
+													<img src="<?php echo get_template_directory_uri(); ?>/images/default_logo.png" alt="" />
+												<?php endif; ?>
+											</a>
+											<div class="media-body">
+												<div class="media-heading">
+													<p>
+														<a href="<?php the_permalink(); ?>">
+															<?php echo cltv_trim(get_the_title(), 28); ?>
+														</a>
+													</p>
+												</div>
 											</div>
-										</div>
-									</li>
-								<?php endwhile; ?>
-							</ul>
-						</div>
+										</li>
+									<?php endwhile; ?>
+								</ul>
+							</div>
 
+						<?php endif; ?>
 					<?php endforeach; ?>
 
 				</div>

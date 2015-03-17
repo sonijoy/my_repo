@@ -6,7 +6,6 @@
 	if(get_post_type() == 'archive'){
 		$channel=get_post_meta($channel, 'channel', true);
 	}
-
 	// channel's banner image
 	$banner = new WP_Query(array(
 		'post_type'=>'sponsor',
@@ -26,7 +25,7 @@
 	$banner = $banner->have_posts() ? $banner->posts[0] : false;
 
 	// channel video
-	$channel_video = cltv_channel_video($channel);
+	$channel_video = cltv_channel_video($post->ID);
 	if(get_field('is_live', $channel)) {
 		$stream_type = 'live';
 	}

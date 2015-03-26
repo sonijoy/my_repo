@@ -37,7 +37,7 @@ namespace zencache
 		 *
 		 * @var string|integer|boolean A boolean-ish value; e.g. `1` or `0`.
 		 */
-		define('ZENCACHE_ENABLE', '1');
+		define('ZENCACHE_ENABLE', '%%ZENCACHE_ENABLE%%');
 
 	if(!defined('ZENCACHE_DEBUGGING_ENABLE'))
 		/**
@@ -47,7 +47,7 @@ namespace zencache
 		 *
 		 * @var string|integer|boolean A boolean-ish value; e.g. `1` or `0`.
 		 */
-		define('ZENCACHE_DEBUGGING_ENABLE', '1');
+		define('ZENCACHE_DEBUGGING_ENABLE', '%%ZENCACHE_DEBUGGING_ENABLE%%');
 
 	if(!defined('ZENCACHE_ALLOW_BROWSER_CACHE'))
 		/**
@@ -60,7 +60,7 @@ namespace zencache
 		 * @note If this is a `FALSE` (or an empty) value; ZenCache will send no-cache headers.
 		 *    If `TRUE`, ZenCache will NOT send no-cache headers.
 		 */
-		define('ZENCACHE_ALLOW_BROWSER_CACHE', '1');
+		define('ZENCACHE_ALLOW_BROWSER_CACHE', '%%ZENCACHE_ALLOW_BROWSER_CACHE%%');
 
 	if(!defined('ZENCACHE_GET_REQUESTS'))
 		/**
@@ -70,7 +70,7 @@ namespace zencache
 		 *
 		 * @var string|integer|boolean A boolean-ish value; e.g. `1` or `0`.
 		 */
-		define('ZENCACHE_GET_REQUESTS', '0');
+		define('ZENCACHE_GET_REQUESTS', '%%ZENCACHE_GET_REQUESTS%%');
 
 	if(!defined('ZENCACHE_CACHE_404_REQUESTS'))
 		/**
@@ -80,7 +80,7 @@ namespace zencache
 		 *
 		 * @var string|integer|boolean A boolean-ish value; e.g. `1` or `0`.
 		 */
-		define('ZENCACHE_CACHE_404_REQUESTS', '0');
+		define('ZENCACHE_CACHE_404_REQUESTS', '%%ZENCACHE_CACHE_404_REQUESTS%%');
 
 	if(!defined('ZENCACHE_FEEDS_ENABLE'))
 		/**
@@ -90,7 +90,7 @@ namespace zencache
 		 *
 		 * @var string|integer|boolean A boolean-ish value; e.g. `1` or `0`.
 		 */
-		define('ZENCACHE_FEEDS_ENABLE', '0');
+		define('ZENCACHE_FEEDS_ENABLE', '%%ZENCACHE_FEEDS_ENABLE%%');
 
 	if(!defined('ZENCACHE_DIR'))
 		/**
@@ -100,7 +100,7 @@ namespace zencache
 		 *
 		 * @var string Absolute server directory path.
 		 */
-		define('ZENCACHE_DIR', WP_CONTENT_DIR.'/'.'cache/zencache/cache');
+		define('ZENCACHE_DIR', WP_CONTENT_DIR.'/'.'%%ZENCACHE_DIR%%');
 
 	if(!defined('ZENCACHE_MAX_AGE'))
 		/**
@@ -110,7 +110,7 @@ namespace zencache
 		 *
 		 * @var string Anything compatible with PHP's {@link \strtotime()}.
 		 */
-		define('ZENCACHE_MAX_AGE', '7 days');
+		define('ZENCACHE_MAX_AGE', '%%ZENCACHE_MAX_AGE%%');
 
 	if(!defined('ZENCACHE_404_CACHE_FILENAME'))
 		/**
@@ -131,7 +131,7 @@ namespace zencache
 		 *
 		 * @var string Absolute server path to QC plugin file.
 		 */
-		define('ZENCACHE_PLUGIN_FILE', WP_CONTENT_DIR.'/plugins/zencache/zencache.php');
+		define('ZENCACHE_PLUGIN_FILE', '%%ZENCACHE_PLUGIN_FILE%%');
 
 	/*
 	 * Include shared methods between {@link advanced_cache} and {@link plugin}.

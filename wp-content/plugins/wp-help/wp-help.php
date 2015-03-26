@@ -120,9 +120,9 @@ class CWS_WP_Help_Plugin extends WP_Stack_Plugin {
 				'hierarchical' => true,
 				'supports'     => array( 'title', 'editor', 'revisions', 'page-attributes' ),
 				'map_meta_cap' => true,
-				'capability_type' => 'page',
+				'capability_type' => 'channel',
 				'capabilities' => array(
-					'read_posts'         => apply_filters( 'cws_wp_help_view_documents_cap', 'edit_posts' ),
+					'read_posts'         => apply_filters( 'cws_wp_help_view_documents_cap', 'edit_channels' ),
 				),
 				'labels' => array (
 					'name'               => __( 'Help Documents',                        'wp-help' ),

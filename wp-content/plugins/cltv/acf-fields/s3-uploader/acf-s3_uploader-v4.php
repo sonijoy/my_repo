@@ -1,6 +1,6 @@
 <?php
 
-class acf_S3Uploader extends acf_field
+class acf_s3_uploader extends acf_field
 {
 
   /*
@@ -147,6 +147,6 @@ class acf_S3Uploader extends acf_field
 
 }
 
-new acf_S3Uploader();
+new acf_s3_uploader();
 
 ?>

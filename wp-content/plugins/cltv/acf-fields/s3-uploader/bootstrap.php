@@ -2,6 +2,7 @@
 
 use Aws\S3\S3Client;
 use Aws\Common\Credentials\Credentials;
+require_once(dirname(__File__).'/acf-s3_uploader.php');
 
 // endpoint for the aws cors ajax call by fineuploader
 add_action("init", "s3_uploader_init");
@@ -23,9 +24,6 @@ add_action("before_delete_post","s3_uploader_delete_post");
 
 // delete files from s3
 add_action("delete_attachment","s3_uploader_delete_attachment");
-
-// register the ACF field
-add_action('acf/register_fields', 's3_uploader_register_fields');
 
 // catch query vars
 add_filter("request", "s3_uploader_awscors_request" );
@@ -153,13 +151,6 @@ function s3_uploader_awscors_request($vars) {
 		$vars['s3_uploader_cors'] = true;
 	}
 	return $vars;
-}
-
-// Register custom fields
-// action: acf/register_fields
-function s3_uploader_register_fields()
-{
-	include_once(dirname(__File__).'/s3-uploader.php');
 }
 
 ?>

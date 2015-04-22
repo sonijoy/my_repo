@@ -1,19 +1,20 @@
 <div class="sidebar-channel-php">
 	<?php if($sponsors->have_posts()): ?>
+		<h2 class="widget">Sponsor</h2>
 		<div class="sponsor">
 			<?php $i=1; while($sponsors->have_posts()): $sponsors->the_post(); ?>
 				<?php if(!get_field('banner_ad')): ?>
-				<div class="row-fluid" data-sponsor="<?php echo $i; ?>">
-					<div class="span12">
-						<a href="<?php the_field('sponsor_url'); ?>">
-							<?php if(has_post_thumbnail()): ?>
-								<?php the_post_thumbnail('large'); ?>
-							<?php else: ?>
-								<?php the_title(); ?>
-							<?php endif; ?>
-						</a>
+					<div class="row-fluid" data-sponsor="<?php echo $i; ?>">
+						<div class="span12">
+							<a href="<?php the_field('sponsor_url'); ?>">
+								<?php if(has_post_thumbnail()): ?>
+									<?php the_post_thumbnail('large'); ?>
+								<?php else: ?>
+									<?php the_title(); ?>
+								<?php endif; ?>
+							</a>
+						</div>
 					</div>
-				</div>
 				<?php $i++; endif; ?>
 			<?php endwhile; ?>
 		</div>
@@ -25,21 +26,18 @@
 		</div>
 	<?php endif; wp_reset_postdata(); ?>
 
+	<h2 class="widget">Channel Info</h2>
 	<div class="row-fluid channel_details">
-		<div class="span4">
 			<a href="#">
 				<?php echo get_the_post_thumbnail($channel, 'medium'); ?>
 			</a>
-		</div>
-		<div class="span8">
-			<h2>
+			<h4>
 				<?php if(get_field('is_live')): ?>
 					<?php the_field('broadcast_title'); ?>
 				<?php else: ?>
 					<?php echo $channel_video['title']; ?>
 				<?php endif; ?>
-			</h2>
-		</div>
+			</h4>
 	</div>
 
 	<?php if(get_the_content() != ''): ?>
@@ -79,10 +77,9 @@
 	</div>
 
 	<?php if($archives['All']->have_posts()): ?>
+		<h2 class="widget">Archives</h2>
 		<div class="row-fluid">
 			<div class="span12">
-
-				<h3>Archived Videos:</h3>
 
 				<ul class="nav nav-tabs">
 					<?php foreach($archives as $cat => $archive_query): ?>
@@ -140,4 +137,22 @@
 			</div>
 		</div>
 	<?php endif; wp_reset_postdata(); ?>
+
+	<?php if(count($photo_gallery)): ?>
+		<h2 class="widget">Photos</h2>
+		<div class="row-fluid photo-gallery">
+			<?php $i=0; foreach($photo_gallery as $photo): ?>
+				<?php if($i>7) break; ?>
+				<div class="span6">
+					<a href="">
+						<img class="img-responsive" src="<?php echo $photo['url']; ?>">
+					</a>
+			</div>
+			<?php $i++; endforeach; ?>
+		</div>
+		<?php if(count($photo_gallery) > 2): ?>
+			<a class="span12 text-center" href="<?php echo $photo_gallery_url; ?>">See All</a>
+		<?php endif; ?>
+	<?php endif; ?>
+
 </div>

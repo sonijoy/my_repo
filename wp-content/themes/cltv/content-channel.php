@@ -79,6 +79,9 @@
 		));
 	}
 
+	$photo_gallery = get_field('photo_gallery', $channel);
+	$photo_gallery_url = home_url('/photo-gallery?channelId='.$channel);
+
 	wp_reset_postdata();
 ?>
 
@@ -86,7 +89,7 @@
 
 	<div id="content" class="clearfix row-fluid content-channel">
 
-		<div id="main" class="span9 clearfix" role="main">
+		<div id="main" class="span9 clearfix well" role="main">
 
 			<?php if (have_posts()): ?>
 
@@ -190,6 +193,7 @@
 				<?php endwhile; ?>
 
 					<?php if($sponsors->have_posts()): ?>
+						<h2 class="widget">Sponsors</h2>
 						<div class="sponsor_list">
 							<div class="row-fluid">
 								<ul class="thumbnails">

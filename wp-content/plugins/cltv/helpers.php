@@ -174,6 +174,7 @@ function cltv_setup_cache_cron(){
 // Update the popular channel cache
 function cltv_update_popular_cache(){
 	global $wpdb;
+	echo 'updating cache...';
 
 	// clear cached entries that have not been updated in 48 hours
 	$wpdb->query( "DELETE FROM popular_channels WHERE last_update < " . ( time() - ( 86400 * 2 ) ) );
@@ -181,9 +182,9 @@ function cltv_update_popular_cache(){
 	try {
 		include_once(dirname(__File__).'/vendor/gapi.class.php');
 		// create the GAPI object
-		$email_address = 'info@citylinktv.com';
-		$password = 'Joshua06';
-		$ga =new gapi($email_address, $password);
+		$email_address = '307499639171-6t6h8l04vhietbp627ncno85l1epj5kd@developer.gserviceaccount.com';
+		$keyfile = dirname(__File__).'/vendor/cltv.p12';
+		$ga =new gapi($email_address, $keyfile);
 
 		// set the filters
 		$report_id = '50765226';
@@ -213,6 +214,7 @@ function cltv_update_popular_cache(){
 		return false;
 	}
 }
+//cltv_update_popular_cache();
 
 // Get an array of popular channels
 function cltv_get_popular_channels($max = 25) {

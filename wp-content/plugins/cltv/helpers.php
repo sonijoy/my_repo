@@ -174,7 +174,6 @@ function cltv_setup_cache_cron(){
 // Update the popular channel cache
 function cltv_update_popular_cache(){
 	global $wpdb;
-	echo 'updating cache...';
 
 	// clear cached entries that have not been updated in 48 hours
 	$wpdb->query( "DELETE FROM popular_channels WHERE last_update < " . ( time() - ( 86400 * 2 ) ) );

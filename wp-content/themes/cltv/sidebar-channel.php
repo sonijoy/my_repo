@@ -109,7 +109,7 @@
 									<?php while($archive_query->have_posts()): $archive_query->the_post(); ?>
 										<li class="media">
 											<a class="pull-left" href="<?php the_permalink(); ?>">
-												<?php if(has_post_thumbnail()): ?>
+												<?php if(has_post_thumbnail() && get_the_post_thumbnail()): ?>
 													<?php the_post_thumbnail('thumbnail'); ?>
 												<?php else: ?>
 													<img src="<?php echo get_template_directory_uri(); ?>/images/default_logo.png" alt="" />

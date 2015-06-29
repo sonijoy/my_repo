@@ -22,13 +22,12 @@ require_once(dirname(__File__)."/post-types/commercial.php");
 require_once(dirname(__File__)."/post-types/sponsor.php");
 
 // ACF fields
+// S3 uploader should probably be a separate plugin
 require_once(dirname(__File__)."/acf-fields/s3-uploader/bootstrap.php");
-add_action('acf/register_fields', 'cltv_register_fields');
-function cltv_register_fields()
+add_action('acf/include_field_types', 'cltv_include_field_types');
+function cltv_include_field_types()
 {
-  require_once(dirname(__File__).'/acf-fields/channel-stream-key.php');
-  require_once(dirname(__File__).'/acf-fields/channel-rtmp-url.php');
-  require_once(dirname(__File__).'/acf-fields/channel-embed-code.php');
+  require_once(dirname(__File__).'/acf-fields/acf-channel_embed_code.php');
 }
 
 // wp-admin customization

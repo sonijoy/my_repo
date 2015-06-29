@@ -66,6 +66,13 @@ h3 {
 .img-responsive {
 	max-width: 100%;
 }
+#header-navbar .phone {
+	padding: 15px;
+	display: inline-block;
+	line-height: 30px;
+	color: white;
+	font-weight: bold;
+}
 
 @media (max-width: 480px) {
 .channel_offline {

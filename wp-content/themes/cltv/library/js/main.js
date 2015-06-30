@@ -119,7 +119,7 @@
 			}
 
 			//Hide password-protected channel
-			if($('form.protected-post-form').length != 0) {
+			if($('form.post-password-form').length != 0) {
 				$('#main').hide();
 				$('.social').hide();
 				$('.sponsor').hide();

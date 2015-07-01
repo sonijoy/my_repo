@@ -138,7 +138,7 @@
 		</div>
 	<?php endif; wp_reset_postdata(); ?>
 
-	<?php if(count($photo_gallery)): ?>
+	<?php if(is_array($photo_gallery) && count($photo_gallery)): ?>
 		<h2 class="widget">Photos</h2>
 		<div class="row-fluid photo-gallery">
 			<?php $i=0; foreach($photo_gallery as $photo): ?>

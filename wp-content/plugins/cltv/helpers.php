@@ -117,7 +117,7 @@ function cltv_channel_video($id){
 				wp_reset_postdata();
 			}
 			//found an archive
-			if($archive){
+			if(isset($archive) && $archive){
 				$poster = wp_get_attachment_image_src(get_post_thumbnail_ID($archive), 'full');
 				$poster = $poster[0];
 				//if youtube video url

@@ -14,7 +14,7 @@ require_once(TEMPLATEPATH.'/library/scripts.php');
 // Options panel
 require_once('library/options-panel.php');
 
-add_theme_support( 'post-thumbnails' ); 
+add_theme_support( 'post-thumbnails' );
 
 // Set content width
 if ( ! isset( $content_width ) ) $content_width = 580;
@@ -36,5 +36,12 @@ function add_class_attachment_link($html){
 }
 add_filter('wp_get_attachment_link','add_class_attachment_link',10,1);
 
+// remove "protected: " from titles
+function protect_my_privates($text){
+  $text='%s';
+  return $text;
+}
+add_filter('private_title_format','protect_my_privates');
+add_filter('protected_title_format', 'protect_my_privates');
 
 ?>

@@ -29,6 +29,15 @@ function optionsframework_option_name() {
 function optionsframework_options() {
 	$options = array();
 
+	$options[] = array( "name" => "General",
+						"type" => "heading");
+
+	$options[] = array( "name" => "Global Message Board",
+					"desc" => "",
+					"id" => "global_admin_message",
+					"std" => "",
+					"type" => "text");
+
 	$options[] = array( "name" => "Streaming",
 						"type" => "heading");
 

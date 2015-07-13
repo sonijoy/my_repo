@@ -16,6 +16,10 @@ a.editinline,
 #wpadminbar #wp-admin-bar-new-content,
 #contextual-help-link-wrap,
 #wpadminbar #wp-admin-bar-site-name .ab-sub-wrapper,
-#wpadminbar #wp-admin-bar-wp-logo {
+#wpadminbar #wp-admin-bar-wp-logo,
+.update-nag {
 	display:none !important;
+}
+.update-nag.message-nag {
+	display: block !important;
 }

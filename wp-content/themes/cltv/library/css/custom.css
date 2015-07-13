@@ -6,7 +6,7 @@
 
 body {
 	/*background-image:url('../../images/tiny_grid.png');*/
-	background: #EEEEEE;
+	background: #F1F1F1;
 }
 .easysmp_wrapper, .easysmp_wrapper object, .easysmp_wrapper video {
 	width:100%;
@@ -33,6 +33,9 @@ header .navbar .navbar-inner {
 }
 h3 {
 	font-size:20px;
+}
+a, a:visited {
+	color: #004890;
 }
 .hero-unit, .well {
 	background: white;

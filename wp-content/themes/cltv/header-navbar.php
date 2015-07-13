@@ -63,7 +63,7 @@
 								<li><a href="<?php echo get_permalink(5188); ?>">Contact</a></li>
 							</ul>
 
-							<span class="phone pull-left">Call 417-209-9920</span>
+							<span class="phone pull-left">Call 417-209-9929</span>
 
 							<div class="navbar_tools" style="display:none;"></div>
 							<form class="navbar-search pull-right" role="search" method="get" id="searchform" action="<?php echo home_url( '/' ); ?>">

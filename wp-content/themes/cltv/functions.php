@@ -44,4 +44,19 @@ function protect_my_privates($text){
 add_filter('private_title_format','protect_my_privates');
 add_filter('protected_title_format', 'protect_my_privates');
 
+// Show a notice if user has no email
+function admin_notice_message(){
+  $message = of_get_option('global_admin_message');
+  if(!$message){
+  	return;
+  }
+  $html = '<div style="width:100%;clear:both;"></div>';
+  $html .= '<div class="update-nag message-nag" style="border:1px solid #7ad03a;font-size:15px;display:block;">';
+  $html .= of_get_option('global_admin_message');
+	$html .= '</div>';
+
+  echo $html;
+}
+add_action('admin_notices', 'admin_notice_message');
+
 ?>

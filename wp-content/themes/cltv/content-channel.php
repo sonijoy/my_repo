@@ -148,9 +148,7 @@
 											        width: "100%",
 											        //height: "100%",
 											        skin: "bekle",
-                                                    <?php if($stream_type == 'live'): ?>
-                                                        autostart: true,
-                                                    <?php endif; ?>
+                                                    autostart: true,
 											        playlist: [<?php if(!empty($channel_video['commercial']['html5'])): ?>{
 											        	image: "<?php echo $channel_video['poster']; ?>",
 											        	sources: [<?php if($channel_video['commercial']['flash']): ?>{

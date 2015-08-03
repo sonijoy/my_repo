@@ -28,6 +28,7 @@ add_action('acf/include_field_types', 'cltv_include_field_types');
 function cltv_include_field_types()
 {
   require_once(dirname(__File__).'/acf-fields/acf-channel_embed_code.php');
+  require_once(dirname(__File__).'/acf-fields/acf-channel_rtmp_url.php');
 }
 
 // wp-admin customization

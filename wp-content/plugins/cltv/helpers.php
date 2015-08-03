@@ -35,13 +35,35 @@ function cltv_states() {
 }
 
 // generate the src paramter for video player
-function cltv_format_video_src($video, $live=false, $http=false, $attachment_id=0) {
-	//using CDN?
-	if(of_get_option('use_wowza_cdn')) {
-		$wowza_base = of_get_option('wowza_cdn');
-	} else {
-		$wowza_base = of_get_option('wowza_server');
-	}
+function cltv_format_video_src($video, $live=false, $http=false, $attachment_id=0, $channel=0) {
+    // get streaming options
+    $wowza_server = get_post_meta($channel, 'wowza_server', true);
+    $use_cdn = of_get_option('use_wowza_cdn');
+    $split_wowza_servers = of_get_option('split_wowza_servers');
+    if(!$wowza_server) {
+      $wowza_server = 'us-west-1';
+    }
+    
+    // splitting the servers?
+	if($split_wowza_servers) {
+      //using CDN?
+      if($use_cdn) {
+        $wowza_base = 'http://streamcdn-' . $wowza_server;
+      } 
+      else {
+        $wowza_base = 'http://stream-' . $wowza_server;
+      }
+      $wowza_base .= '.citylinktv.com/';
+	} 
+    else {
+      //using CDN?
+      if($use_cdn) {
+        $wowza_base = of_get_option('wowza_cdn');
+      } 
+      else {
+        $wowza_base = of_get_option('wowza_server');
+      }
+	}	
 
 	//live videos
 	if($live){
@@ -139,7 +161,7 @@ function cltv_channel_video($id){
 		if($youtube_url) {
 			$src = array('html5'=>$youtube_url, 'flash'=>false);
 		} else {
-			$src = cltv_format_video_src($filename, $live, $http, $attachment_id);
+			$src = cltv_format_video_src($filename, $live, $http, $attachment_id, $channel);
 		}
 		$commercial_id = get_post_meta($id, 'commercial', true);
 		$commercial = false;
@@ -152,7 +174,7 @@ function cltv_channel_video($id){
 				} else {
 					$attachment_id = get_post_meta($commercial->ID, 'commercial_video_file', true);
 					$commercial = basename(get_field('commercial_video_file', $commercial->ID));
-					$commercial = cltv_format_video_src($commercial, false, $http, $attachment_id);
+					$commercial = cltv_format_video_src($commercial, false, $http, $attachment_id, $channel);
 				}
 			}
 		}

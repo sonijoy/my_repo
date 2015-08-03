@@ -57,6 +57,11 @@ function optionsframework_options() {
 					"desc" => "",
 					"id" => "use_wowza_cdn",
 					"type" => "checkbox");
+  
+    $options[] = array( "name" => "Split Wowza Servers?",
+					"desc" => "",
+					"id" => "split_wowza_servers",
+					"type" => "checkbox");
 
 	$options[] = array( "name" => "Archive RTMP",
 						"desc" => "",

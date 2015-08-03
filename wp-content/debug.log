@@ -14,3 +14,9 @@
 [03-Aug-2015 20:58:51 UTC] PHP Notice:  Undefined index: plugins in /home/fester/dev/cltv/wordpress/wp-content/plugins/the-events-calendar/src/Tribe/Activation_Page.php on line 27
 [03-Aug-2015 21:08:37 UTC] PHP Warning:  copy(/home/fester/dev/cltv/wordpress/wp-admin/includes/update-core.php): failed to open stream: Permission denied in /home/fester/dev/cltv/wordpress/wp-admin/includes/class-wp-filesystem-direct.php on line 231
 [03-Aug-2015 21:11:06 UTC] PHP Warning:  copy(/home/fester/dev/cltv/wordpress/wp-admin/includes/update-core.php): failed to open stream: Permission denied in /home/fester/dev/cltv/wordpress/wp-admin/includes/class-wp-filesystem-direct.php on line 231
+[03-Aug-2015 22:31:05 UTC] PHP Parse error:  syntax error, unexpected '$wowza_server' (T_VARIABLE) in /home/fester/dev/cltv/wordpress/wp-content/plugins/cltv/helpers.php on line 41
+[03-Aug-2015 22:32:05 UTC] PHP Parse error:  syntax error, unexpected '$wowza_server' (T_VARIABLE) in /home/fester/dev/cltv/wordpress/wp-content/plugins/cltv/helpers.php on line 41
+[03-Aug-2015 22:34:05 UTC] PHP Parse error:  syntax error, unexpected '$wowza_server' (T_VARIABLE) in /home/fester/dev/cltv/wordpress/wp-content/plugins/cltv/helpers.php on line 41
+[03-Aug-2015 22:35:05 UTC] PHP Parse error:  syntax error, unexpected '$wowza_server' (T_VARIABLE) in /home/fester/dev/cltv/wordpress/wp-content/plugins/cltv/helpers.php on line 41
+[03-Aug-2015 22:37:05 UTC] PHP Parse error:  syntax error, unexpected '$wowza_server' (T_VARIABLE) in /home/fester/dev/cltv/wordpress/wp-content/plugins/cltv/helpers.php on line 41
+[03-Aug-2015 22:39:05 UTC] PHP Parse error:  syntax error, unexpected '$wowza_server' (T_VARIABLE) in /home/fester/dev/cltv/wordpress/wp-content/plugins/cltv/helpers.php on line 41

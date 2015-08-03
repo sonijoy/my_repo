@@ -3,7 +3,7 @@
 Plugin Name: Autoptimize
 Plugin URI: http://blog.futtta.be/autoptimize
 Description: Optimizes your website, concatenating the CSS and JavaScript code, and compressing it.
-Version: 1.9.2
+Version: 1.9.4
 Author: Frank Goossens (futtta)
 Author URI: http://blog.futtta.be/
 Domain Path: localization/
@@ -44,7 +44,7 @@ $conf = autoptimizeConfig::instance();
 /* Check if we're updating, in which case we might need to do stuff and flush the cache
 to avoid old versions of aggregated files lingering around */
 
-$autoptimize_version="1.9.2";
+$autoptimize_version="1.9.3";
 $autoptimize_db_version=get_option('autoptimize_version','none');
 
 if ($autoptimize_db_version !== $autoptimize_version) {
@@ -190,7 +190,7 @@ function autoptimize_start_buffering() {
 			}
 		} else {
 			if (!class_exists('CSSmin')) {
-				@include(WP_PLUGIN_DIR.'/autoptimize/classes/external/php/yui-php-cssmin-2.4.8-3_fixes.php');
+				@include(WP_PLUGIN_DIR.'/autoptimize/classes/external/php/yui-php-cssmin-2.4.8-4.php');
 			}
 		}
 		define('COMPRESS_CSS',false);
@@ -312,7 +312,11 @@ if(autoptimizeCache::cacheavail()) {
 	$conf = autoptimizeConfig::instance();
 	if( $conf->get('autoptimize_html') || $conf->get('autoptimize_js') || $conf->get('autoptimize_css') || $conf->get('autoptimize_cdn_js') || $conf->get('autoptimize_cdn_css')) {
 		// Hook to wordpress
-		add_action('template_redirect','autoptimize_start_buffering',2);
+		if (defined('AUTOPTIMIZE_INIT_EARLIER')) {
+			add_action('init','autoptimize_start_buffering',-1);
+		} else {
+			add_action('template_redirect','autoptimize_start_buffering',2);
+		}
 	}
 }
 

@@ -112,6 +112,36 @@ namespace zencache
 		 */
 		define('ZENCACHE_MAX_AGE', '7 days');
 
+	if(!defined('ZENCACHE_EXCLUDE_URIS'))
+		/**
+		 * URI exclusions.
+		 *
+		 * @since 140422 First documented version.
+		 *
+		 * @var string A regular expression; else an empty string.
+		 */
+		define('ZENCACHE_EXCLUDE_URIS', '');
+
+	if(!defined('ZENCACHE_EXCLUDE_REFS'))
+		/**
+		 * HTTP referrer exclusions.
+		 *
+		 * @since 140422 First documented version.
+		 *
+		 * @var string A regular expression; else an empty string.
+		 */
+		define('ZENCACHE_EXCLUDE_REFS', '');
+
+	if(!defined('ZENCACHE_EXCLUDE_AGENTS'))
+		/**
+		 * HTTP user-agent exclusions.
+		 *
+		 * @since 140422 First documented version.
+		 *
+		 * @var string A regular expression; else an empty string.
+		 */
+		define('ZENCACHE_EXCLUDE_AGENTS', '/(?:w3c_validator)/i');
+
 	if(!defined('ZENCACHE_404_CACHE_FILENAME'))
 		/**
 		 * 404 file name (if applicable).
@@ -133,13 +163,16 @@ namespace zencache
 		 */
 		define('ZENCACHE_PLUGIN_FILE', WP_CONTENT_DIR.'/plugins/zencache/zencache.php');
 
-	/*
-	 * Include shared methods between {@link advanced_cache} and {@link plugin}.
-	 */
-	if(defined('WP_DEBUG') && WP_DEBUG)
-		require_once dirname(ZENCACHE_PLUGIN_FILE).'/includes/share.php';
-	else if((@require_once(dirname(ZENCACHE_PLUGIN_FILE).'/includes/share.php')) === FALSE)
-		return; // Unable to find class dependency. Fail softly.
+    /*
+     * Include shared methods between {@link advanced_cache} and {@link plugin}.
+     */
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        if ((include_once(dirname(ZENCACHE_PLUGIN_FILE).'/includes/share.php')) === false) {
+            return;
+        } // Unable to find class dependency. Fail softly.
+    } else if ((@include_once(dirname(ZENCACHE_PLUGIN_FILE).'/includes/share.php')) === false) {
+        return; // Unable to find class dependency. Fail softly.
+    }
 
 	/**
 	 * ZenCache (Advanced Cache Handler)
@@ -489,6 +522,33 @@ namespace zencache
 		const NC_DEBUG_GET_REQUEST_QUERIES = 'nc_debug_get_request_queries';
 
 		/**
+		 * No-cache because the current request excluded by its URI.
+		 *
+		 * @since 140422 First documented version.
+		 *
+		 * @var string A unique string identifier in the set of `NC_DEBUG_` constants.
+		 */
+		const NC_DEBUG_EXCLUDED_URIS = 'nc_debug_excluded_uris';
+
+		/**
+		 * No-cache because the current user-agent is excluded.
+		 *
+		 * @since 140422 First documented version.
+		 *
+		 * @var string A unique string identifier in the set of `NC_DEBUG_` constants.
+		 */
+		const NC_DEBUG_EXCLUDED_AGENTS = 'nc_debug_excluded_agents';
+
+		/**
+		 * No-cache because the current HTTP referrer is excluded.
+		 *
+		 * @since 140422 First documented version.
+		 *
+		 * @var string A unique string identifier in the set of `NC_DEBUG_` constants.
+		 */
+		const NC_DEBUG_EXCLUDED_REFS = 'nc_debug_excluded_refs';
+
+		/**
 		 * No-cache because the current request is a 404 error.
 		 *
 		 * @since 140422 First documented version.
@@ -679,8 +739,9 @@ namespace zencache
 			if($this->is_uncacheable_request_method())
 				return $this->maybe_set_debug_info($this::NC_DEBUG_UNCACHEABLE_REQUEST);
 
-			if(isset($_SERVER['REMOTE_ADDR'], $_SERVER['SERVER_ADDR']) && $_SERVER['REMOTE_ADDR'] === $_SERVER['SERVER_ADDR'])
-				if(!$this->is_localhost()) return $this->maybe_set_debug_info($this::NC_DEBUG_SELF_SERVE_REQUEST);
+			if(isset($_SERVER['SERVER_ADDR']) && $this->current_ip() === $_SERVER['SERVER_ADDR'])
+				if(!$this->is_localhost()) // Allow for a localhost scenario; i.e., a developer testing.
+					return $this->maybe_set_debug_info($this::NC_DEBUG_SELF_SERVE_REQUEST);
 
 			if(!ZENCACHE_FEEDS_ENABLE && $this->is_feed())
 				return $this->maybe_set_debug_info($this::NC_DEBUG_FEED_REQUEST);
@@ -699,6 +760,21 @@ namespace zencache
 
 			if(!ZENCACHE_GET_REQUESTS && $this->is_get_request_w_query() && (!isset($_GET['zcAC']) || !filter_var($_GET['zcAC'], FILTER_VALIDATE_BOOLEAN)))
 				return $this->maybe_set_debug_info($this::NC_DEBUG_GET_REQUEST_QUERIES);
+
+			if(ZENCACHE_EXCLUDE_URIS && preg_match(ZENCACHE_EXCLUDE_URIS, $_SERVER['REQUEST_URI']))
+				return $this->maybe_set_debug_info($this::NC_DEBUG_EXCLUDED_URIS);
+
+			if(ZENCACHE_EXCLUDE_AGENTS && !empty($_SERVER['HTTP_USER_AGENT']) && !$this->is_auto_cache_engine())
+				if(preg_match(ZENCACHE_EXCLUDE_AGENTS, $_SERVER['HTTP_USER_AGENT']))
+					return $this->maybe_set_debug_info($this::NC_DEBUG_EXCLUDED_AGENTS);
+
+			if(ZENCACHE_EXCLUDE_REFS && !empty($_REQUEST['_wp_http_referer']))
+				if(preg_match(ZENCACHE_EXCLUDE_REFS, stripslashes($_REQUEST['_wp_http_referer'])))
+					return $this->maybe_set_debug_info($this::NC_DEBUG_EXCLUDED_REFS);
+
+			if(ZENCACHE_EXCLUDE_REFS && !empty($_SERVER['HTTP_REFERER']))
+				if(preg_match(ZENCACHE_EXCLUDE_REFS, $_SERVER['HTTP_REFERER']))
+					return $this->maybe_set_debug_info($this::NC_DEBUG_EXCLUDED_REFS);
 
 			$this->protocol       = $this->is_ssl() ? 'https://' : 'http://';
 			$this->version_salt   = $this->apply_filters(__CLASS__.'__version_salt', '');
@@ -1053,7 +1129,7 @@ namespace zencache
 					break; // Break switch handler.
 
 				case $this::NC_DEBUG_SELF_SERVE_REQUEST:
-					$reason = __('because `$_SERVER[\'REMOTE_ADDR\']` === `$_SERVER[\'SERVER_ADDR\']`; i.e. a self-serve request. DEVELOPER TIP: if you are testing on a localhost installation, please add `define(\'LOCALHOST\', TRUE);` to your `/wp-config.php` file while you run tests :-) Remove it (or set it to a `FALSE` value) once you go live on the web.', $this->text_domain);
+					$reason = __('because `[current IP address]` === `$_SERVER[\'SERVER_ADDR\']`; i.e. a self-serve request. DEVELOPER TIP: if you are testing on a localhost installation, please add `define(\'LOCALHOST\', TRUE);` to your `/wp-config.php` file while you run tests :-) Remove it (or set it to a `FALSE` value) once you go live on the web.', $this->text_domain);
 					break; // Break switch handler.
 
 				case $this::NC_DEBUG_FEED_REQUEST:
@@ -1079,6 +1155,18 @@ namespace zencache
 
 				case $this::NC_DEBUG_GET_REQUEST_QUERIES:
 					$reason = __('because `$_GET` contains query string data. The current configuration says NOT to cache GET requests with a query string.', $this->text_domain);
+					break; // Break switch handler.
+
+				case $this::NC_DEBUG_EXCLUDED_URIS:
+					$reason = __('because `$_SERVER[\'REQUEST_URI\']` matches a configured URI Exclusion Pattern on this installation.', $this->text_domain);
+					break; // Break switch handler.
+
+				case $this::NC_DEBUG_EXCLUDED_AGENTS:
+					$reason = __('because `$_SERVER[\'HTTP_USER_AGENT\']` matches a configured User-Agent Exclusion Pattern on this installation.', $this->text_domain);
+					break; // Break switch handler.
+
+				case $this::NC_DEBUG_EXCLUDED_REFS:
+					$reason = __('because `$_SERVER[\'HTTP_REFERER\']` and/or `$_GET[\'_wp_http_referer\']` matches a configured HTTP Referrer Exclusion Pattern on this installation.', $this->text_domain);
 					break; // Break switch handler.
 
 				case $this::NC_DEBUG_404_REQUEST:

@@ -3,8 +3,8 @@ Contributors: jmadea
 Donate link: http://madea.net/projects/
 Tags: media, upload, filetypes, mimetypes
 Requires at least: 3.3.1
-Tested up to: 3.4.1
-Stable tag: 1.2
+Tested up to: 4.2.3
+Stable tag: 1.3
 
 This plugin adds a panel to the Settings->Media page, enabling changes to the file types which are permitted to be uploaded to the media library. 
 
@@ -31,6 +31,8 @@ No. The Save Changes button is necessary to save changes mades to other options 
 1. The Manage Upload Types section on the Settings->Media page in the administration interface.
 
 == Changelog ==
+= 1.3 = 
+* Tested for compatibility with current WordPress versions and updated this file.
 
 = 1.2 = 
 * Fix for small bug introduced in 1.1. Please update.

@@ -1,0 +1,14 @@
+[31-Jul-2015 21:42:26 UTC] PHP Fatal error:  Maximum execution time of 30 seconds exceeded in /home/fester/dev/cltv/wordpress/wp-includes/post.php on line 650
+[31-Jul-2015 21:42:27 UTC] PHP Notice:  Undefined index: scheme in /home/fester/dev/cltv/wordpress/wp-content/plugins/varnish-http-purge/varnish-http-purge.php on line 167
+[31-Jul-2015 21:42:27 UTC] PHP Notice:  Undefined index: host in /home/fester/dev/cltv/wordpress/wp-content/plugins/varnish-http-purge/varnish-http-purge.php on line 167
+[31-Jul-2015 21:42:27 UTC] PHP Notice:  Undefined index: host in /home/fester/dev/cltv/wordpress/wp-content/plugins/varnish-http-purge/varnish-http-purge.php on line 172
+[03-Aug-2015 18:38:38 UTC] PHP Notice:  Undefined index: path in /home/fester/dev/cltv/wordpress/wp-content/plugins/amazon-s3-and-cloudfront/classes/amazon-s3-and-cloudfront.php on line 298
+[03-Aug-2015 18:39:12 UTC] PHP Notice:  Undefined index: path in /home/fester/dev/cltv/wordpress/wp-content/plugins/amazon-s3-and-cloudfront/classes/amazon-s3-and-cloudfront.php on line 298
+[03-Aug-2015 18:45:27 UTC] PHP Fatal error:  Maximum execution time of 30 seconds exceeded in /home/fester/dev/cltv/wordpress/wp-includes/wp-db.php on line 1606
+[03-Aug-2015 18:45:27 UTC] PHP Notice:  Undefined index: scheme in /home/fester/dev/cltv/wordpress/wp-content/plugins/varnish-http-purge/varnish-http-purge.php on line 167
+[03-Aug-2015 18:45:27 UTC] PHP Notice:  Undefined index: host in /home/fester/dev/cltv/wordpress/wp-content/plugins/varnish-http-purge/varnish-http-purge.php on line 167
+[03-Aug-2015 18:45:27 UTC] PHP Notice:  Undefined index: host in /home/fester/dev/cltv/wordpress/wp-content/plugins/varnish-http-purge/varnish-http-purge.php on line 172
+[03-Aug-2015 18:51:39 UTC] PHP Notice:  Undefined index: path in /home/fester/dev/cltv/wordpress/wp-content/plugins/amazon-s3-and-cloudfront/classes/amazon-s3-and-cloudfront.php on line 298
+[03-Aug-2015 20:58:13 UTC] PHP Notice:  Undefined index: plugins in /home/fester/dev/cltv/wordpress/wp-content/plugins/the-events-calendar/src/Tribe/Activation_Page.php on line 27
+[03-Aug-2015 20:58:35 UTC] PHP Notice:  Undefined index: plugins in /home/fester/dev/cltv/wordpress/wp-content/plugins/the-events-calendar/src/Tribe/Activation_Page.php on line 27
+[03-Aug-2015 20:58:51 UTC] PHP Notice:  Undefined index: plugins in /home/fester/dev/cltv/wordpress/wp-content/plugins/the-events-calendar/src/Tribe/Activation_Page.php on line 27

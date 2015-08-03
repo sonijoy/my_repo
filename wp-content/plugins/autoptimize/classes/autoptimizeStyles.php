@@ -10,9 +10,16 @@ class autoptimizeStyles extends autoptimizeBase {
 	private $datauris = false;
 	private $hashmap = array();
 	private $alreadyminified = false;
+	private $inline = false;
+	private $defer = false;
+	private $defer_inline = false;
 	
 	//Reads the page and collects style tags
 	public function read($options) {
+		$noptimizeCSS = apply_filters( 'autoptimize_filter_css_noptimize', false, $this->content );
+                if ($noptimizeCSS)
+                        return false;
+
 		// Remove everything that's not the header
 		if ($options['justhead'] == true) {
 			$content = explode('</head>',$this->content,2);
@@ -28,13 +35,18 @@ class autoptimizeStyles extends autoptimizeBase {
 		}
 
 		// should we defer css?
+		// value: true/ false
 		$this->defer = $options['defer'];
+		$this->defer = apply_filters( 'autoptimize_filter_css_defer', $this->defer );
 
 		// should we inline while deferring?
+		// value: inlined CSS
 		$this->defer_inline = $options['defer_inline'];
 
 		// should we inline?
+		// value: true/ false
 		$this->inline = $options['inline'];
+		$this->inline = apply_filters( 'autoptimize_filter_css_inline', $this->inline );
 		
 		// get cdn url
 		$this->cdn_url = $options['cdn_url'];
@@ -270,6 +282,8 @@ class autoptimizeStyles extends autoptimizeBase {
 						if($icheck->check()) {
 							// we have the base64 image in cache
 							$headAndData=$icheck->retrieve();
+							$_base64data=explode(";base64,",$headAndData);
+							$base64data=$_base64data[1];
 						} else {
 							// It's an image and we don't have it in cache, get the type
 							$explA=explode('.',$ipath);
@@ -310,6 +324,13 @@ class autoptimizeStyles extends autoptimizeBase {
 						// Store image on the mhtml document
 						$this->mhtml .= "--_\r\nContent-Location:{$mhtmlcount}\r\nContent-Transfer-Encoding:base64\r\n\r\n{$base64data}\r\n";
 						$mhtmlcount++;
+					} else {
+                                                // just cdn the URL if applicable
+                                                if (!empty($this->cdn_url)) {
+                                                        $url = trim($quotedurl," \t\n\r\0\x0B\"'");
+                                                        $cdn_url=$this->url_replace_cdn($url);
+                                                        $imgreplace[$matches[1][$count]] = str_replace($quotedurl,$cdn_url,$matches[1][$count]);
+                                                }
 					}
 				}
 			} else if ((is_array($matches)) && (!empty($this->cdn_url))) {
@@ -326,7 +347,7 @@ class autoptimizeStyles extends autoptimizeBase {
 				}
 			
 			// Minify
-			if (($this->already_minified!==true) && (apply_filters( "autoptimize_css_do_minify", true))) {
+			if (($this->alreadyminified!==true) && (apply_filters( "autoptimize_css_do_minify", true))) {
 				if (class_exists('Minify_CSS_Compressor')) {
 					$tmp_code = trim(Minify_CSS_Compressor::process($code));
 				} else if(class_exists('CSSmin')) {
@@ -337,11 +358,15 @@ class autoptimizeStyles extends autoptimizeBase {
 						$tmp_code = trim(CssMin::minify($code));
 					}
 				}
-				$tmp_code = apply_filters( 'autoptimize_css_after_minify',$tmp_code );
 				if (!empty($tmp_code)) {
 					$code = $tmp_code;
 					unset($tmp_code);
 				}
+			}
+			$tmp_code = apply_filters( 'autoptimize_css_after_minify',$code );
+			if (!empty($tmp_code)) {
+				$code = $tmp_code;
+				unset($tmp_code);
 			}
 			
 			$this->hashmap[md5($code)] = $hash;

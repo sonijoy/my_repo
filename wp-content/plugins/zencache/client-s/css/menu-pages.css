@@ -236,9 +236,26 @@ Menu page styles.
 	-webkit-transform : scale(0.98, 0.98);
 	transform         : scale(0.98, 0.98);
 }
-.plugin-menu-page .pro-preview
+.pro-preview .plugin-menu-page-panel-heading
 {
-	opacity : 0.5;
+    background: #216095;
+}
+.pro-preview.pro-additional-features .plugin-menu-page-panel-heading:after
+{
+    font-variant : small-caps !important;
+    font-family  : sans-serif !important;
+    content      : 'additional pro version only features' !important
+}
+.pro-preview .pro-preview-feature:after
+{
+    font-variant : small-caps !important;
+    font-family  : sans-serif !important;
+    content      : 'pro version only' !important;
+    margin-left  : 15px;
+    background   : #216095;
+    color        : #FFFFFF;
+    padding      : 0 5px 2px 5px;
+    font-weight  : normal;
 }
 .plugin-menu-page .info,
 .plugin-menu-page .notice,
@@ -422,6 +439,10 @@ Panel styles.
 .plugin-menu-page-panel-body p.error
 {
 	color: #000000;
+}
+.plugin-menu-page-panel-body h2
+{
+    margin : 0 0 .5em 0;
 }
 .plugin-menu-page-panel-body h3
 {

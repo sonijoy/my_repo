@@ -91,13 +91,13 @@ if (get_option('autoptimize_show_adv','0')=='1') {
 <?php _e('For performance reasons it is better to include JavaScript at the bottom of HTML, but this sometimes breaks things. Especially useful for jQuery-based themes.','autoptimize'); ?></label></td>
 </tr>
 <tr valign="top" class="hidden js_sub ao_adv">
-<th scope="row"><?php _e('Look for scripts only in &lt;head&gt;?','autoptimize'); ?></th>
+<th scope="row"><?php _e('Look for scripts only in &lt;head&gt;?','autoptimize'); _e(' <i>(deprecated)</i>','autoptimize');?></th>
 <td><label for="autoptimize_js_justhead"><input type="checkbox" name="autoptimize_js_justhead" <?php echo get_option('autoptimize_js_justhead')?'checked="checked" ':''; ?>/>
-<?php _e('Mostly usefull in combination with previous option when using jQuery-based templates, but might help keeping cache size under control.','autoptimize'); ?></label></td>
+<?php _e('Mostly useful in combination with previous option when using jQuery-based templates, but might help keeping cache size under control.','autoptimize'); ?></label></td>
 </tr>
 <tr valign="top" class="hidden js_sub ao_adv">
 <th scope="row"><?php _e('Exclude scripts from Autoptimize:','autoptimize'); ?></th>
-<td><label for="autoptimize_js_exclude"><input type="text" style="width:100%;" name="autoptimize_js_exclude" value="<?php echo get_option('autoptimize_js_exclude',"s_sid,smowtion_size,sc_project,WAU_,wau_add,comment-form-quicktags,edToolbar,ch_client,nonce,post_id"); ?>"/><br />
+<td><label for="autoptimize_js_exclude"><input type="text" style="width:100%;" name="autoptimize_js_exclude" value="<?php echo get_option('autoptimize_js_exclude',"s_sid,smowtion_size,sc_project,WAU_,wau_add,comment-form-quicktags,edToolbar,ch_client,seal.js"); ?>"/><br />
 <?php _e('A comma-seperated list of scripts you want to exclude from being optimized, for example \'whatever.js, another.js\' (without the quotes) to exclude those scripts from being aggregated and minimized by Autoptimize.','autoptimize'); ?></label></td>
 </tr>
 <tr valign="top" class="hidden js_sub ao_adv">
@@ -119,7 +119,7 @@ if (get_option('autoptimize_show_adv','0')=='1') {
 <?php _e('Enable this to include small background-images in the CSS itself instead of as seperate downloads.','autoptimize'); ?></label></td>
 </tr>
 <tr valign="top" class="hidden css_sub ao_adv">
-<th scope="row"><?php _e('Look for styles only in &lt;head&gt;?','autoptimize'); ?></th>
+<th scope="row"><?php _e('Look for styles only in &lt;head&gt;?','autoptimize'); _e(' <i>(deprecated)</i>','autoptimize'); ?></th>
 <td><label for="autoptimize_css_justhead"><input type="checkbox" name="autoptimize_css_justhead" <?php echo get_option('autoptimize_css_justhead')?'checked="checked" ':''; ?>/>
 <?php _e('Don\'t autoptimize CSS outside the head-section. If the cache gets big, you might want to enable this.','autoptimize'); ?></label></td>
 </tr>
@@ -183,6 +183,7 @@ if (get_option('autoptimize_show_adv','0')=='1') {
 </form>
 </div>
 <div style="float:right;width:30%" id="autoptimize_admin_feed">
+	<div style="margin:0px 15px 15px 15px;font-size:larger;"><a href="<?php echo network_admin_url(); ?>plugin-install.php?tab=search&type=author&s=futtta"><?php _e("Happy with Autoptimize? Try my other plugins!"); ?></a></div>
         <div style="margin-left:10px;margin-top:-5px;">
                 <h3>
                         <?php _e("futtta about","autoptimize") ?>
@@ -219,6 +220,7 @@ if (get_option('autoptimize_show_adv','0')=='1') {
 			if (jQuery("#autoptimize_js").attr('checked')) {
 				jQuery(".js_sub:visible").fadeTo("fast",1);
 			}
+			check_ini_state()
 			jQuery( "input#autoptimize_show_adv" ).val("1");
 		});
 
@@ -232,6 +234,7 @@ if (get_option('autoptimize_show_adv','0')=='1') {
                         if (!jQuery("#autoptimize_js").attr('checked')) {
                                 jQuery(".js_sub:visible").fadeTo("fast",.33);
                         }
+                        check_ini_state()
 			jQuery( "input#autoptimize_show_adv" ).val("0");
 		});
 
@@ -378,7 +381,7 @@ if (get_option('autoptimize_show_adv','0')=='1') {
 			$config = array('autoptimize_html' => 0,
 				'autoptimize_html_keepcomments' => 0,
 				'autoptimize_js' => 0,
-				'autoptimize_js_exclude' => "s_sid, smowtion_size, sc_project, WAU_, wau_add, comment-form-quicktags, edToolbar, ch_client, nonce, post_id",
+				'autoptimize_js_exclude' => "s_sid, smowtion_size, sc_project, WAU_, wau_add, comment-form-quicktags, edToolbar, ch_client, seal.js",
 				'autoptimize_js_trycatch' => 0,
 				'autoptimize_js_justhead' => 0,
 				'autoptimize_js_forcehead' => 0,

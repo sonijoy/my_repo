@@ -2,7 +2,7 @@
 /*
 Plugin Name: WP Help
 Description: Administrators can create detailed, hierarchical documentation for the site's authors and editors, viewable in the WordPress admin.
-Version: 1.4
+Version: 1.4.1
 License: GPL
 Plugin URI: http://txfx.net/wordpress-plugins/wp-help/
 Author: Mark Jaquith
@@ -12,7 +12,7 @@ Domain Path: /languages
 
 ==========================================================================
 
-Copyright 2011-2013  Mark Jaquith
+Copyright 2011-2015  Mark Jaquith
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -120,9 +120,9 @@ class CWS_WP_Help_Plugin extends WP_Stack_Plugin {
 				'hierarchical' => true,
 				'supports'     => array( 'title', 'editor', 'revisions', 'page-attributes' ),
 				'map_meta_cap' => true,
-				'capability_type' => 'channel',
+				'capability_type' => 'page',
 				'capabilities' => array(
-					'read_posts'         => apply_filters( 'cws_wp_help_view_documents_cap', 'edit_channels' ),
+					'read_posts'         => apply_filters( 'cws_wp_help_view_documents_cap', 'edit_posts' ),
 				),
 				'labels' => array (
 					'name'               => __( 'Help Documents',                        'wp-help' ),

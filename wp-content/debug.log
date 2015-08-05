@@ -20,3 +20,8 @@
 [03-Aug-2015 22:35:05 UTC] PHP Parse error:  syntax error, unexpected '$wowza_server' (T_VARIABLE) in /home/fester/dev/cltv/wordpress/wp-content/plugins/cltv/helpers.php on line 41
 [03-Aug-2015 22:37:05 UTC] PHP Parse error:  syntax error, unexpected '$wowza_server' (T_VARIABLE) in /home/fester/dev/cltv/wordpress/wp-content/plugins/cltv/helpers.php on line 41
 [03-Aug-2015 22:39:05 UTC] PHP Parse error:  syntax error, unexpected '$wowza_server' (T_VARIABLE) in /home/fester/dev/cltv/wordpress/wp-content/plugins/cltv/helpers.php on line 41
+[05-Aug-2015 04:10:13 UTC] PHP Fatal error:  Maximum execution time of 30 seconds exceeded in /home/fester/dev/cltv/wordpress/wp-includes/post.php on line 1160
+[05-Aug-2015 04:10:15 UTC] PHP Notice:  Undefined index: scheme in /home/fester/dev/cltv/wordpress/wp-content/plugins/varnish-http-purge/varnish-http-purge.php on line 167
+[05-Aug-2015 04:10:15 UTC] PHP Notice:  Undefined index: host in /home/fester/dev/cltv/wordpress/wp-content/plugins/varnish-http-purge/varnish-http-purge.php on line 167
+[05-Aug-2015 04:10:15 UTC] PHP Notice:  Undefined index: host in /home/fester/dev/cltv/wordpress/wp-content/plugins/varnish-http-purge/varnish-http-purge.php on line 172
+[05-Aug-2015 04:11:20 UTC] PHP Notice:  Undefined variable: video in /home/fester/dev/cltv/wordpress/wp-content/themes/cltv/video.php on line 37

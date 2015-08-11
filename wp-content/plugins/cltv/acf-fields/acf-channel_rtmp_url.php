@@ -41,13 +41,13 @@ class acf_ChannelRtmpUrl extends acf_field
 	{
 		global $post;
         $server = get_post_meta($post->ID, 'wowza_server', true);      
-		$message = 'RTMP URL is:<br> rtmp://stream-';
+		$message = 'RTMP URL is:<br> rtmp://stream';
       
-		if(!$server) {
-          $server = 'us-west-1';          
+		if($server) {
+          $message .= '-' . $server;       
         }
            
-        $message .= $server . '.citylinktv.com/livepkgr';
+        $message .= '.citylinktv.com/livepkgr';
       
 		echo $message;
 	}

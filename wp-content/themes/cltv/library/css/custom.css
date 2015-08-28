@@ -145,6 +145,18 @@ html input[type="button"],input[type="radio"],input[type="checkbox"]{width:auto}
 	font-size:11px;
 }
 
+.box{
+	border: solid 1px;
+	border-color: #888888;
+	margin: 0px 5px 10px 0px;
+	background-color: white;
+    box-shadow: 1px 1px #888888;
+}
+
+#state{
+	font-size:15px;
+	margin:4px;
+}
 
 /*-------------------------------------------------------------
 |

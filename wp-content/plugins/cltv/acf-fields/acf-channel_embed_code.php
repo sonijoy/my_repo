@@ -40,7 +40,7 @@ class acf_ChannelEmbed extends acf_field
 	function render_field( $field )
 	{
 		global $post;
-		$embed_url = 'http://www.citylinktv.com/channel-embed?nonav=1&id='.$post->ID;
+		$embed_url = 'http://citylinktv.com/channel-embed?nonav=1&id='.$post->ID;
 		$embed_code = '<iframe src="'.$embed_url.'" width="630" height="350" style="overflow:hidden; border:none;"></iframe>';
 		echo "<input id='channel_embed' type='text' readonly='true' value='$embed_code' />";
 	}

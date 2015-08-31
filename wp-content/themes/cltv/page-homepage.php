@@ -2,27 +2,8 @@
 /*
 Template Name: Homepage
 */
-/*$channels_most = array(
-	'post_type'=>'channel',
-	'meta_key'=>'post_views_count',
-	'posts_per_page' => -1,
-	//'meta_value' => ''
-	//'compare' => '!='
-	);
-$chanel_most=get_posts($channels_most);
-echo "<pre/>";
-print_r($chanel_most);*/
-		//"SELECT * from wp_postmeta "
 
-
-
-//$query="SELECT * FROM wp_postmeta WHERE meta_key='post_views_count' and meta_value >0 ORDER BY (meta_value+0) DESC ";
- //$popular = $wpdb->get_results($query, OBJECT);
-//echo "<pre/>";
- //print_r($popular);
-//exit;
-
-//$popular = cltv_get_popular_channels(62);
+$popular = cltv_get_popular_channels(62);
 $video = cltv_format_video_src(of_get_option('front_page_video'));
 $channels = new WP_Query(array(
 	'post_type'=>'channel',
@@ -48,38 +29,42 @@ if(of_get_option('use_wowza_cdn')) {
 							<div class="row-fluid tab-pane fade in active" id="popular-content">
 								<div class="span12">
 									<h2>Most Viewed (30 Days)</h2>
+                                  
+                                  
 									<!--<ul class="media-list">-->
 										<?php 
-										//wpp_get_mostpopular( 'post_type="channel"&thumbnail_width=30&thumbnail_height=30' ); 
-										wpp_get_mostpopular( 'post_type="channel"&limit=50&title_length=23&range=monthly&thumbnail_width=35&thumbnail_height=35&post_html="<li>{thumb} <a href=\'{url}\'>{text_title}</a></li>"' );
-
-										/*foreach($popular as $slug): 
-										 $p_id= $slug->post_id;?>
-											<?php //$channel = new WP_Query(array('post_type'=>'channel', 'name'=>$slug)); ?>
+										// hiding this until we have data 
+										//wpp_get_mostpopular( 'post_type="channel"&limit=50&title_length=23&range=monthly&thumbnail_width=35&thumbnail_height=35&post_html="<li>{thumb} <a href=\'{url}\'>{text_title}</a></li>"' ); ?>
+                                  
+                                    
+                                    <ul class="media-list">
+										<?php foreach($popular as $slug): ?>
+											<?php $channel = new WP_Query(array('post_type'=>'channel', 'name'=>$slug)); ?>
 											<?php
-											//if($channel->have_posts()): while($channel->have_posts()):
-												//$channel->the_post();
-												//$archives = get_posts(array('posts_per_page'=>1, 'post_type'=>'archive','meta_key'=>'channel','meta_value'=>get_the_ID()));
-												//if($archives && get_the_ID() != 3953):
+											if($channel->have_posts()): while($channel->have_posts()):
+												$channel->the_post();
+												$archives = get_posts(array('posts_per_page'=>1, 'post_type'=>'archive','meta_key'=>'channel','meta_value'=>get_the_ID()));
+												if($archives && get_the_ID() != 3953):
 											?>
 												<li class="media">
-													<a class="pull-left" href="<?php the_permalink($p_id); ?>">
-														<?php if(has_post_thumbnail($p_id)): ?>
-															<?php echo get_the_post_thumbnail($p_id,'thumbnail', array('class'=>'media-object')); ?>
+													<a class="pull-left" href="<?php the_permalink(); ?>">
+														<?php if(has_post_thumbnail()): ?>
+															<?php the_post_thumbnail('thumbnail', array('class'=>'media-object')); ?>
 														<?php else: ?>
 															<img class="media-object" src="<?php echo get_template_directory_uri(); ?>/images/default_logo.png" alt="" />
 														<?php endif; ?>
 													</a>
 													<div class="media-body">
 														<h4 class="media-heading">
-															<a href="<?php echo get_the_permalink($p_id); ?>" title="<?php the_title($p_id); ?>">
-																<?php echo cltv_trim(get_the_title($p_id), 25); ?>
+															<a href="<?php the_permalink(); ?>" title="<?php the_title(); ?>">
+																<?php echo cltv_trim(get_the_title(), 25); ?>
 															</a>
 														</h4>
 													</div>
 												</li>
-											<?php //endif; endwhile; endif; wp_reset_postdata(); ?>
-										<?php endforeach; */ ?>
+											<?php endif; endwhile; endif; wp_reset_postdata(); ?>
+										<?php endforeach;  ?>
+									</ul>
 									<!--</ul>-->
 								</div>
 
@@ -127,6 +112,7 @@ if(of_get_option('use_wowza_cdn')) {
 
 					<div class="row-fluid all_channels">
 						<h2>Channels</h2>
+                        <div class="clearfix"></div>
 						<ul class="columnize" data-columns="3">
 							<?php
 							 $statearr = array();
@@ -145,16 +131,16 @@ if(of_get_option('use_wowza_cdn')) {
 									<?php 
 										if(!in_array($field, $statearr)){
 											if (!empty($statearr)) echo "</div>";
-											echo '<div class="box">';
+											echo '<div class="well">';
 											echo '<li id="state">'.$states[$field].'</li>';
 											$statearr[] = $field;
 										}
 									?>
 											
-									<li style="margin:0 0 0 8px"><a href="<?php the_permalink(); ?>">
+									<li>
+                                      <a href="<?php the_permalink(); ?>">
 										<?php //the_field('state'); ?>  <?php the_title(); ?>
-
-										</a>
+								      </a>
 									</li>
 
 									<?php endif; ?>

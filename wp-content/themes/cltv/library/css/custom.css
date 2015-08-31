@@ -133,29 +133,33 @@ html input[type="button"],input[type="radio"],input[type="checkbox"]{width:auto}
 	line-height:30px;
 }
 .page-template-page-homepage-php .all_channels ul {
-	margin:0;
-	padding:0;
-	list-style-type:none;
-	-moz-column-count: 3;
-    -moz-column-gap: 8px;
-    -webkit-column-count: 3;
-    -webkit-column-gap: 8px;
-    column-count: 3;
-    column-gap: 8px;
-	font-size:11px;
+  margin:0;
+  padding:0;
+  list-style-type:none;
+  -moz-column-count: 3;
+  -moz-column-gap: 8px;
+  -webkit-column-count: 3;
+  -webkit-column-gap: 8px;
+  column-count: 3;
+  column-gap: 8px;
+  font-size:11px;
+}
+.page-template-page-homepage-php .all_channels .well {
+  display: inline-block;
+  width: 100%;
 }
 
 .box{
-	border: solid 1px;
-	border-color: #888888;
-	margin: 0px 5px 10px 0px;
-	background-color: white;
-    box-shadow: 1px 1px #888888;
+  border: solid 1px;
+  border-color: #888888;
+  margin: 0px 5px 10px 0px;
+  background-color: white;
+  box-shadow: 1px 1px #888888;
 }
 
 #state{
-	font-size:15px;
-	margin:4px;
+  font-size:15px;
+  margin:4px;
 }
 
 /*-------------------------------------------------------------

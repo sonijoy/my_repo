@@ -1,12 +1,12 @@
 <div id="paid" align="center" style="background-color: black; height: 350px; ">
   
-  <div style="padding-top: 100px; font-size:18px; color:red;" ><b>This is a paid channel,You have to pay amount to watch this</b><br><br>
+  <div style="padding-top: 100px; font-size:18px; color:red;" ><b>This is a paid channel, you must pay to watch:</b><br><br>
     <input style="text-align:center; width:80px;" readonly type= "text" name="amt" value="$<?php echo $amount ;?>">
   </div>
 
   <div>				
     <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
-    <input type="hidden" name="cmd" value="_xclick-subscriptions" />
+    <input type="hidden" name="cmd" value="_xclick" />
     <input type="hidden" name="business" value="<?php echo $paypal_email; ?>">
     <input type="hidden" name="item_name" value="<?php echo $channel_slug;?>">
     <input type="hidden" name="item_number" value="<?php echo $channel;?>">

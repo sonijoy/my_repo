@@ -4,7 +4,7 @@
   global $post;
   $channel=$post->ID;
   if(get_post_type() == 'archive'){
-    $channel=get_post_meta($channel, 'channel', true);
+    $channel = get_post_meta($channel, 'channel', true);
   }
   // channel's banner image
   $banner = new WP_Query(array(
@@ -85,61 +85,24 @@
   wp_reset_postdata();
 
   // get paypal info
-  $post_id = $post->ID;
-  $paid_user = get_current_user_id();
-  $paid_p = ( isset($_REQUEST['st']) ? $_REQUEST['st'] : false );
-  $paid = get_post_meta($post_id, 'paid', true);
-  $is_user_logged_in = is_user_logged_in();
-  $is_user_authorized = false;
-  $is_paypal_enabled = false;
-
-  // user has paid
-  if(!empty($paid_p) && $paid_p=="Completed") {
-    add_user_meta($paid_user, 'paid_post_id', $post_id); 
-  }
+  $submit_payment = ( isset($_REQUEST['st']) ? 'true' : 'false' );
+  $is_paypal = get_post_meta($channel, 'paypal_enabled', true);
+  $localStorage_key = time() . '-paid-' . $channel;
 
   // pay-per-view is enabled
-  if($paid == 1) {
+  if($is_paypal) {          
     
-    $is_paypal_enabled = true;
+    $is_paypal = 'true';
+    $channel_permalink = get_permalink($channel);
+    $channel_slug = urlencode(get_the_title($channel));
+    $amount = get_post_meta ($channel, 'paypal_amount', true );
+    $currency = get_post_meta($channel, 'paypal_currency', true);
+    $currency = strtoupper($currency);
+    $paypal_email = get_post_meta($channel, 'paypal_email', true);    
     
-    // user is logged in
-    if($is_user_logged_in) {
-      
-      $return_url = get_permalink($post_id);
-      $user_id = get_current_user_id();
-      $channel_name = get_the_title($post_id);
-      $post_ids = $wpdb->get_col("SELECT DISTINCT(meta_value) FROM $wpdb->usermeta WHERE meta_key = 'paid_post_id' AND user_id = '" . $user_id . "'  ");
-      
-      // user has paid
-      if(in_array($post_id, $post_ids)){
-        
-        $is_user_authorized = true;
-        
-      }
-      
-      // user has not paid
-      else {
-        $amount = get_post_meta ($post_id, 'amount', true );
-        $currency = get_post_meta($post_id, 'currency', true);
-        $currency = strtoupper($currency);
-        $post_author_id = get_post_field('post_author', $post_id);
-        $user = get_user_by('id', $post_author_id);
-        $paypal_email = get_post_meta($post_id, 'paypal_email', true);
-      }
-      
-    }
-    
-    // user is not logged in
-    else {
-      ?>
-        <script>
-          alert('You must register to view this channel');
-          window.location='/wp-login.php?action=register';
-        </script>
-      <?php
-    }
-    
+  }
+  else {
+    $is_paypal = 'false';
   }
 
   
@@ -199,50 +162,74 @@
 		<div class="span12">
 			<?php  ?>
 			<?php if($channel_video['src']): ?>
+          
+              <?php if($is_paypal): ?>
+                <script type="text/template" id="paypal-form">
+                  <?php require_once locate_template('templates/channel-paypal.php'); ?>
+                </script>
+              <?php endif; ?>
+          
               <script>
                   $(document).ready(function(){
-                      var android = /Android/i.test(navigator.userAgent);
-                      if(android && navigator.mimeTypes["application/x-shockwave-flash"] == undefined) {
-                          //$('#video').html($('#android').html());
-                      } else {
-                          var theplayer = jwplayer("video").setup({
-                              primary: 'flash',
-                              aspectratio: "16:9",
-                              width: "100%",
-                              //height: "100%",
-                              skin: "bekle",
-                              autostart: true,
-                              playlist: [<?php if(!empty($channel_video['commercial']['html5'])): ?>{
-                                  image: "<?php echo $channel_video['poster']; ?>",
-                                  sources: [<?php if($channel_video['commercial']['flash']): ?>{
-                                      file: "<?php echo $channel_video['commercial']['flash']; ?>"
-                                  },<?php endif; ?> {
-                                      file: "<?php echo $channel_video['commercial']['html5']; ?>"
-                                  }]
-                              },<?php endif; ?> {
-                                  image: "<?php echo $channel_video['poster']; ?>",
-                                  sources: [<?php if($channel_video['src']['flash']): ?>{
-                                      file: "<?php echo $channel_video['src']['flash']; ?>"
-                                  },<?php endif; ?> {
-                                      file: "<?php echo $channel_video['src']['html5']; ?>"
-                                  }]
-                              }]
-                          });
+                    
+                      var android = /Android/i.test(navigator.userAgent),
+                        localStorage_key = '<?php echo $localStorage_key; ?>',
+                        is_paypal = <?php echo $is_paypal; ?>,
+                        is_paid = localStorage.localStorage_key,
+                        submit_payment = <?php echo $submit_payment; ?>;
+                    
+                      // user has just paid
+                      if(submit_payment) {
+                        localStorage.setItem(localStorage_key, true);
+                        is_paid = true;
                       }
+                    
+                      // don't try to user player on android
+                      if(android && navigator.mimeTypes["application/x-shockwave-flash"] == undefined) {
+                        // doing nothing will show the link instead of player
+                      } 
+                    
+                      // show the paypal form
+                      else if(is_paypal && !is_paid) {
+                        $('#video').html($('#paypal-form').html());
+                      }
+                      
+                      // show the player
+                      else if(!is_paypal || (is_paypal && is_paid)) {
+                        
+                        var theplayer = jwplayer("video").setup({
+                          primary: 'flash',
+                          aspectratio: "16:9",
+                          width: "100%",
+                          //height: "100%",
+                          skin: "bekle",
+                          autostart: true,
+                          playlist: [<?php if(!empty($channel_video['commercial']['html5'])): ?>{
+                            image: "<?php echo $channel_video['poster']; ?>",
+                            sources: [<?php if($channel_video['commercial']['flash']): ?>{
+                                file: "<?php echo $channel_video['commercial']['flash']; ?>"
+                            },<?php endif; ?> {
+                                file: "<?php echo $channel_video['commercial']['html5']; ?>"
+                            }]
+                          },<?php endif; ?> {
+                            image: "<?php echo $channel_video['poster']; ?>",
+                            sources: [<?php if($channel_video['src']['flash']): ?>{
+                                file: "<?php echo $channel_video['src']['flash']; ?>"
+                            },<?php endif; ?> {
+                                file: "<?php echo $channel_video['src']['html5']; ?>"
+                            }]
+                          }]
+                        });
+                        
+                      }
+                    
                   });
               </script>
-              <?php if( !$is_paypal_enabled || ($is_paypal_enabled && $is_user_authorized) ): ?>
 
                 <div id="video">
                   <noscript>You must have javascript enabled to watch this video</noscript>
                   <a href="<?php echo $channel_video['src']['html5']; ?>">Tap here to watch video</a>
                 </div>
-          
-              <?php elseif($is_paypal_enabled): ?>
-          
-                <?php require_once locate_template('templates/channel-paypal.php'); ?>
-
-              <?php endif; //if( !$is_paypal_enabled || ($is_paypal_enabled && $is_user_authorized) ) ?>
           
             <?php else: // if($channel_video['src']) ?>
 

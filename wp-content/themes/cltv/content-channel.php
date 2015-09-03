@@ -171,9 +171,11 @@
                   $(document).ready(function(){
                     
                       var android = /Android/i.test(navigator.userAgent),
-                        localStorage_key = Math.round(+new Date()/1000) + '-paid-' + '<?php echo $channel; ?>',
+                        channel = <?php echo $channel; ?>,
+                        localStorage_key = 'paid-' + channel,
                         is_paypal = <?php echo $is_paypal; ?>,
-                        is_paid = localStorage.localStorage_key;
+                        localStorage_value = localStorage[localStorage_key],
+                        is_paid;
                         
                       var getUrlVars = function() {
                         var vars = {};
@@ -184,12 +186,20 @@
                         return vars;
                       }
                       
+                      // this param is set when returning from paypal
                       var submit_payment = getUrlVars()["st"];
+                    
+                      if(localStorage_value) {
+                        is_paid = true;
+                      }
+                      else {
+                        is_paid = false;
+                      }
                     
                       // user has just paid
                       if(submit_payment) {
                         console.log('submitting');
-                        localStorage.setItem(localStorage_key, true);
+                        localStorage.setItem(localStorage_key, Math.round(+new Date()/1000));
                         is_paid = true;
                       }
                     

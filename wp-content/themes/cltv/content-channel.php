@@ -93,7 +93,7 @@
   if($is_paypal) {          
     
     $is_paypal = 'true';
-    $channel_permalink = get_permalink($channel);
+    $channel_permalink = get_permalink($channel) . '?st';
     $channel_slug = urlencode(get_the_title($channel));
     $amount = get_post_meta ($channel, 'paypal_amount', true );
     $currency = get_post_meta($channel, 'paypal_currency', true);

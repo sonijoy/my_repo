@@ -85,15 +85,13 @@
   wp_reset_postdata();
 
   // get paypal info
-  $submit_payment = ( isset($_REQUEST['st']) ? 'true' : 'false' );
   $is_paypal = get_post_meta($channel, 'paypal_enabled', true);
-  $localStorage_key = time() . '-paid-' . $channel;
 
   // pay-per-view is enabled
   if($is_paypal) {          
     
     $is_paypal = 'true';
-    $channel_permalink = get_permalink($channel) . '?st';
+    $channel_permalink = get_permalink($channel) . '?st=1';
     $channel_slug = urlencode(get_the_title($channel));
     $amount = get_post_meta ($channel, 'paypal_amount', true );
     $currency = get_post_meta($channel, 'paypal_currency', true);
@@ -173,13 +171,24 @@
                   $(document).ready(function(){
                     
                       var android = /Android/i.test(navigator.userAgent),
-                        localStorage_key = '<?php echo $localStorage_key; ?>',
+                        localStorage_key = Math.round(+new Date()/1000) + '-paid-' + '<?php echo $channel; ?>',
                         is_paypal = <?php echo $is_paypal; ?>,
-                        is_paid = localStorage.localStorage_key,
-                        submit_payment = <?php echo $submit_payment; ?>;
+                        is_paid = localStorage.localStorage_key;
+                        
+                      var getUrlVars = function() {
+                        var vars = {};
+                        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,    
+                        function(m,key,value) {
+                          vars[key] = value;
+                        });
+                        return vars;
+                      }
+                      
+                      var submit_payment = getUrlVars()["st"];
                     
                       // user has just paid
                       if(submit_payment) {
+                        console.log('submitting');
                         localStorage.setItem(localStorage_key, true);
                         is_paid = true;
                       }

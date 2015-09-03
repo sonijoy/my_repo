@@ -7,12 +7,14 @@
   <div>				
     <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
     <input type="hidden" name="cmd" value="_xclick" />
+    <input type="hidden" name="charset" value="utf-8">
     <input type="hidden" name="business" value="<?php echo $paypal_email; ?>">
     <input type="hidden" name="item_name" value="<?php echo $channel_slug;?>">
     <input type="hidden" name="item_number" value="<?php echo $channel;?>">
     <input type="hidden" name="lc" value="GB">
     <input type="hidden" name="no_note" value="1">
     <input type="hidden" name="src" value="1">
+    <input type="hidden" name="amount" value="<?php echo $amount; ?>">
     <input type="hidden" name="a3" value="<?php echo $amount; ?>">
     <input type="hidden" name="p3" value="1">
     <input type="hidden" name="t3" value="M">

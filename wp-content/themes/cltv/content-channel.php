@@ -95,6 +95,7 @@
     $channel_slug = urlencode(get_the_title($channel));
     $amount = get_post_meta ($channel, 'paypal_amount', true );
     $currency = get_post_meta($channel, 'paypal_currency', true);
+    $paypal_message = get_post_meta($channel, 'paypal_message', true);
     $currency = strtoupper($currency);
     $paypal_email = get_post_meta($channel, 'paypal_email', true);    
     

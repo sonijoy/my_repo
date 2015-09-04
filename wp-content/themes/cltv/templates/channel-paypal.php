@@ -1,6 +1,6 @@
 <div id="paid" align="center" style="background-color: black; height: 350px; ">
   
-  <div style="padding-top: 100px; font-size:18px; color:red;" ><b>This is a paid channel, you must pay to watch:</b><br><br>
+  <div style="padding-top: 100px; font-size:18px; color:red;" ><b><?php echo $paypal_message; ?></b><br><br>
     <input style="text-align:center; width:80px;" readonly type= "text" name="amt" value="$<?php echo $amount ;?>">
   </div>
 
